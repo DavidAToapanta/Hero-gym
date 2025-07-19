@@ -29,6 +29,61 @@ export class UsuariosService {
       },
     });
 
+    switch (dto.rol) {
+      case 'administrador':
+        await this.prisma.administrador.create({
+          data: { usuarioId: usuario.id },
+        });
+        break;
+      case 'entrenador':
+        if (!dto.horario || dto.sueldo === undefined) {
+          throw new BadRequestException('Horario y sueldo requeridos para entrenador');
+        }
+        await this.prisma.entrenador.create({
+          data: {
+            usuarioId: usuario.id,
+            horario: dto.horario,
+            sueldo: dto.sueldo,
+          },
+        });
+        break;
+      case 'recepcionista':
+        if (!dto.horario || dto.sueldo === undefined) {
+          throw new BadRequestException('Horario y sueldo requeridos para recepcionista');
+        }
+        await this.prisma.recepcionista.create({
+          data: {
+            usuarioId: usuario.id,
+            horario: dto.horario,
+            sueldo: dto.sueldo,
+          },
+        });
+        break;
+      case 'cliente':
+        if (
+          !dto.horario ||
+          !dto.sexo ||
+          !dto.observaciones ||
+          !dto.objetivos ||
+          dto.tiempoEntrenar === undefined
+        ) {
+          throw new BadRequestException('Datos de cliente incompletos');
+        }
+        await this.prisma.cliente.create({
+          data: {
+            usuarioId: usuario.id,
+            horario: dto.horario,
+            sexo: dto.sexo,
+            observaciones: dto.observaciones,
+            objetivos: dto.objetivos,
+            tiempoEntrenar: dto.tiempoEntrenar,
+          },
+        });
+        break;
+      default:
+        throw new BadRequestException('Rol no válido');
+    }
+
     const { password, ...result } = usuario;
     return result;
   }

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateUsuarioDto {
   @IsNotEmpty()
@@ -25,4 +25,33 @@ export class CreateUsuarioDto {
   @IsNotEmpty()
   @IsString()
   fechaNacimiento: string;
+
+  @IsNotEmpty()
+  @IsString()
+  rol: string;
+
+  @IsOptional()
+  @IsString()
+  horario?: string;
+
+  @IsOptional()
+  @IsNumber()
+  sueldo?: number;
+
+  @IsOptional()
+  @IsString()
+  sexo?: string;
+
+  @IsOptional()
+  @IsString()
+  observaciones?: string;
+
+  @IsOptional()
+  @IsString()
+  objetivos?: string;
+
+  @IsOptional()
+  @IsInt()
+  tiempoEntrenar?: number;
+
 }
