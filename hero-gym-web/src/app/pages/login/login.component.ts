@@ -23,8 +23,10 @@ export class LoginComponent {
 
   onSubmit(): void {
     if (this.loginForm.valid) {
-      const { cedula, password } = this.loginForm.value; // ✅ corregido aquí
+      const { cedula, password } = this.loginForm.value; 
+      
       this.authService.login(cedula, password).subscribe({
+        next: (response) => this.authService.handleLoginSuccess(response),
         error: (err) => this.errorMessage = err.message
       });
     } else {
