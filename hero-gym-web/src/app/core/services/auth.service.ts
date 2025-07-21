@@ -37,4 +37,18 @@ export class AuthService {
       this.router.navigate(['/dashboard']);
     }
   }
+
+  getToken(): string | null {
+    return localStorage.getItem('access_token');
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+
+  logout(): void {
+    localStorage.removeItem('access_token');
+    this.router.navigate(['/login']);
+  }
+
 }

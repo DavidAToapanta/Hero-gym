@@ -1,1 +1,104 @@
-<p>clientes works!</p>
+<div class="grid grid-cols-12 min-h-screen">
+    <main class="col-span-12 md:col-span-10 p-6 bg-gray-50">
+      <div class="p-6">
+        <h2 class="text-2xl font-bold mb-4">Registrar Cliente</h2>
+        <form
+          [formGroup]="clienteForm"
+          (ngSubmit)="onSubmit()"
+          class="space-y-4 mb-8"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              formControlName="nombre"
+              placeholder="Nombre"
+              class="rounded p-2 border w-full"
+            />
+            <input
+              type="text"
+              formControlName="apellido"
+              placeholder="Apellido"
+              class="rounded p-2 border w-full"
+            />
+            <input
+              type="text"
+              formControlName="cedula"
+              placeholder="Cédula"
+              class="rounded p-2 border w-full"
+            />
+            <input
+              type="password"
+              formControlName="password"
+              placeholder="Contraseña"
+              class="rounded p-2 border w-full"
+            />
+            <input
+              type="text"
+              formControlName="horario"
+              placeholder="Horario"
+              class="rounded p-2 border w-full"
+            />
+            <select formControlName="sexo" class="rounded p-2 border w-full">
+              <option value="">Sexo</option>
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+            </select>
+            <input
+              type="text"
+              formControlName="objetivo"
+              placeholder="Objetivo"
+              class="rounded p-2 border w-full"
+            />
+            <input
+              type="text"
+              formControlName="tiempoEntrenar"
+              placeholder="Tiempo de Entrenar"
+              class="rounded p-2 border w-full"
+            />
+            <textarea
+              formControlName="observaciones"
+              placeholder="Observaciones"
+              class="rounded p-2 border w-full md:col-span-2"
+            ></textarea>
+          </div>
+          <button
+            type="submit"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+          >
+            Registrar
+          </button>
+          <p class="text-green-600" *ngIf="successMessage">{{ successMessage }}</p>
+          <p class="text-red-600" *ngIf="errorMessage">{{ errorMessage }}</p>
+        </form>
+  
+        <h2 class="text-2xl font-bold mb-4">Lista de Clientes</h2>
+        <table class="min-w-full bg-white rounded shadow">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="px-4 py-2 text-left">Nombre</th>
+              <th class="px-4 py-2 text-left">Apellido</th>
+              <th class="px-4 py-2 text-left">Cédula</th>
+              <th class="px-4 py-2 text-left">Horario</th>
+              <th class="px-4 py-2 text-left">Sexo</th>
+              <th class="px-4 py-2 text-left">Objetivo</th>
+              <th class="px-4 py-2 text-left">Tiempo Entrenar</th>
+              <th class="px-4 py-2 text-left">Observaciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of clientes" class="border-t">
+              <td class="px-4 py-2">{{ c.nombre }}</td>
+              <td class="px-4 py-2">{{ c.apellido }}</td>
+              <td class="px-4 py-2">{{ c.cedula }}</td>
+              <td class="px-4 py-2">{{ c.horario }}</td>
+              <td class="px-4 py-2">{{ c.sexo }}</td>
+              <td class="px-4 py-2">{{ c.objetivo }}</td>
+              <td class="px-4 py-2">{{ c.tiempoEntrenar }}</td>
+              <td class="px-4 py-2">{{ c.observaciones }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+  
