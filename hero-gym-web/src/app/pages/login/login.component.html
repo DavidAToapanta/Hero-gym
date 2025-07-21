@@ -1,31 +1,66 @@
 <div class="min-h-screen flex items-center justify-center bg-gray-100">
   <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8">
     <h2 class="text-2xl font-bold mb-6 text-center">Iniciar sesión</h2>
-    <form>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <!-- Cédula -->
       <div class="mb-4">
-        <label class="block text-sm font-medium mb-1" for="email">Correo</label>
+        <label class="block text-sm font-medium mb-1" for="cedula"
+          >Cédula</label
+        >
         <input
-          id="email"
-          type="email"
+          id="cedula"
+          type="text"
+          formControlName="cedula"
           class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          placeholder="email@ejemplo.com"
+          placeholder="Ingrese su cédula"
         />
+        <p
+          class="text-red-600 text-sm mt-1"
+          *ngIf="
+            loginForm.get('cedula')?.touched &&
+            loginForm.get('cedula')?.hasError('required')
+          "
+        >
+          La cédula es requerida.
+        </p>
       </div>
+
+      <!-- Contraseña -->
       <div class="mb-6">
-        <label class="block text-sm font-medium mb-1" for="password">Contraseña</label>
+        <label class="block text-sm font-medium mb-1" for="password"
+          >Contraseña</label
+        >
         <input
           id="password"
           type="password"
+          formControlName="password"
           class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="********"
         />
+        <p
+          class="text-red-600 text-sm mt-1"
+          *ngIf="
+            loginForm.get('password')?.touched &&
+            loginForm.get('password')?.hasError('required')
+          "
+        >
+          La contraseña es requerida.
+        </p>
       </div>
+
+      <!-- Botón -->
       <button
         type="submit"
-        class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md"
+        [disabled]="loginForm.invalid"
+        class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md disabled:bg-gray-400"
       >
         Ingresar
       </button>
+
+      <!-- Error general -->
+      <p *ngIf="errorMessage" class="text-red-500 mt-4 text-center">
+        {{ errorMessage }}
+      </p>
     </form>
   </div>
 </div>
