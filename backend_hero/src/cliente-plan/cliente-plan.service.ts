@@ -25,10 +25,10 @@ export class ClientePlanService {
     }
 
     async findOne(id: number) {
-        const clientePlan = await this.prisma.clientePlan.findUnique({ where: { id } });
-        if (!clientePlan) throw new NotFoundException('ClientePlan no encontrado');
-        return clientePlan;
-      }
+      return this.prisma.clientePlan.findUnique({ where: { id } });
+    }
+    
+    
 
     async update(id: number, dto: UpdateClientePlanDto) {
         await this.findOne(id);
@@ -49,4 +49,35 @@ export class ClientePlanService {
         await this.findOne(id);
         return this.prisma.clientePlan.delete({ where: { id } });
       }
+
+      async contarClientesActivos(): Promise<number> {
+        try {
+          const ahora = new Date();
+      
+          const clientesActivos = await this.prisma.clientePlan.findMany({
+            where: {
+              activado: true,
+              fechaFin: {
+                gte: ahora
+              }
+            },
+            select: {
+              clienteId: true
+            },
+            distinct: ['clienteId']
+          });
+      
+          console.log('✔ Clientes activos:', clientesActivos);
+          return clientesActivos.length;
+      
+        } catch (error) {
+          console.error('❌ Error en contarClientesActivos():', error);
+          throw new Error('Fallo al contar clientes activos');
+        }
+      }
+      
+      
+      
+      
+      
 }

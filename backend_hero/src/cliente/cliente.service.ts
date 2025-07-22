@@ -7,32 +7,34 @@ import { UpdateClienteDto } from './dto/update-cliente.dto';
 
 @Injectable()
 export class ClienteService {
-    constructor(private prisma: PrismaService){}
+  constructor(private prisma: PrismaService) {}
 
-    create(dto: CreateClienteDto){
-        return this.prisma.cliente.create({ data: dto});
-    }
+  create(dto: CreateClienteDto) {
+    return this.prisma.cliente.create({ data: dto });
+  }
 
-    findAll() {
-        return this.prisma.cliente.findMany();
-    }
+  findAll() {
+    return this.prisma.cliente.findMany();
+  }
 
-    async findOne(id: number){
-        const cliente = await this.prisma.cliente.findUnique({
-            where: { id }
-        });
-        if (!cliente) throw new NotFoundException('Cliente no encontrado');
-        return cliente;
-    }
+  async findOne(id: number) {
+    const cliente = await this.prisma.cliente.findUnique({
+      where: { id },
+    });
+    if (!cliente) throw new NotFoundException('Cliente no encontrado');
+    return cliente;
+  }
 
-    async update(id: number, dto: UpdateClienteDto){
-        await this.findOne(id);
-        return this.prisma.cliente.update({ where: { id}, data: dto});
-    }
+  async update(id: number, dto: UpdateClienteDto) {
+    await this.findOne(id);
+    return this.prisma.cliente.update({ where: { id }, data: dto });
+  }
 
-    async remove(id: number){
-        await this.findOne(id);
-        return this.prisma.cliente.delete({ where: { id}})
-    }
-    
+  async remove(id: number) {
+    await this.findOne(id);
+    return this.prisma.cliente.delete({ where: { id } });
+  }
+
+  // Dentro de ClienteService
+
 }
