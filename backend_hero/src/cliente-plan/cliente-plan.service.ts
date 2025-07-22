@@ -25,7 +25,15 @@ export class ClientePlanService {
     }
 
     async findOne(id: number) {
-      return this.prisma.clientePlan.findUnique({ where: { id } });
+      if (!id || isNaN(id)) {
+        throw new Error('ID no válido');
+      }
+    
+      return this.prisma.clientePlan.findUnique({
+        where: {
+          id: id,
+        },
+      });
     }
     
     
@@ -51,33 +59,24 @@ export class ClientePlanService {
       }
 
       async contarClientesActivos(): Promise<number> {
-        try {
-          const ahora = new Date();
+        const ahora = new Date();
       
-          const clientesActivos = await this.prisma.clientePlan.findMany({
-            where: {
-              activado: true,
-              fechaFin: {
-                gte: ahora
-              }
-            },
-            select: {
-              clienteId: true
-            },
-            distinct: ['clienteId']
-          });
+        const clientesActivos = await this.prisma.clientePlan.findMany({
+          where: {
+            activado: true,
+            fechaFin: {
+              gte: ahora
+            }
+          },
+          select: {
+            clienteId: true
+          },
+          distinct: ['clienteId']
+        });
       
-          console.log('✔ Clientes activos:', clientesActivos);
-          return clientesActivos.length;
-      
-        } catch (error) {
-          console.error('❌ Error en contarClientesActivos():', error);
-          throw new Error('Fallo al contar clientes activos');
-        }
+        return clientesActivos.length;
       }
       
-      
-      
-      
+  
       
 }

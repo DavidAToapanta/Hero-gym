@@ -17,10 +17,18 @@ export class ClientePlanController {
         return this.clientePlanService.findAll();
     }
 
-    @Get(':id')
+    @Get('activos')
+async obtenerClientesActivos() {
+  console.log('→ Llamando a contarClientesActivos');
+  const cantidad = await this.clientePlanService.contarClientesActivos();
+  return { activos: cantidad };
+}
+
+@Get(':id')
 findOne(@Param('id') id: string) {
   return this.clientePlanService.findOne(+id);
 }
+
 
 @Patch(':id')
 update(@Param('id') id: string, @Body() dto: UpdateClientePlanDto) {
@@ -30,13 +38,6 @@ update(@Param('id') id: string, @Body() dto: UpdateClientePlanDto) {
 @Delete(':id')
 remove(@Param('id') id: string) {
   return this.clientePlanService.remove(+id);
-}
-
-@Get('activos')
-async obtenerClientesActivos() {
-  const cantidad = await this.clientePlanService.contarClientesActivos();
-  console.log('Clientes activos:', cantidad);
-  return { activos: cantidad };
 }
 
 
