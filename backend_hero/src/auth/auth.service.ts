@@ -31,8 +31,10 @@ export class AuthService {
         };
       
         return {
-          access_token: this.jwtService.sign(payload),
+          access_token: this.jwtService.sign(payload), // ya usa los 7 días
         };
+        
+        
       }
       
 }
