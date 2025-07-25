@@ -32,7 +32,7 @@ export class AuthService {
    */
   handleLoginSuccess(response: { access_token: string }): void {
     localStorage.setItem('access_token', response.access_token);
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/dashboard'], { replaceUrl: true });
   }
   
   logout(): void {

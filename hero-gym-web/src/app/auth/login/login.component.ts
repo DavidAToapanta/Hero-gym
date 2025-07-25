@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../core/services/auth.service';
+
 import { Router } from '@angular/router'; // ✅ agrega esto
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-login',
@@ -11,7 +12,7 @@ import { Router } from '@angular/router'; // ✅ agrega esto
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit{
   loginForm: FormGroup;
   errorMessage = '';
 
@@ -27,6 +28,12 @@ export class LoginComponent {
       cedula: ['', Validators.required],
       password: ['', Validators.required]
     });
+  }
+
+  ngOnInit(): void {
+    if(this.authService.isAuthenticated()){
+      this.router.navigate(['/dashboard'], { replaceUrl: true }); // ✅ redirige al dashboard si ya está autenticado
+    }
   }
 
   onSubmit(): void {
