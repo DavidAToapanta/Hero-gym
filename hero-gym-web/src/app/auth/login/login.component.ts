@@ -41,11 +41,12 @@ export class LoginComponent implements OnInit{
       const { cedula, password } = this.loginForm.value; 
       
       this.authService.login(cedula, password).subscribe({
-        next: (response) => {
-          this.authService.handleLoginSuccess(response);
-          this.router.navigate(['/dashboard']); // ✅ redirige al dashboard
-        },
-        error: (err) => {
+       next: () => {}, //L redireccion se maneja en el servicio
+
+       error: () => {
+
+       
+
           this.errorMessage = 'Credenciales inválidas';
         }
       });

@@ -37,6 +37,7 @@ export class AuthService {
   
   logout(): void {
     localStorage.removeItem('access_token');
+    this.router.navigate(['/dashboard'], { replaceUrl: true})
   }
   
   getToken(): string | null {
