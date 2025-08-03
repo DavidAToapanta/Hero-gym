@@ -27,6 +27,7 @@ model Usuario {
   entrenador      Entrenador[]
   recepcionista   Recepcionista[]
   cliente         Cliente[]
+  gastos          Gasto[]
 }
 
 model Administrador {
@@ -237,4 +238,13 @@ model SerieTiempo {
   unidadMedida        String
 
   semanaEjercicio     SemanaEjercicio  @relation(fields: [semanaEjercicioId], references: [id])
+}
+
+model Gasto {
+  id         Int      @id @default(autoincrement())
+  concepto   String
+  monto      Float
+  fecha      DateTime
+  usuarioId  Int
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
 }

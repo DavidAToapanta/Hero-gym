@@ -60,21 +60,20 @@ export class ClientePlanService {
 
       async contarClientesActivos(): Promise<number> {
         const ahora = new Date();
-      
-        const clientesActivos = await this.prisma.clientePlan.findMany({
+    
+        const clientes = await this.prisma.clientePlan.findMany({
           where: {
             activado: true,
-            fechaFin: {
-              gte: ahora
-            }
+            fechaFin: { gte: ahora }
           },
           select: {
             clienteId: true
-          },
-          distinct: ['clienteId']
+          }
         });
-      
-        return clientesActivos.length;
+    
+        const idsUnicos = new Set(clientes.map(c => c.clienteId));
+    
+        return idsUnicos.size;
       }
       
   
