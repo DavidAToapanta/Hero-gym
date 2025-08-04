@@ -241,10 +241,11 @@ model SerieTiempo {
 }
 
 model Gasto {
-  id         Int      @id @default(autoincrement())
-  concepto   String
-  monto      Float
-  fecha      DateTime
-  usuarioId  Int
-  usuario    Usuario  @relation(fields: [usuarioId], references: [id])
+  id          Int      @id @default(autoincrement())
+  descripcion String
+  monto       Float
+  fecha       DateTime @default(now())
+  usuarioId   Int
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
 }
+
