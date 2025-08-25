@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MetricsCardsComponent } from "./components/metrics-cards/metrics-cards.component";
 import { DashboardLayoutComponent } from '../../layouts/dashboard-layout/dashboard-layout.component';
+import { RecentMembersComponent } from "./components/recent-members/recent-members.component";
 
 @Component({
   selector: 'app-dashboard',
@@ -11,8 +12,9 @@ import { DashboardLayoutComponent } from '../../layouts/dashboard-layout/dashboa
     RouterOutlet,
     LucideAngularModule,
     MetricsCardsComponent,
-    DashboardLayoutComponent
-  ],
+    DashboardLayoutComponent,
+    RecentMembersComponent
+],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
