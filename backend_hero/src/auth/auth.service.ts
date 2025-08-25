@@ -11,31 +11,26 @@ export class AuthService {
     ){}
 
     async login(cedula: string, password: string) {
-        const user = await this.prisma.usuario.findUnique({
-          where: { cedula }, // ✅ usamos campo único
+        const usuario = await this.prisma.usuario.findUnique({
+            where: { cedula }, // ✅ usamos campo único
         });
-      
-        if (!user) {
-          throw new UnauthorizedException('Cédula no encontrada');
+
+        if (!usuario) {
+            throw new UnauthorizedException('Cédula no encontrada');
         }
-      
-        const valid = await bcrypt.compare(password, user.password);
+
+        const valid = await bcrypt.compare(password, usuario.password);
         if (!valid) {
-          throw new UnauthorizedException('Contraseña incorrecta');
+            throw new UnauthorizedException('Contraseña incorrecta');
         }
-      
-        const payload = {
-          sub: user.id,
-          userName: user.userName, // puedes incluir lo que necesites
-          cedula: user.cedula,
-        };
-      
+
         return {
-          access_token: this.jwtService.sign(payload), // ya usa los 7 días
+            access_token: this.jwtService.sign({
+                sub: usuario.id,
+                userName: usuario.userName,
+                cedula: usuario.cedula,
+            }),
         };
-        
-        
-      }
+    }
       
 }
-

@@ -13,7 +13,7 @@
     <div class="bg-white p-4 rounded-2xl shadow-lg flex items-center justify-between">
       <div>
         <p class="text-sm text-gray-500">Ingresos del mes</p>
-        <h3 class="text-2xl font-bold text-gray-900">$1,250</h3>
+        <h3 class="text-2xl font-bold text-gray-900">{{ ingresosMes | currency:'USD':'symbol':'1.0-0' }}</h3>
       </div>
       <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-currency-dollar"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16.7 8a3 3 0 0 0 -2.7 -2h-4a3 3 0 0 0 0 6h4a3 3 0 0 1 0 6h-4a3 3 0 0 1 -2.7 -2" /><path d="M12 3v3m0 12v3" /></svg>
       
@@ -23,7 +23,7 @@
     <div class="bg-white p-4 rounded-2xl shadow-lg flex items-center justify-between">
       <div>
         <p class="text-sm text-gray-500">Pagos pendientes</p>
-        <h3 class="text-2xl font-bold text-gray-900">12</h3>
+        <h3 class="text-2xl font-bold text-gray-900">{{ pagosPendientes }}</h3>
       </div>
       <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-alert-triangle"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg>
       
@@ -37,5 +37,5 @@
       </div>
       <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-clipboard"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" /><path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" /></svg>
     </div>
-  </div>
+</div>
   

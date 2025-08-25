@@ -12,9 +12,16 @@ export class PagoController {
     return this.pagoService.create(dto);
   }
 
+  
   @Get()
   findAll() {
     return this.pagoService.findAll();
+  }
+
+  @Get('Ingresos-mes')
+  async ingresosDelMes(){
+    const total = await this.pagoService.obtenerIngresoDelMes();
+    return { ingresos: total};
   }
 
   @Get(':id')

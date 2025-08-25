@@ -30,4 +30,42 @@ export class DeudaService {
     await this.findOne(id);
     return this.prisma.deuda.delete({ where: { id } });
   }
+
+  async countDeudoresUnicos(){
+    const total = await this.prisma.cliente.count({
+      where: {
+        planes: {
+          some: {
+            deudas: {
+              some: { solventada: false }
+            }
+          }
+        }
+      }
+    });
+    return { total};
+  }
+
+  async getDeudoresUnicos(){
+    return this.prisma.cliente.findMany({
+      where: {
+        planes: {
+          some: {
+            //activos: true, // opcional 
+            deudas: { some: { solventada: false}},
+          },
+        },
+      },
+      select: {
+        id: true,
+        usuario: {
+          select: {
+            nombres: true,
+            apellidos: true,
+            cedula: true,
+          },
+        },
+      },
+    });
+  }
 }

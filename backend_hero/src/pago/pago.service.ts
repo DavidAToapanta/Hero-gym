@@ -46,4 +46,24 @@ export class PagoService {
         return this.prisma.pago.delete({ where: { id } });
       }
 
+      async obtenerIngresoDelMes(): Promise<number>{
+        const ahora = new Date();
+        const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+        const finMes  = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0);
+
+        const resultado = await this.prisma.pago.aggregate({
+          _sum: {
+            monto: true,
+          },
+          where: {
+            fecha: {
+              gte: inicioMes,
+              lte: finMes,
+            }
+          }
+        });
+
+        return resultado._sum.monto ?? 0;
+      }
+
 }

@@ -17,10 +17,22 @@ export class DeudaController {
     return this.deudaService.findAll();
   }
 
+  @Get('deudores')
+  deudoresList(){
+    return this.deudaService.getDeudoresUnicos();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.deudaService.findOne(+id);
   }
+
+
+  @Get('deudores/count')
+  deudoresCount(){
+    return this.deudaService.countDeudoresUnicos();
+  }
+
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateDeudaDto) {
