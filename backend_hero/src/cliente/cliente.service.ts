@@ -36,5 +36,26 @@ export class ClienteService {
   }
 
   // Dentro de ClienteService
-
+  findRecientes(limit = 5 ){
+    return this.prisma.cliente.findMany({
+      take: limit,
+      orderBy: { id: 'desc'},
+      select: {
+        id: true,
+        horario: true,
+        sexo: true,
+        observaciones: true,
+        objetivos: true,
+        tiempoEntrenar: true,
+        usuario:{
+          select: {
+            id: true,
+            userName: true,
+            nombres: true,
+            apellidos: true,
+          },
+        },
+      },
+    });
+  }
 }
