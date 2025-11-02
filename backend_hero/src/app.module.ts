@@ -9,6 +9,7 @@ import { ClientePlanModule } from './cliente-plan/cliente-plan.module';
 import { PagoModule } from './pago/pago.module';
 import { DeudaModule } from './deuda/deuda.module';
 import { GastoModule } from './gasto/gasto.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [UsuariosModule,
@@ -20,7 +21,8 @@ import { GastoModule } from './gasto/gasto.module';
             ClientePlanModule,
             PagoModule,
             DeudaModule,
-            GastoModule
+            GastoModule,
+            NotificationsModule
   ]
 })
 export class AppModule {}

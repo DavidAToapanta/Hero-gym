@@ -1,4 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+
 import { ClienteService } from './cliente.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
@@ -18,8 +20,8 @@ export class ClienteController {
     }
 
     @Get('recientes')
-    findRecientes() {
-        return this.clienteService.findRecientes();
+    findRecientes(@Query('limit') limit = '10') {
+        return this.clienteService.findRecientes(Number(limit) || 10);
     }
 
     @Get(':id')
