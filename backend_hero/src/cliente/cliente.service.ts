@@ -1,8 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
-import { dot } from 'node:test/reporters';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 
 @Injectable()
@@ -13,9 +12,65 @@ export class ClienteService {
     return this.prisma.cliente.create({ data: dto });
   }
 
-  findAll() {
-    return this.prisma.cliente.findMany();
+  async findAll(page = 1, limit = 10, search?: string) {
+    const take = Math.max(1, Math.min(limit, 50));
+    const currentPage = Math.max(1, page);
+    const skip = (currentPage - 1) * take;
+
+    const trimmedSearch = search?.trim();
+    const where: Prisma.ClienteWhereInput = trimmedSearch
+      ? {
+          OR: [
+            {
+              usuario: {
+                nombres: { contains: trimmedSearch, mode: 'insensitive' },
+              },
+            },
+            {
+              usuario: {
+                apellidos: { contains: trimmedSearch, mode: 'insensitive' },
+              },
+            },
+            {
+              usuario: {
+                cedula: { contains: trimmedSearch, mode: 'insensitive' },
+              },
+            },
+          ],
+        }
+      : {};
+
+    // Ejecutamos count y fetch dentro de una transacción para mantener coherencia
+    const [totalItems, clientes] = await this.prisma.$transaction([
+      this.prisma.cliente.count({ where }),
+      this.prisma.cliente.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { id: 'desc' },
+        include: {
+          usuario: true,
+          planes: {
+            orderBy: { fechaFin: 'desc' },
+            take: 1,
+            include: { plan: { select: { nombre: true } } },
+          },
+        },
+      }),
+    ]);
+  
+    return {
+      data: clientes,
+      meta: {
+        totalItems,
+        itemCount: clientes.length,
+        perPage: take,
+        totalPages: Math.ceil(totalItems / take),
+        currentPage,
+      },
+    };
   }
+  
 
   async findOne(id: number) {
     const cliente = await this.prisma.cliente.findUnique({

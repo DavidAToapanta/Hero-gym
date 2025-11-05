@@ -4,7 +4,7 @@ import { MetricsCardsComponent } from "./components/metrics-cards/metrics-cards.
 import { RecentMembersComponent } from "./components/recent-members/recent-members.component";
 import { QuickActionsComponent } from "./components/quick-actions/quick-actions.component";
 import { NotificationsComponent } from "./components/notifications/notifications.component";
-
+import { MonthlyIncomeChartComponent } from './components/monthly-income-chart/monthly-income-chart.component';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -13,8 +13,9 @@ import { NotificationsComponent } from "./components/notifications/notifications
     MetricsCardsComponent,
     RecentMembersComponent,
     QuickActionsComponent,
-    NotificationsComponent
-  ],
+    NotificationsComponent,
+    MonthlyIncomeChartComponent
+],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })

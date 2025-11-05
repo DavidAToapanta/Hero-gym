@@ -1,0 +1,78 @@
+
+<div class="bg-white rounded-2xl shadow-lg p-6 mx-[4cm]">
+    <!-- Encabezado -->
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">
+        Lista de Productos ({{ totalProductos }})
+      </h3>
+    </div>
+  
+    <!-- Tabla -->
+    <div class="overflow-x-auto" *ngIf="!isLoading; else loadingState">
+      <table
+        class="min-w-full text-sm border-separate border-spacing-y-2"
+        *ngIf="productos.length > 0; else emptyState"
+      >
+        <thead>
+          <tr class="text-left text-gray-500 border-b border-gray-200">
+            <th class="py-3 font-medium">Nombre</th>
+            <th class="py-3 font-medium">Precio</th>
+            <th class="py-3 font-medium">Stock</th>
+            <th class="py-3 font-medium">Estado</th>
+            <th class="py-3 font-medium text-center">Acciones</th>
+          </tr>
+        </thead>
+  
+        <tbody>
+          <tr
+            *ngFor="let p of productos"
+            class="bg-gray-50 hover:bg-gray-100 transition rounded-lg"
+          >
+            <td class="py-3 px-4 font-medium text-gray-800">{{ p.nombre }}</td>
+            <td class="py-3 px-4 text-gray-600">${{ p.precio | number: '1.2-2' }}</td>
+            <td class="py-3 px-4 text-gray-600">{{ p.stock }}</td>
+            <td class="py-3 px-4">
+              <span
+                class="px-3 py-1 rounded-full text-xs font-semibold"
+                [ngClass]="
+                  p.estado
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'
+                "
+              >
+                {{ p.estado ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <button
+                (click)="editarProducto(p)"
+                class="text-indigo-600 hover:text-indigo-800 mr-3"
+              >
+                Editar
+              </button>
+              <button
+                (click)="eliminarProducto(p.id)"
+                class="text-red-600 hover:text-red-800"
+              >
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Estado vacío -->
+    <ng-template #emptyState>
+      <div class="flex flex-col items-center justify-center text-gray-500 py-10">
+        <lucide-icon name="package" class="w-10 h-10 mb-3"></lucide-icon>
+        <p>No se encontraron productos</p>
+      </div>
+    </ng-template>
+  
+    <!-- Estado cargando -->
+    <ng-template #loadingState>
+      <p class="text-center text-gray-500 py-6">Cargando productos...</p>
+    </ng-template>
+  </div>
+  

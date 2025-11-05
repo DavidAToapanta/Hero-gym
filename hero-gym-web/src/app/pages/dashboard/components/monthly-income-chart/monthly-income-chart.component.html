@@ -1,1 +1,47 @@
-<p>monthly-income-chart works!</p>
+<div class="bg-white rounded-2xl shadow-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-900">Ingresos</h2>
+      
+          <div class="flex items-center gap-3">
+            <!-- Filtros de periodo -->
+            <div class="flex gap-1 rounded-md bg-gray-100 p-1">
+              <button class="text-xs px-3 py-1 rounded"
+                      [class.bg-white]="periodo==='dia'"
+                      (click)="cargarPeriodo('dia')">Día</button>
+              <button class="text-xs px-3 py-1 rounded"
+                      [class.bg-white]="periodo==='mes'"
+                      (click)="cargarPeriodo('mes')">Mes</button>
+              <button class="text-xs px-3 py-1 rounded"
+                      [class.bg-white]="periodo==='anio'"
+                      (click)="cargarPeriodo('anio')">Año</button>
+            </div>
+      
+            <!-- Cambiar tipo de gráfico -->
+            <div class="flex gap-1 rounded-md bg-gray-100 p-1">
+              <button class="text-xs px-3 py-1 rounded"
+                      [class.bg-white]="modo==='line'"
+                      (click)="cambiarModo('line')">Línea</button>
+              <button class="text-xs px-3 py-1 rounded"
+                      [class.bg-white]="modo==='bar'"
+                      (click)="cambiarModo('bar')">Columnas</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="p-4 bg-gray-50 rounded-xl min-h-[300px] flex items-center justify-center">
+          <!-- Estado de carga -->
+          <p *ngIf="cargando" class="text-gray-500 animate-pulse">Cargando ingresos...</p>
+      
+          <!-- Error -->
+          <p *ngIf="error" class="text-red-500">{{ error }}</p>
+      
+          <!-- Gráfico -->
+          <canvas *ngIf="!cargando && !error"
+                  baseChart
+                  [type]="chartType"
+                  [data]="chartConfig.data"
+                  [options]="chartConfig.options">
+          </canvas>
+        </div>
+      </div>
+      

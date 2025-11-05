@@ -5,7 +5,7 @@ import { ClienteService } from './cliente.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 
-@Controller('cliente')
+@Controller('clientes')
 export class ClienteController {
     constructor(private readonly clienteService: ClienteService){}
 
@@ -15,9 +15,16 @@ export class ClienteController {
     }
 
     @Get()
-    findAll() {
-        return this.clienteService.findAll();
+    findAll(
+      @Query('page') page = '1',
+      @Query('limit') limit = '10',
+      @Query('search') search = '',
+    ) {
+      const pageNumber = Number(page) || 1;
+      const limitNumber = Number(limit) || 10;
+      return this.clienteService.findAll(pageNumber, limitNumber, search);
     }
+
 
     @Get('recientes')
     findRecientes(@Query('limit') limit = '10') {

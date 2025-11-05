@@ -1,0 +1,28 @@
+<div class="bg-white rounded-2xl shadow-md p-4 mb-6 mx-[4cm]">
+  <div class="relative">
+    <lucide-icon
+      name="search"
+      class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"
+    ></lucide-icon>
+
+    <input
+      type="text"
+      placeholder="Buscar producto por nombre..."
+      [(ngModel)]="termino"
+      (input)="onBuscar()"
+      class="w-full pl-12 pr-10 py-2.5 text-gray-700 border border-gray-200 rounded-xl 
+             focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none
+             transition duration-150 ease-in-out placeholder-gray-400"
+    />
+
+    <button
+      *ngIf="termino"
+      (click)="limpiarBusqueda()"
+      class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+      title="Limpiar"
+    >
+      <lucide-icon name="x"></lucide-icon>
+    </button>
+  </div>
+</div>
+  

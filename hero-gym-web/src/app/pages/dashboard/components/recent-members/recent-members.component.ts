@@ -17,8 +17,8 @@ export class RecentMembersComponent implements OnInit {
 
   ngOnInit(): void {
     this.clienteService.getRecentClients().subscribe({
-      next: (data) => (this.recentMembers = data),
-      error: (err) => console.error('Error fetching recent clients', err),
+      next: (data: any[]) => (this.recentMembers = data),
+      error: (err: any) => console.error('Error fetching recent clients', err),
     });
   }
 

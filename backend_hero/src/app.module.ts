@@ -10,6 +10,7 @@ import { PagoModule } from './pago/pago.module';
 import { DeudaModule } from './deuda/deuda.module';
 import { GastoModule } from './gasto/gasto.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { EstadisticasModule } from './estadisticas/estadisticas.module';
 
 @Module({
   imports: [UsuariosModule,
@@ -22,7 +23,8 @@ import { NotificationsModule } from './notifications/notifications.module';
             PagoModule,
             DeudaModule,
             GastoModule,
-            NotificationsModule
+            NotificationsModule,
+            EstadisticasModule,
   ]
 })
 export class AppModule {}
