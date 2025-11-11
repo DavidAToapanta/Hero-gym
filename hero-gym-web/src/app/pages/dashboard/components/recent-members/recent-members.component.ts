@@ -8,7 +8,7 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './recent-members.component.html',
-  styleUrl: './recent-members.component.css'
+  styleUrls: ['./recent-members.component.css']
 })
 export class RecentMembersComponent implements OnInit {
   recentMembers: any[] = [];

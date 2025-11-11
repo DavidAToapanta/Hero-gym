@@ -26,14 +26,14 @@
         <tbody>
           <tr
             *ngFor="let p of productos"
-            class="bg-gray-50 hover:bg-gray-100 transition rounded-lg"
+            class="bg-white border border-gray-200 hover:shadow-md transition rounded-xl"
           >
-            <td class="py-3 px-4 font-medium text-gray-800">{{ p.nombre }}</td>
-            <td class="py-3 px-4 text-gray-600">${{ p.precio | number: '1.2-2' }}</td>
-            <td class="py-3 px-4 text-gray-600">{{ p.stock }}</td>
-            <td class="py-3 px-4">
+            <td class="py-3 px-4 font-semibold text-gray-800">{{ p.nombre }}</td>
+            <td class="px-4 text-gray-700">${{ p.precio | number: '1.2-2' }}</td>
+            <td class="px-4 text-gray-700">{{ p.stock }}</td>
+            <td class="px-4">
               <span
-                class="px-3 py-1 rounded-full text-xs font-semibold"
+                class="px-2 py-1 rounded-full text-xs font-medium"
                 [ngClass]="
                   p.estado
                     ? 'bg-green-100 text-green-700'
@@ -43,18 +43,20 @@
                 {{ p.estado ? 'Activo' : 'Inactivo' }}
               </span>
             </td>
-            <td class="py-3 px-4 text-center">
+            <td class="text-center px-4">
               <button
                 (click)="editarProducto(p)"
-                class="text-indigo-600 hover:text-indigo-800 mr-3"
+                class="text-indigo-600 hover:text-indigo-800 mr-3 transition"
+                title="Editar"
               >
-                Editar
+                <lucide-icon name="pencil"></lucide-icon>
               </button>
               <button
                 (click)="eliminarProducto(p.id)"
-                class="text-red-600 hover:text-red-800"
+                class="text-red-600 hover:text-red-800 transition"
+                title="Eliminar"
               >
-                Eliminar
+                <lucide-icon name="trash-2"></lucide-icon>
               </button>
             </td>
           </tr>

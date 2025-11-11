@@ -11,6 +11,9 @@ import { DeudaModule } from './deuda/deuda.module';
 import { GastoModule } from './gasto/gasto.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { EstadisticasModule } from './estadisticas/estadisticas.module';
+import { AdministradorModule } from './administrador/administrador.module';
+import { EntrenadorModule } from './entrenador/entrenador.module';
+import { RecepcionistaModule } from './recepcionista/recepcionista.module';
 
 @Module({
   imports: [UsuariosModule,
@@ -25,6 +28,9 @@ import { EstadisticasModule } from './estadisticas/estadisticas.module';
             GastoModule,
             NotificationsModule,
             EstadisticasModule,
+            AdministradorModule,
+            EntrenadorModule,
+            RecepcionistaModule,
   ]
 })
 export class AppModule {}

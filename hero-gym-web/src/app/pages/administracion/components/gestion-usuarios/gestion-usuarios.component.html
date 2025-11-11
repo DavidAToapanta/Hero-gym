@@ -1,0 +1,59 @@
+<div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+    <!-- Encabezado -->
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <lucide-icon name="users" class="w-5 h-5 text-indigo-600"></lucide-icon>
+        Usuarios del Sistema
+      </h2>
+  
+      <button
+        (click)="abrirModal()"
+        class="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+      >
+        <lucide-icon name="plus" class="w-4 h-4"></lucide-icon>
+        Nuevo Usuario
+      </button>
+    </div>
+  
+    <!-- Tabla de usuarios -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm border-separate border-spacing-y-2">
+        <thead>
+          <tr class="text-left text-gray-500 border-b border-gray-200">
+            <th class="py-3 font-medium">Nombre</th>
+            <th class="py-3 font-medium">Rol</th>
+            <th class="py-3 font-medium">Estado</th>
+            <th class="py-3 font-medium">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let u of usuarios"
+            class="bg-gray-50 hover:bg-gray-100 transition rounded-lg"
+          >
+            <td class="py-3 px-4 font-medium text-gray-800">{{ u.nombres }} {{ u.apellidos }}</td>
+            <td class="py-3 px-4 capitalize">{{ u.rol }}</td>
+            <td class="py-3 px-4">
+              <span
+                class="text-xs px-2 py-1 rounded-full"
+                [ngClass]="'bg-green-100 text-green-700'"
+              >
+                Activo
+              </span>
+            </td>
+            <td class="py-3 px-4">
+              <button (click)="eliminar(u)" class="text-red-600 hover:underline">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Modal -->
+  <app-usuario-modal
+    *ngIf="mostrarModal"
+    (close)="cerrarModal()"
+    (save)="guardarUsuario($event)"
+  ></app-usuario-modal>
+  

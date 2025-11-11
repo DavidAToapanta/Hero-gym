@@ -1,0 +1,42 @@
+<div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+    <!-- Encabezado -->
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <lucide-icon name="layers" class="w-5 h-5 text-indigo-600"></lucide-icon>
+        Gestión de Planes
+      </h2>
+  
+      <button
+        (click)="abrirModal()"
+        class="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+      >
+        <lucide-icon name="plus" class="w-4 h-4"></lucide-icon>
+        Nuevo Plan
+      </button>
+    </div>
+  
+    <!-- Lista de planes desde backend -->
+    <div class="space-y-3" *ngIf="planes?.length; else sinPlanes">
+      <div
+        *ngFor="let plan of planes"
+        class="flex justify-between items-center border border-gray-200 rounded-xl px-4 py-3 hover:shadow-sm transition"
+      >
+        <div>
+          <p class="font-semibold text-gray-900">{{ plan.nombre }}</p>
+          <p class="text-sm text-gray-500">{{ plan.mesesPagar }} meses • ${{ plan.precio }}</p>
+        </div>
+        <span class="text-indigo-600 text-sm font-medium">Activo</span>
+      </div>
+    </div>
+    <ng-template #sinPlanes>
+      <p class="text-sm text-gray-500">No hay planes registrados.</p>
+    </ng-template>
+  </div>
+  
+  <!-- Modal -->
+  <app-plan-modal
+    *ngIf="mostrarModal"
+    (close)="cerrarModal()"
+    (save)="guardarPlan($event)"
+  ></app-plan-modal>
+  

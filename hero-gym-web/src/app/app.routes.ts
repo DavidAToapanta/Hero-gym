@@ -8,6 +8,7 @@ import { ProductosComponent } from './pages/productos/productos.component';
 import { PagosComponent } from './pages/pagos/pagos.component';
 import { PlanesComponent } from './pages/planes/planes.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
+import { AdministracionComponent } from './pages/administracion/administracion.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -23,7 +24,8 @@ export const routes: Routes = [
       { path: 'productos', component: ProductosComponent},
       { path: 'pagos', component: PagosComponent},
       { path: 'planes', component: PlanesComponent},
-      { path: 'usuarios', component: UsuariosComponent}
+      { path: 'usuarios', component: UsuariosComponent},
+      { path: 'administracion', component: AdministracionComponent}
 
 
     ]

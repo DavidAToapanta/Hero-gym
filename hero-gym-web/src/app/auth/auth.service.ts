@@ -32,6 +32,7 @@ export class AuthService {
    */
   handleLoginSuccess(response: { access_token: string }): void {
     localStorage.setItem('access_token', response.access_token);
+    localStorage.setItem('ultimoAcceso', new Date().toISOString());
     this.router.navigate(['/dashboard'], { replaceUrl: true });
   }
   

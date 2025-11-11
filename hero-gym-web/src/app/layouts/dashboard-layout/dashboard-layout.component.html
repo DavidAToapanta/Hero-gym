@@ -135,7 +135,7 @@
           <span>Rutinas</span>
         </a>
         <a
-          routerLink="/dashboard/Pagos"
+          routerLink="/dashboard/pagos"
           class="flex items-center space-x-2 text-gray-700 hover:text-black"
         >
           <!-- Users icon -->
@@ -184,7 +184,7 @@
           <span>Comprobantes</span>
         </a>
         <a
-          routerLink="/dashboard/Comprobantes"
+          routerLink="/dashboard/administracion"
           class="flex items-center space-x-2 text-gray-700 hover:text-black"
         >
           <!-- Users icon -->
@@ -238,7 +238,7 @@
           </div>
           <!-- Usuario -->
           <div class="text-right">
-            <p class="text-sm font-semibold text-gray-800">Carlos Rodríguez</p>
+            <p class="text-sm font-semibold text-gray-800">{{ userName || 'Administrador' }}</p>
             <p class="text-xs text-gray-500">Administrador</p>
           </div>
         </div>

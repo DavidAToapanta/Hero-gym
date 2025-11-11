@@ -33,36 +33,51 @@ export class ClienteService {
     forceRefresh = false,
   ): Observable<PaginatedResponse<any>> {
     const cacheKey = this.buildCacheKey(page, limit, search);
+    const searchTerm = search?.trim() || '';
 
     // Si forceRefresh es true, limpiar el cache para esta clave específica
     if (forceRefresh) {
       this.cache.delete(cacheKey);
+      console.log('[ClienteService] Force refresh - cache eliminado para:', cacheKey);
     } else if (this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey)!;
-      // Verificar que el cache no esté vacío
-      if (cached && cached.data && cached.data.length > 0) {
+      // Verificar que el cache tenga datos válidos (puede ser un array vacío válido)
+      if (cached && cached.data !== undefined && cached.meta) {
+        console.log('[ClienteService] Retornando desde cache:', cacheKey);
         return of(cached);
       }
-      // Si el cache está vacío, eliminarlo y hacer una nueva petición
+      // Si el cache está corrupto o incompleto, eliminarlo y hacer una nueva petición
       this.cache.delete(cacheKey);
+      console.log('[ClienteService] Cache corrupto eliminado:', cacheKey);
     }
 
     let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString());
 
-    if (search && search.trim() !== '') {
-      params = params.set('search', search.trim());
+    if (searchTerm) {
+      params = params.set('search', searchTerm);
     }
+
+    console.log('[ClienteService] Haciendo petición HTTP:', { page, limit, search: searchTerm, forceRefresh });
+    const startTime = Date.now();
 
     return this.http
       .get<PaginatedResponse<any>>(this.apiUrl, { params })
-      .pipe(tap((response) => {
-        // Solo cachear si la respuesta tiene datos válidos
-        if (response && response.data) {
-          this.cache.set(cacheKey, response);
-        }
-      }));
+      .pipe(
+        tap((response) => {
+          const duration = Date.now() - startTime;
+          console.log(`[ClienteService] Respuesta recibida en ${duration}ms:`, {
+            items: response?.data?.length || 0,
+            totalItems: response?.meta?.totalItems || 0,
+          });
+          // Cachear la respuesta solo si tiene la estructura correcta
+          if (response && response.meta !== undefined) {
+            this.cache.set(cacheKey, response);
+            console.log('[ClienteService] Respuesta cacheada:', cacheKey);
+          }
+        })
+      );
   }
 
   // 🔹 Crear nuevo cliente

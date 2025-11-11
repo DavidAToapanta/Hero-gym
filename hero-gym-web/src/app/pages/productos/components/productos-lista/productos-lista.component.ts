@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ProductoService } from '../../../../core/services/producto.service';
@@ -10,14 +10,14 @@ import { ProductoService } from '../../../../core/services/producto.service';
   imports: [CommonModule, LucideAngularModule],
   templateUrl: './productos-lista.component.html',
 })
-export class ProductosListaComponent implements OnInit {
+export class ProductosListaComponent implements OnInit, OnChanges {
   @Input() searchTerm: string = '';
+  @Output() edit = new EventEmitter<any>();
+  @Output() deleted = new EventEmitter<void>();
 
   productos: any[] = [];
   totalProductos = 0;
   isLoading = true;
-  page = 1;
-  limit = 10;
 
   constructor(private productoService: ProductoService) {}
 
@@ -25,19 +25,19 @@ export class ProductosListaComponent implements OnInit {
     this.cargarProductos();
   }
 
-  ngOnChanges() {
-    this.cargarProductos();
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['searchTerm'] && !changes['searchTerm'].firstChange) {
+      this.cargarProductos();
+    }
   }
 
   cargarProductos() {
     this.isLoading = true;
 
-    this.productoService.getProductos(this.page, this.limit).subscribe({
-      next: (res) => {
-        this.productos = res.data.filter((p) =>
-          p.nombre.toLowerCase().includes(this.searchTerm.toLowerCase())
-        );
-        this.totalProductos = res.meta.totalItems;
+    this.productoService.getProductos(this.searchTerm.trim()).subscribe({
+      next: (productos) => {
+        this.productos = productos;
+        this.totalProductos = productos.length;
         this.isLoading = false;
       },
       error: (err) => {
@@ -47,17 +47,23 @@ export class ProductosListaComponent implements OnInit {
     });
   }
 
+  recargar() {
+    this.cargarProductos();
+  }
+
   eliminarProducto(id: number) {
     if (confirm('¿Seguro que deseas eliminar este producto?')) {
       this.productoService.deleteProducto(id).subscribe({
-        next: () => this.cargarProductos(),
+        next: () => {
+          this.cargarProductos();
+          this.deleted.emit();
+        },
         error: (err) => console.error('Error eliminando producto:', err),
       });
     }
   }
 
   editarProducto(producto: any) {
-    // Aquí luego conectas el formulario de edición
-    console.log('Editar producto:', producto);
+    this.edit.emit(producto);
   }
 }

@@ -1,10 +1,12 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-recent-activity',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './recent-activity.component.html',
-  styleUrl: './recent-activity.component.css'
+  styleUrls: ['./recent-activity.component.css']
 })
 export class RecentActivityComponent {
 

@@ -1,19 +1,30 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { AuthRoutingModule } from "../../auth/auth-routing.module";
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../auth/auth.service';
 
 @Component({
   selector: 'app-dashboard-layout',
-  imports: [AuthRoutingModule, RouterOutlet],
+  standalone: true,
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './dashboard-layout.component.html',
-  styleUrl: './dashboard-layout.component.css'
+  styleUrls: ['./dashboard-layout.component.css']
 })
 export class DashboardLayoutComponent {
+  userName = '';
+
   constructor(
     private authService: AuthService,
     private router: Router
-  ){}
+  ){
+    const token = this.authService.getToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        this.userName = payload.userName || '';
+      } catch {}
+    }
+  }
   
   logout() {
     this.authService.logout();

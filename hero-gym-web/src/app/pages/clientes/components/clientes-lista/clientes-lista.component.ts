@@ -4,6 +4,7 @@ import { ClienteService } from '../../../../core/services/cliente.service';
 import { LucideAngularModule } from 'lucide-angular';
 
 
+
 @Component({
   selector: 'app-clientes-lista',
   standalone: true,
@@ -17,53 +18,42 @@ export class ClientesListaComponent implements OnInit, OnChanges {
   itemsPerPage = 10;
   totalPages = 0;
   isLoading = false;
-  private _searchTerm = '';
-  private isInitialized = false;
+  @Input() searchTerm: string = '';
 
   constructor(private clienteService: ClienteService) {}
 
-  @Input() set searchTerm(value: string) {
-    const normalized = value?.trim() ?? '';
-    if (normalized === this._searchTerm) {
-      return;
-    }
-    this._searchTerm = normalized;
-    if (this.isInitialized) {
-      this.cargarClientes(1, true);
-    }
-  }
-
-  get searchTerm(): string {
-    return this._searchTerm;
-  }
-
   ngOnInit(): void {
-    this.isInitialized = true;
-    // Siempre forzar refresh al inicializar para obtener datos frescos
+    console.log('[ClientesLista] ngOnInit - Iniciando carga de clientes');
     this.cargarClientes(1, true);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // Si cambia el searchTerm y el componente ya está inicializado, recargar
-    if (changes['searchTerm'] && this.isInitialized) {
+    if (changes['searchTerm'] && !changes['searchTerm'].firstChange) {
+      console.log('[ClientesLista] searchTerm cambió:', changes['searchTerm'].currentValue);
       this.cargarClientes(1, true);
     }
   }
 
   private cargarClientes(page: number = 1, forceRefresh = false): void {
-    // Si es una carga forzada, limpiar los datos anteriores primero
-    if (forceRefresh) {
-      this.clientes = [];
-      this.totalClientes = 0;
-      this.currentPage = 1;
-      this.totalPages = 0;
+    if (this.isLoading) {
+      console.warn('[ClientesLista] Ya hay una carga en progreso, ignorando nueva solicitud');
+      return;
     }
-    
+
     this.isLoading = true;
+    const searchTerm = this.searchTerm?.trim() || '';
+    console.log('[ClientesLista] cargarClientes llamado:', { page, searchTerm, forceRefresh });
+    
+    const startTime = Date.now();
     this.clienteService
-      .getClientes(page, this.itemsPerPage, this._searchTerm, forceRefresh)
+      .getClientes(page, this.itemsPerPage, searchTerm, forceRefresh)
       .subscribe({
         next: (response) => {
+          const duration = Date.now() - startTime;
+          console.log(`[ClientesLista] Datos recibidos en ${duration}ms:`, {
+            clientes: response?.data?.length || 0,
+            totalItems: response?.meta?.totalItems || 0,
+          });
           this.clientes = response?.data || [];
           const meta = response?.meta;
           this.totalClientes = meta?.totalItems || 0;
@@ -72,9 +62,11 @@ export class ClientesListaComponent implements OnInit, OnChanges {
           this.isLoading = false;
         },
         error: (err) => {
-          console.error(err);
+          const duration = Date.now() - startTime;
+          console.error(`[ClientesLista] Error después de ${duration}ms:`, err);
           this.clientes = [];
           this.totalClientes = 0;
+          this.totalPages = 0;
           this.isLoading = false;
         },
       });

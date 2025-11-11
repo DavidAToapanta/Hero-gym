@@ -249,3 +249,4 @@ model Gasto {
   usuario     Usuario  @relation(fields: [usuarioId], references: [id])
 }
 
+  

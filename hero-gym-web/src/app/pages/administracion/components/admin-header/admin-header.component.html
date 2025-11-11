@@ -1,0 +1,38 @@
+<!-- Título general -->
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+      <span class="text-yellow-500 mr-2">👑</span>
+      Panel de Administración
+    </h1>
+    <p class="text-gray-600">
+      Bienvenido <span class="font-semibold">{{ admin.nombre }}</span> – Administrador del Sistema
+    </p>
+  </div>
+  
+  <!-- Tarjeta de administrador -->
+  <div class="bg-white rounded-2xl shadow-md p-6 flex justify-between items-center border border-gray-100">
+    <div class="flex items-center gap-4">
+      <!-- Avatar -->
+      <div class="w-16 h-16 flex items-center justify-center rounded-full bg-yellow-100 border border-yellow-300 text-yellow-700 text-xl font-semibold">
+        DT
+      </div>
+  
+      <!-- Info -->
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">{{ admin.nombre }}</h2>
+        <p class="text-gray-500 text-sm">{{ admin.rol }}</p>
+  
+        <div class="flex items-center gap-2 mt-2">
+          <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Sistema {{ admin.estadoSistema }}</span>
+          <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">Acceso {{ admin.acceso }}</span>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Último acceso -->
+    <div class="text-right">
+      <p class="text-gray-400 text-sm">Último acceso</p>
+      <p class="text-gray-800 font-semibold">{{ admin.ultimoAcceso }}</p>
+    </div>
+  </div>
+  

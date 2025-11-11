@@ -1,0 +1,46 @@
+<div class="bg-white rounded-2xl shadow-lg p-6 mx-[4cm]">
+  <h2 class="text-xl font-semibold text-gray-900 mb-4">
+    Historial de Pagos
+  </h2>
+
+  <div *ngIf="isLoading" class="text-gray-500">Cargando pagos...</div>
+  <div *ngIf="!isLoading && filteredPagos.length === 0" class="text-gray-500">Sin resultados.</div>
+
+  <!-- Tabla -->
+  <div class="overflow-x-auto" *ngIf="!isLoading && filteredPagos.length > 0">
+    <table class="min-w-full text-sm border-separate border-spacing-y-2">
+      <thead>
+        <tr class="text-left text-gray-500 border-b border-gray-200">
+          <th class="py-3 font-medium">ID</th>
+          <th class="py-3 font-medium">Cliente</th>
+          <th class="py-3 font-medium">Plan</th>
+          <th class="py-3 font-medium">Monto</th>
+          <th class="py-3 font-medium">Fecha</th>
+          <th class="py-3 font-medium text-center">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr class="bg-gray-50 hover:bg-gray-100 transition" *ngFor="let pago of filteredPagos">
+          <td class="py-3 px-2 font-medium text-gray-900">{{ pago.id }}</td>
+          <td class="py-3 px-2 text-gray-700">
+            {{ pago.clientePlan?.cliente?.usuario?.nombres }}
+            {{ pago.clientePlan?.cliente?.usuario?.apellidos }}
+          </td>
+          <td class="py-3 px-2 text-gray-700">{{ pago.clientePlan?.plan?.nombre }}</td>
+          <td class="py-3 px-2 text-gray-700">${{ pago.monto | number:'1.2-2' }}</td>
+          <td class="py-3 px-2 text-gray-700">{{ pago.fecha | date:'yyyy-MM-dd' }}</td>
+          <td class="py-3 px-2 text-center">
+            <button
+              (click)="eliminar(pago.id)"
+              class="text-red-600 hover:text-red-800 transition"
+              title="Eliminar"
+            >
+              <lucide-icon name="trash-2"></lucide-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

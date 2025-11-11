@@ -8,7 +8,7 @@ import { UserPlus, CreditCard, Dumbbell, Boxes } from 'lucide-angular';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './quick-actions.component.html',
-  styleUrl: './quick-actions.component.css'
+  styleUrls: ['./quick-actions.component.css']
 })
 export class QuickActionsComponent {
   constructor(private router: Router){}

@@ -5,9 +5,10 @@ import { ClienteService } from '../../../../core/services/cliente.service';
 
 @Component({
   selector: 'app-clientes-formulario',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './clientes-formulario.component.html',
-  styleUrl: './clientes-formulario.component.css',
+  styleUrls: ['./clientes-formulario.component.css'],
 })
 export class ClientesFormularioComponent {
   @Output() close = new EventEmitter<void>();

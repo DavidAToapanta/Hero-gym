@@ -9,7 +9,13 @@ import { ClientesFormularioComponent } from "./components/clientes-formulario/cl
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ClientesListaComponent, ClientesBusquedaComponent, ClientesFormularioComponent],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    ClientesListaComponent,
+    ClientesBusquedaComponent,
+    ClientesFormularioComponent,
+  ],
   templateUrl: './clientes.component.html',
   styleUrls: ['./clientes.component.css'],
 })

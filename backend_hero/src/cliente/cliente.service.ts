@@ -40,20 +40,41 @@ export class ClienteService {
         }
       : {};
 
-    // Ejecutamos count y fetch dentro de una transacción para mantener coherencia
-    const [totalItems, clientes] = await this.prisma.$transaction([
+    // Ejecutamos count y fetch en paralelo para mejor rendimiento
+    const [totalItems, clientes] = await Promise.all([
       this.prisma.cliente.count({ where }),
       this.prisma.cliente.findMany({
         where,
         skip,
         take,
         orderBy: { id: 'desc' },
-        include: {
-          usuario: true,
+        select: {
+          id: true,
+          horario: true,
+          sexo: true,
+          objetivos: true,
+          tiempoEntrenar: true,
+          usuario: {
+            select: {
+              id: true,
+              nombres: true,
+              apellidos: true,
+              cedula: true,
+            },
+          },
           planes: {
             orderBy: { fechaFin: 'desc' },
             take: 1,
-            include: { plan: { select: { nombre: true } } },
+            select: {
+              id: true,
+              fechaInicio: true,
+              fechaFin: true,
+              plan: {
+                select: {
+                  nombre: true,
+                },
+              },
+            },
           },
         },
       }),
@@ -87,7 +108,30 @@ export class ClienteService {
 
   async remove(id: number) {
     await this.findOne(id);
-    return this.prisma.cliente.delete({ where: { id } });
+
+    // Borrado en cascada manual de entidades asociadas más comunes
+    await this.prisma.$transaction(async (tx) => {
+      // ClientePlan dependencias: pagos y deudas
+      const cps = await tx.clientePlan.findMany({ where: { clienteId: id }, select: { id: true } });
+      const cpIds = cps.map((x) => x.id);
+      if (cpIds.length) {
+        await tx.pago.deleteMany({ where: { clientePlanId: { in: cpIds } } });
+        await tx.deuda.deleteMany({ where: { clientePlanId: { in: cpIds } } });
+      }
+      await tx.clientePlan.deleteMany({ where: { clienteId: id } });
+
+      // Otras dependencias directas
+      await tx.compra.deleteMany({ where: { clienteId: id } });
+      await tx.novedad.deleteMany({ where: { clienteId: id } });
+      await tx.clienteMedida.deleteMany({ where: { clienteId: id } });
+
+      // Nota: Si existen rutinas y su árbol asociado, se deberían eliminar en orden.
+      // Por simplicidad y porque aún no se usan en la UI de clientes/pagos, omitimos aquí.
+
+      await tx.cliente.delete({ where: { id } });
+    });
+
+    return { ok: true };
   }
 
   async findRecientes(limit = 10) {

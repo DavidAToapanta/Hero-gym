@@ -2,19 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-interface PaginationMeta {
-  totalItems: number;
-  itemCount: number;
-  perPage: number;
-  totalPages: number;
-  currentPage: number;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: PaginationMeta;
-}
-
 @Injectable({
   providedIn: 'root',
 })
@@ -23,12 +10,13 @@ export class ProductoService {
 
   constructor(private http: HttpClient) {}
 
-  // 🔹 Obtener productos con paginación
-  getProductos(page = 1, limit = 10): Observable<PaginatedResponse<any>> {
-    const params = new HttpParams()
-      .set('page', page)
-      .set('limit', limit);
-    return this.http.get<PaginatedResponse<any>>(this.apiUrl, { params });
+  // 🔹 Obtener productos con filtro opcional por nombre
+  getProductos(searchTerm = ''): Observable<any[]> {
+    const params = searchTerm
+      ? new HttpParams().set('search', searchTerm)
+      : undefined;
+
+    return this.http.get<any[]>(this.apiUrl, { params });
   }
 
   // 🔹 Crear nuevo producto

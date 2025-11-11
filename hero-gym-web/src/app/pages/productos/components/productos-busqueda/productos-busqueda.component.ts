@@ -8,7 +8,7 @@ import { LucideAngularModule } from "lucide-angular";
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './productos-busqueda.component.html',
-  styleUrl: './productos-busqueda.component.css',
+  styleUrls: ['./productos-busqueda.component.css'],
 })
 export class ProductosBusquedaComponent {
   @Output() buscar = new EventEmitter<string>();

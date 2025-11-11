@@ -15,14 +15,23 @@ export class ClienteController {
     }
 
     @Get()
-    findAll(
+    async findAll(
       @Query('page') page = '1',
       @Query('limit') limit = '10',
       @Query('search') search = '',
     ) {
       const pageNumber = Number(page) || 1;
       const limitNumber = Number(limit) || 10;
-      return this.clienteService.findAll(pageNumber, limitNumber, search);
+      try {
+        const startTime = Date.now();
+        const result = await this.clienteService.findAll(pageNumber, limitNumber, search);
+        const duration = Date.now() - startTime;
+        console.log(`[Clientes] findAll completado en ${duration}ms - Página: ${pageNumber}, Límite: ${limitNumber}, Búsqueda: "${search}"`);
+        return result;
+      } catch (error) {
+        console.error('[Clientes] Error en findAll:', error);
+        throw error;
+      }
     }
 
 
