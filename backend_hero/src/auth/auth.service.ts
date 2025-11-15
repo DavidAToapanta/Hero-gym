@@ -24,11 +24,24 @@ export class AuthService {
             throw new UnauthorizedException('Contraseña incorrecta');
         }
 
+        let rol = 'SIN_ROL';
+        const admin = await this.prisma.administrador.findFirst({ where: { usuarioId: usuario.id}});
+        const recep = await this.prisma.recepcionista.findFirst({ where: { usuarioId: usuario.id}});
+        const entrenador = await this.prisma.entrenador.findFirst({ where: { usuarioId: usuario.id}});
+
+        if (admin) rol = 'ADMIN';
+        else if (recep) rol = 'RECEPCIONISTA';
+        else if (entrenador) rol = 'ENTRENADOR';
+
+        // const payload = { sub: usuario.id, userName: usuario.userName, cedula: usuario.cedula, role: rol };
+
+
         return {
             access_token: this.jwtService.sign({
                 sub: usuario.id,
                 userName: usuario.userName,
                 cedula: usuario.cedula,
+                rol,
             }),
         };
     }
