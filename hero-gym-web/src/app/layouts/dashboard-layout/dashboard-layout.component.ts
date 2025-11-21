@@ -30,5 +30,11 @@ export class DashboardLayoutComponent {
     this.authService.logout();
     this.router.navigateByUrl('/login', { replaceUrl: true});
   }
+
+  hasRole(roles: string[]): boolean {
+    const hasPermission = this.authService.hasRole(roles);
+    // console.log(`DashboardLayout: Checking roles ${roles}, Result: ${hasPermission}`);
+    return hasPermission;
+  }
   
 }

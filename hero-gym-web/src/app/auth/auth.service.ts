@@ -1,5 +1,3 @@
-// src/app/auth/auth.service.ts
-
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -44,7 +42,6 @@ export class AuthService {
   getToken(): string | null {
     return localStorage.getItem('access_token');
   }
-  
 
   isAuthenticated(): boolean {
     return !!this.getToken();
@@ -52,13 +49,25 @@ export class AuthService {
 
   getUserRole(): string | null {
     const token = this.getToken();
-    if (!token) return null;
+    if (!token) {
+      console.warn('AuthService: No token found');
+      return null;
+    }
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.role || null;
+      console.log('AuthService: Full Token Payload:', payload);
+      console.log('AuthService: Extracted Role:', payload.rol);
+      return payload.rol || null;
     } catch (e) {
+      console.error('AuthService: Error decoding token', e);
       return null;
     }
+  }
+
+  hasRole(allowedRoles: string[]): boolean {
+    const userRole = this.getUserRole();
+    if (!userRole) return false;
+    return allowedRoles.includes(userRole);
   }
 }

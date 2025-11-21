@@ -3,6 +3,7 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { LoginComponent } from './auth/login/login.component';
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
+import { RoleGuard } from './core/guards/role.guard';
 import { ClientesComponent } from './pages/clientes/clientes.component';
 import { ProductosComponent } from './pages/productos/productos.component';
 import { PagosComponent } from './pages/pagos/pagos.component';
@@ -20,14 +21,42 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: '', component: DashboardComponent },
-      { path: 'clientes', component: ClientesComponent},
-      { path: 'productos', component: ProductosComponent},
-      { path: 'pagos', component: PagosComponent},
-      { path: 'planes', component: PlanesComponent},
-      { path: 'usuarios', component: UsuariosComponent},
-      { path: 'administracion', component: AdministracionComponent}
-
-
+      { 
+        path: 'clientes', 
+        component: ClientesComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'RECEPCIONISTA'] }
+      },
+      { 
+        path: 'productos', 
+        component: ProductosComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      { 
+        path: 'pagos', 
+        component: PagosComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      { 
+        path: 'planes', 
+        component: PlanesComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      { 
+        path: 'usuarios', 
+        component: UsuariosComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      { 
+        path: 'administracion', 
+        component: AdministracionComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      }
     ]
   },
 

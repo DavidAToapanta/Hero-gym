@@ -55,6 +55,7 @@
           </svg>
           <span>Panel</span>
         </a>
+        
         <a
           routerLink="/dashboard/clientes"
           class="flex items-center space-x-2 text-gray-700 hover:text-black"
@@ -79,11 +80,12 @@
           </svg>
           <span>Miembros</span>
         </a>
-        <a
+
+        <a *ngIf="hasRole(['ADMIN'])"
           routerLink="/dashboard/productos"
           class="flex items-center space-x-2 text-gray-700 hover:text-black"
         >
-          <!-- Users icon -->
+          <!-- Shopping cart icon -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -104,11 +106,12 @@
           </svg>
           <span>Productos</span>
         </a>
-        <a
-          routerLink="/dashboard/productos"
+
+        <a *ngIf="hasRole(['ADMIN'])"
+          routerLink="/dashboard/planes"
           class="flex items-center space-x-2 text-gray-700 hover:text-black"
         >
-          <!-- Users icon -->
+          <!-- Notebook icon -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -132,13 +135,14 @@
               d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"
             />
           </svg>
-          <span>Rutinas</span>
+          <span>Planes</span>
         </a>
-        <a
+
+        <a *ngIf="hasRole(['ADMIN'])"
           routerLink="/dashboard/pagos"
           class="flex items-center space-x-2 text-gray-700 hover:text-black"
         >
-          <!-- Users icon -->
+          <!-- Credit card icon -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -156,11 +160,12 @@
           </svg>
           <span>Pagos</span>
         </a>
-        <a
+
+        <a *ngIf="hasRole(['ADMIN'])"
           routerLink="/dashboard/Pagos"
           class="flex items-center space-x-2 text-gray-700 hover:text-black"
         >
-          <!-- Users icon -->
+          <!-- File text icon -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -183,11 +188,12 @@
           </svg>
           <span>Comprobantes</span>
         </a>
-        <a
+
+        <a *ngIf="hasRole(['ADMIN'])"
           routerLink="/dashboard/administracion"
           class="flex items-center space-x-2 text-gray-700 hover:text-black"
         >
-          <!-- Users icon -->
+          <!-- Bell icon -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -207,7 +213,6 @@
           </svg>
           <span>Administracion</span>
         </a>
-        <!-- Agrega más enlaces similares si quieres -->
       </div>
 
       <!-- Notificación + Usuario -->

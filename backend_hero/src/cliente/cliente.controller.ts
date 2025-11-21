@@ -4,8 +4,14 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestj
 import { ClienteService } from './cliente.service';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles, Role } from '../auth/decorators/roles.decorator';
 
 @Controller('clientes')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN, Role.RECEPCIONISTA)
 export class ClienteController {
     constructor(private readonly clienteService: ClienteService){}
 

@@ -70,15 +70,19 @@ export class GestionUsuariosComponent implements OnInit {
       sueldo: usuario.sueldo ? Number(usuario.sueldo) : undefined,
     };
 
+    console.log('Enviando usuario al backend:', dto);
+
     this.usuarioService.crearUsuario(dto).subscribe({
-      next: () => {
+      next: (res) => {
+        console.log('Usuario creado exitosamente:', res);
+        alert('Usuario creado exitosamente');
         this.cargarUsuarios();
         this.cerrarModal();
       },
       error: (err) => {
         console.error('Error al guardar usuario:', err);
         const mensaje = err.error?.message || 'Error al guardar el usuario. Por favor intente nuevamente.';
-        alert(mensaje);
+        alert('Error: ' + mensaje);
       }
     });
   }
