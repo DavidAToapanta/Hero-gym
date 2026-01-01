@@ -32,19 +32,46 @@
             <td class="px-4">{{ c.usuario?.cedula }}</td>
             <td class="px-4 text-gray-700">{{ c.objetivos }}</td>
             <td class="px-4">
-              <span [ngClass]="getBadgeClasses(getEstado(c))" class="px-2 py-1 rounded-full text-xs font-medium">
-                {{ getEstado(c) }}
-              </span>
+              <div class="flex flex-col gap-1">
+                <span [ngClass]="getBadgeClasses(getEstado(c))" class="px-2 py-1 rounded-full text-xs font-medium">
+                  {{ getEstado(c) }}
+                </span>
+                <!-- Mostrar deuda si existe -->
+                <span *ngIf="getDeudaTotal(c) > 0" class="text-red-600 text-xs font-semibold">
+                  Deuda: ${{ getDeudaTotal(c) | number:'1.2-2' }}
+                </span>
+              </div>
             </td>
             <td class="px-4 text-gray-700">{{ c.horario }}</td>
-            <td class="text-center px-4">
-              <button
-                (click)="eliminar(c.id)"
-                class="text-red-600 hover:text-red-800 transition"
-                title="Eliminar"
-              >
-                <lucide-icon name="trash-2"></lucide-icon>
-              </button>
+            <td class="px-4">
+              <div class="flex items-center justify-center gap-3">
+                <!-- Botón Renovar (siempre visible) -->
+                <button
+                  (click)="abrirRenovarModal(c)"
+                  class="text-green-600 hover:text-green-800 transition"
+                  title="Renovar Plan"
+                >
+                  <lucide-icon name="refresh-cw"></lucide-icon>
+                </button>
+
+                <!-- Botón Eliminar -->
+                <button
+                  (click)="eliminar(c.id)"
+                  class="text-red-600 hover:text-red-800 transition"
+                  title="Eliminar"
+                >
+                  <lucide-icon name="trash-2"></lucide-icon>
+                </button>
+
+                <!-- Botón Productos -->
+                <button
+                  (click)="abrirProductosModal(c)"
+                  class="text-blue-600 hover:text-blue-800 transition"
+                  title="Productos"
+                >
+                  <lucide-icon name="shopping-cart"></lucide-icon>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -85,3 +112,29 @@
     </div>
   </div>
   
+<!-- Confirmation Dialog -->
+<app-confirm-dialog
+  [show]="showConfirmDialog"
+  title="¿Eliminar cliente?"
+  message="¿Está seguro que desea eliminar este cliente? Esta acción no se puede deshacer."
+  confirmText="Eliminar"
+  cancelText="Cancelar"
+  type="danger"
+  (confirmed)="onConfirmDelete()"
+  (cancelled)="onCancelDelete()"
+></app-confirm-dialog>
+
+<!-- Renovar Modal -->
+<app-renovar
+  [show]="showRenovarModal"
+  [cliente]="clienteToRenovar"
+  (close)="cerrarRenovarModal()"
+  (renovado)="onRenovacionConfirmada($event)"
+></app-renovar>
+
+<!-- Productos Modal -->
+<app-productos-ciente
+  *ngIf="showProductosModal"
+  [cliente]="clienteForProductos"
+  (close)="cerrarProductosModal()"
+></app-productos-ciente>

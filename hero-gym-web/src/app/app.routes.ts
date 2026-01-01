@@ -16,6 +16,12 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
 
   // Este es el dashboard simple
+  {
+    path: 'cliente',
+    loadChildren: () =>
+      import('./pages/clientes/cliente.routes').then(m => m.CLIENTE_ROUTES)
+  },
+  // Rutas del portal de clientes
   { path: 'dashboard', 
     component: DashboardLayoutComponent,
     canActivate: [AuthGuard],
@@ -54,6 +60,12 @@ export const routes: Routes = [
       { 
         path: 'administracion', 
         component: AdministracionComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      { 
+        path: 'facturas', 
+        loadComponent: () => import('./pages/facturas/facturas.component').then(m => m.FacturasComponent),
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] }
       }

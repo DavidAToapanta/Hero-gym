@@ -50,10 +50,22 @@
     </div>
   </div>
   
-  <!-- Modal -->
-  <app-usuario-modal
-    *ngIf="mostrarModal"
-    (close)="cerrarModal()"
-    (save)="guardarUsuario($event)"
-  ></app-usuario-modal>
-  
+<!-- Confirmation Dialog -->
+<app-confirm-dialog
+  [show]="showConfirmDialog"
+  [title]="'¿Eliminar usuario?'"
+  [message]="usuarioToDelete ? '¿Está seguro que desea eliminar al usuario ' + usuarioToDelete.nombres + ' ' + usuarioToDelete.apellidos + '? Esta acción no se puede deshacer.' : ''"
+  confirmText="Eliminar"
+  cancelText="Cancelar"
+  type="danger"
+  (confirmed)="onConfirmDelete()"
+  (cancelled)="onCancelDelete()"
+></app-confirm-dialog>
+
+<!-- Modal -->
+<app-usuario-modal
+  *ngIf="mostrarModal"
+  (close)="cerrarModal()"
+  (save)="guardarUsuario($event)"
+></app-usuario-modal>
+

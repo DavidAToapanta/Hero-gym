@@ -78,3 +78,14 @@
     </ng-template>
   </div>
   
+<!-- Confirmation Dialog -->
+<app-confirm-dialog
+  [show]="showConfirmDialog"
+  title="¿Eliminar producto?"
+  message="¿Está seguro que desea eliminar este producto? Esta acción no se puede deshacer."
+  confirmText="Eliminar"
+  cancelText="Cancelar"
+  type="danger"
+  (confirmed)="onConfirmDelete()"
+  (cancelled)="onCancelDelete()"
+></app-confirm-dialog>

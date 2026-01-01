@@ -2,11 +2,12 @@ import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChange
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { Pago, PagoService } from '../../../../core/services/pago.service';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-pagos-lista',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, ConfirmDialogComponent],
   templateUrl: './pagos-lista.component.html',
   styleUrl: './pagos-lista.component.css',
 })
@@ -18,6 +19,10 @@ export class PagosListaComponent implements OnInit, OnChanges {
   filteredPagos: Pago[] = [];
   isLoading = true;
   totalPagos = 0;
+  
+  // Confirmation dialog state
+  showConfirmDialog = false;
+  pagoToDelete: number | null = null;
 
   constructor(private pagoService: PagoService) {}
 
@@ -74,14 +79,36 @@ export class PagosListaComponent implements OnInit, OnChanges {
   }
 
   eliminar(id: number) {
-    if (confirm('¿Seguro que deseas eliminar este pago?')) {
-      this.pagoService.deletePago(id).subscribe({
-        next: () => this.cargarPagos(),
-        error: (err) => {
-          console.error('Error eliminando pago:', err);
-          this.error.emit('No se pudo eliminar el pago.');
-        },
-      });
-    }
+    this.pagoToDelete = id;
+    this.showConfirmDialog = true;
+  }
+
+  onConfirmDelete() {
+    if (this.pagoToDelete === null) return;
+    
+    console.log('[PagosLista] Eliminando pago con ID:', this.pagoToDelete);
+    this.pagoService.deletePago(this.pagoToDelete).subscribe({
+      next: () => {
+        console.log('[PagosLista] Pago eliminado exitosamente');
+        alert('Pago eliminado exitosamente');
+        this.cargarPagos();
+        this.showConfirmDialog = false;
+        this.pagoToDelete = null;
+      },
+      error: (err) => {
+        console.error('[PagosLista] Error eliminando pago:', err);
+        const mensaje = err.error?.message || err.message || 'Error desconocido';
+        alert(`Error al eliminar el pago: ${mensaje}`);
+        this.error.emit('No se pudo eliminar el pago.');
+        this.showConfirmDialog = false;
+        this.pagoToDelete = null;
+      },
+    });
+  }
+
+  onCancelDelete() {
+    console.log('[PagosLista] Eliminación cancelada');
+    this.showConfirmDialog = false;
+    this.pagoToDelete = null;
   }
 }

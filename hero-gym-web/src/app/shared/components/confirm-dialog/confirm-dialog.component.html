@@ -1,0 +1,47 @@
+@if (show) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm animate-fadeIn">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 animate-slideUp">
+      <!-- Icono y Título -->
+      <div class="flex items-start gap-4 mb-4">
+        <div 
+          [ngClass]="{
+            'bg-red-100 text-red-600': type === 'danger',
+            'bg-yellow-100 text-yellow-600': type === 'warning',
+            'bg-blue-100 text-blue-600': type === 'info'
+          }"
+          class="p-3 rounded-full"
+        >
+          <lucide-icon 
+            [name]="type === 'danger' ? 'alert-triangle' : type === 'warning' ? 'alert-circle' : 'info'"
+            [size]="24"
+          ></lucide-icon>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-gray-900">{{ title }}</h3>
+          <p class="text-gray-600 mt-1">{{ message }}</p>
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-3 justify-end mt-6">
+        <button
+          (click)="onCancel()"
+          class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
+        >
+          {{ cancelText }}
+        </button>
+        <button
+          (click)="onConfirm()"
+          [ngClass]="{
+            'bg-red-600 hover:bg-red-700': type === 'danger',
+            'bg-yellow-600 hover:bg-yellow-700': type === 'warning',
+            'bg-blue-600 hover:bg-blue-700': type === 'info'
+          }"
+          class="px-4 py-2 text-white rounded-lg font-medium transition-colors"
+        >
+          {{ confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

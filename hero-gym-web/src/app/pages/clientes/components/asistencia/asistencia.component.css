@@ -1,0 +1,322 @@
+.asistencia-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Loading State */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(99, 102, 241, 0.1);
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-state p {
+    color: #64748b;
+    font-size: 16px;
+}
+
+/* Error State */
+.error-state {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 2px solid #ef4444;
+    border-radius: 16px;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.error-state h3 {
+    color: #991b1b;
+    margin: 0 0 8px 0;
+    font-size: 20px;
+}
+
+.error-state p {
+    color: #dc2626;
+    margin: 0;
+}
+
+/* No Plan State */
+.no-plan-state {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 16px;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.no-plan-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.no-plan-state h3 {
+    color: #92400e;
+    margin: 0 0 8px 0;
+    font-size: 20px;
+}
+
+.no-plan-state p {
+    color: #b45309;
+    margin: 8px 0;
+}
+
+.suggestion {
+    font-style: italic;
+    font-size: 14px;
+    margin-top: 16px !important;
+}
+
+/* Stats Card */
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+    color: white;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.plan-badge {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Stats Content */
+.stats-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Main Counter */
+.main-counter {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.counter-display {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.dias-asistidos {
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.separator {
+    font-size: 36px;
+    font-weight: 300;
+    opacity: 0.7;
+}
+
+.dias-totales {
+    font-size: 36px;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.counter-label {
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+/* Progress Section */
+.progress-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.progress-bar-container {
+    flex: 1;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+    border-radius: 12px;
+    transition: width 1s ease-out, background 0.3s ease;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+.progress-bar-fill.excellent {
+    background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+}
+
+.progress-bar-fill.good {
+    background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+}
+
+.progress-bar-fill.moderate {
+    background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+}
+
+.progress-bar-fill.low {
+    background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+}
+
+.percentage-display {
+    font-size: 24px;
+    font-weight: 700;
+    min-width: 60px;
+    text-align: right;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Motivational Message */
+.motivational-message {
+    text-align: center;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.motivational-message p {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Plan Info */
+.plan-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.info-item {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-label {
+    font-size: 12px;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.info-value {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .asistencia-container {
+        padding: 16px;
+    }
+
+    .stats-card {
+        padding: 20px;
+    }
+
+    .card-header h2 {
+        font-size: 20px;
+    }
+
+    .dias-asistidos {
+        font-size: 42px;
+    }
+
+    .dias-totales {
+        font-size: 28px;
+    }
+
+    .separator {
+        font-size: 28px;
+    }
+
+    .plan-info {
+        grid-template-columns: 1fr;
+    }
+
+    .percentage-display {
+        font-size: 20px;
+        min-width: 50px;
+    }
+}

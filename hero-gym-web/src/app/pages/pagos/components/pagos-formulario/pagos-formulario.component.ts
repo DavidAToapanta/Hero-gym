@@ -27,9 +27,13 @@ export class PagosFormularioComponent implements OnInit {
   planes: any[] = [];
   selectedPlan: any | null = null;
   selectedPlanId: number | null = null;
+  planActivoDelCliente: any | null = null;
+  planActivoMensaje = '';
   detallesPlan:
     | { nombre: string; fechaInicio: string; fechaFin: string; activado: boolean; precio?: number }
     | null = null;
+  deudaCalculada = 0;
+  mensajeAdvertencia = '';
 
   constructor(private pagoService: PagoService, private clienteService: ClienteService) {}
 
@@ -79,10 +83,19 @@ export class PagosFormularioComponent implements OnInit {
   }
 
   onClienteChange() {
+    this.errorMessage = '';
     this.pago.clientePlanId = null as unknown as number;
     this.selectedPlan = null;
     this.selectedPlanId = null;
     this.detallesPlan = null;
+    this.planActivoDelCliente = this.obtenerPlanVigente(this.selectedClienteId);
+    if (this.planActivoDelCliente) {
+      const nombrePlan = this.planActivoDelCliente?.plan?.nombre ?? 'el plan actual';
+      const fechaFin = this.formatearFechaHumana(this.planActivoDelCliente?.fechaFin);
+      this.planActivoMensaje = `No se puede asignar un nuevo plan porque ${nombrePlan} sigue activo hasta ${fechaFin}.`;
+    } else {
+      this.planActivoMensaje = '';
+    }
   }
 
   onPlanChange() {
@@ -158,6 +171,15 @@ export class PagosFormularioComponent implements OnInit {
     if (this.pago.clientePlanId) {
       crearPagoCon(Number(this.pago.clientePlanId));
     } else {
+      const planVigente = this.obtenerPlanVigente(clienteId);
+      if (planVigente) {
+        const nombrePlan = planVigente?.plan?.nombre ?? 'el plan actual';
+        const fechaFin = this.formatearFechaHumana(planVigente?.fechaFin);
+        this.errorMessage = `No se puede asignar un nuevo plan porque ${nombrePlan} termina el ${fechaFin}.`;
+        this.isSubmitting = false;
+        return;
+      }
+
       const fechaInicio = this.detallesPlan?.fechaInicio || this.hoyISO();
       const meses = Number(this.selectedPlan?.mesesPagar ?? 1);
       const fechaFin = this.sumarMesesISO(fechaInicio, meses);
@@ -228,5 +250,41 @@ export class PagosFormularioComponent implements OnInit {
         ? mensaje.join('. ')
         : 'Ocurrió un error al registrar el pago';
     this.isSubmitting = false;
+  }
+
+  calcularDeuda() {
+    const precioPlan = Number(this.selectedPlan?.precio || 0);
+    const montoPago = Number(this.pago.monto || 0);
+    
+    if (montoPago > 0 && montoPago < precioPlan) {
+      this.deudaCalculada = precioPlan - montoPago;
+      this.mensajeAdvertencia = '';
+    } else if (montoPago > precioPlan && precioPlan > 0) {
+      this.deudaCalculada = 0;
+      this.mensajeAdvertencia = 'El pago supera el precio del plan';
+    } else {
+      this.deudaCalculada = 0;
+      this.mensajeAdvertencia = '';
+    }
+  }
+
+  private obtenerPlanVigente(clienteId: number | null): any | null {
+    if (!clienteId || !Array.isArray(this.clientePlanes)) return null;
+    const hoy = new Date();
+    const planesCliente = this.clientePlanes.filter((cp) => cp?.clienteId === clienteId);
+    return planesCliente
+      .sort((a, b) => new Date(b?.fechaFin ?? 0).getTime() - new Date(a?.fechaFin ?? 0).getTime())
+      .find((cp) => {
+        if (!cp) return false;
+        const fin = new Date(cp?.fechaFin ?? '');
+        return !!cp.activado && !isNaN(fin.getTime()) && fin >= hoy;
+      }) ?? null;
+  }
+
+  private formatearFechaHumana(fechaISO?: string): string {
+    if (!fechaISO) return '';
+    const fecha = new Date(fechaISO);
+    if (isNaN(fecha.getTime())) return fechaISO;
+    return fecha.toLocaleDateString();
   }
 }

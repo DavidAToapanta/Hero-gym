@@ -4,11 +4,12 @@ import { LucideAngularModule } from 'lucide-angular';
 import { UsuarioModalComponent } from './usuario-modal/usuario-modal.component';
 import { UsuarioBasico, UsuarioService } from '../../../../core/services/usuario.service';
 import { forkJoin } from 'rxjs';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-gestion-usuarios',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, UsuarioModalComponent],
+  imports: [CommonModule, LucideAngularModule, UsuarioModalComponent, ConfirmDialogComponent],
   templateUrl: './gestion-usuarios.component.html',
   styleUrl: './gestion-usuarios.component.css',
 })
@@ -16,6 +17,10 @@ export class GestionUsuariosComponent implements OnInit {
   @ViewChild(UsuarioModalComponent) usuarioModal?: UsuarioModalComponent;
   mostrarModal = false;
   usuarios: UsuarioBasico[] = [];
+  
+  // Confirmation dialog state
+  showConfirmDialog = false;
+  usuarioToDelete: UsuarioBasico | null = null;
 
   constructor(private usuarioService: UsuarioService) {}
 
@@ -88,17 +93,36 @@ export class GestionUsuariosComponent implements OnInit {
   }
 
   eliminar(u: UsuarioBasico) {
-    if (!confirm(`¿Está seguro de eliminar al usuario ${u.nombres} ${u.apellidos}?`)) {
-      return;
-    }
+    this.usuarioToDelete = u;
+    this.showConfirmDialog = true;
+  }
+
+  onConfirmDelete() {
+    if (this.usuarioToDelete === null) return;
     
-    this.usuarioService.eliminarUsuario(u.id).subscribe({
-      next: () => this.cargarUsuarios(),
+    console.log('[GestionUsuarios] Eliminando usuario:', this.usuarioToDelete);
+    this.usuarioService.eliminarUsuario(this.usuarioToDelete.id).subscribe({
+      next: () => {
+        console.log('[GestionUsuarios] Usuario eliminado exitosamente');
+        alert('Usuario eliminado exitosamente');
+        this.cargarUsuarios();
+        this.showConfirmDialog = false;
+        this.usuarioToDelete = null;
+      },
       error: (err) => {
-        console.error('Error al eliminar usuario:', err);
-        alert('Error al eliminar el usuario. Por favor intente nuevamente.');
+        console.error('[GestionUsuarios] Error al eliminar usuario:', err);
+        const mensaje = err.error?.message || err.message || 'Error desconocido';
+        alert(`Error al eliminar el usuario: ${mensaje}`);
+        this.showConfirmDialog = false;
+        this.usuarioToDelete = null;
       }
     });
+  }
+
+  onCancelDelete() {
+    console.log('[GestionUsuarios] Eliminación cancelada');
+    this.showConfirmDialog = false;
+    this.usuarioToDelete = null;
   }
 
   private cargarUsuarios(): void {

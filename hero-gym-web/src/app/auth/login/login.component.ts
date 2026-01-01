@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-
-import { Router } from '@angular/router'; // ✅ agrega esto
+import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -19,10 +18,7 @@ export class LoginComponent implements OnInit{
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-
-
-    
-    private router: Router // ✅ agrega esto también
+    private router: Router
   ) {
     this.loginForm = this.fb.group({
       cedula: ['', Validators.required],
@@ -32,7 +28,12 @@ export class LoginComponent implements OnInit{
 
   ngOnInit(): void {
     if(this.authService.isAuthenticated()){
-      this.router.navigate(['/dashboard'], { replaceUrl: true }); // ✅ redirige al dashboard si ya está autenticado
+      const userRole = this.authService.getUserRole();
+      if (userRole === 'CLIENTE') {
+        this.router.navigate(['/cliente'], { replaceUrl: true });
+      } else {
+        this.router.navigate(['/dashboard'], { replaceUrl: true });
+      }
     }
   }
 
@@ -41,12 +42,8 @@ export class LoginComponent implements OnInit{
       const { cedula, password } = this.loginForm.value; 
       
       this.authService.login(cedula, password).subscribe({
-       next: () => {}, //L redireccion se maneja en el servicio
-
+       next: () => {}, // La redirección se maneja en el servicio
        error: () => {
-
-       
-
           this.errorMessage = 'Credenciales inválidas';
         }
       });

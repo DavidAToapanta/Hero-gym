@@ -1,0 +1,130 @@
+<!-- Modal Overlay -->
+<div *ngIf="show" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" (click)="cerrarModal()">
+  <!-- Modal Content -->
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <lucide-icon name="refresh-cw" class="w-6 h-6 text-white"></lucide-icon>
+        <h2 class="text-xl font-semibold text-white">Renovar Plan</h2>
+      </div>
+      <button (click)="cerrarModal()" class="text-white hover:bg-white/20 rounded-lg p-2 transition">
+        <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6">
+      <!-- Información del Cliente -->
+      <div class="bg-gray-50 rounded-lg p-4 mb-6">
+        <h3 class="text-sm font-semibold text-gray-700 mb-2">Información del Cliente</h3>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span class="text-gray-500">Nombre:</span>
+            <p class="font-semibold text-gray-900">{{ cliente?.usuario?.nombres }} {{ cliente?.usuario?.apellidos }}</p>
+          </div>
+          <div>
+            <span class="text-gray-500">Cédula:</span>
+            <p class="font-semibold text-gray-900">{{ cliente?.usuario?.cedula }}</p>
+          </div>
+          <div>
+            <span class="text-gray-500">Plan Actual:</span>
+            <p class="font-semibold text-gray-900">{{ getPlanActual()?.plan?.nombre || 'N/A' }}</p>
+          </div>
+          <div>
+            <span class="text-gray-500">Fecha de Fin:</span>
+            <p class="font-semibold text-red-600">{{ getFechaFinPlan() }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de Renovación -->
+      <form class="space-y-4">
+        <!-- Selección de Plan -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Nuevo Plan <span class="text-red-500">*</span>
+          </label>
+          <select 
+            [(ngModel)]="nuevoPlanId" 
+            name="plan"
+            (ngModelChange)="onPlanChange()"
+            [disabled]="isLoading"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+          >
+            <option *ngFor="let plan of planesDisponibles" [value]="plan.id">
+              {{ plan.nombre }} - ${{ plan.precio }} ({{ plan.mesesPagar }} {{ plan.mesesPagar === 1 ? 'mes' : 'meses' }})
+            </option>
+          </select>
+          
+          <!-- Información del plan seleccionado -->
+          <div *ngIf="planSeleccionado" class="mt-3 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <span class="text-indigo-600 font-medium">Precio:</span>
+                <p class="text-indigo-900 font-semibold">${{ getPrecioPlan() | number:'1.2-2' }}</p>
+              </div>
+              <div>
+                <span class="text-indigo-600 font-medium">Duración:</span>
+                <p class="text-indigo-900 font-semibold">{{ planSeleccionado.mesesPagar }} {{ planSeleccionado.mesesPagar === 1 ? 'mes' : 'meses' }}</p>
+              </div>
+            </div>
+            <div *ngIf="fechaInicio" class="mt-2 text-sm">
+              <span class="text-indigo-600 font-medium">Fecha fin calculada:</span>
+              <p class="text-indigo-900 font-semibold">{{ getFechaFinCalculada() }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fecha de Inicio -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Fecha de Inicio <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="date" 
+            [(ngModel)]="fechaInicio"
+            name="fechaInicio"
+            [disabled]="isLoading"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100"
+          />
+        </div>
+
+        <!-- Observaciones -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Observaciones
+          </label>
+          <textarea 
+            [(ngModel)]="observaciones"
+            name="observaciones"
+            rows="3"
+            [disabled]="isLoading"
+            placeholder="Notas adicionales sobre la renovación..."
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none disabled:bg-gray-100"
+          ></textarea>
+        </div>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3">
+      <button 
+        (click)="cerrarModal()"
+        [disabled]="isLoading"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Cancelar
+      </button>
+      <button 
+        (click)="confirmarRenovacion()"
+        [disabled]="isLoading"
+        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <lucide-icon *ngIf="!isLoading" name="check" class="w-4 h-4"></lucide-icon>
+        <span *ngIf="isLoading" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+        {{ isLoading ? 'Renovando...' : 'Confirmar Renovación' }}
+      </button>
+    </div>
+  </div>
+</div>

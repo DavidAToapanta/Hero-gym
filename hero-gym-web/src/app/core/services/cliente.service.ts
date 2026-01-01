@@ -19,7 +19,7 @@ export interface PaginatedResponse<T> {
   providedIn: 'root',
 })
 export class ClienteService {
-  private apiUrl = 'http://localhost:3000/clientes'; // URL del backend NestJS
+  private apiUrl = 'http://localhost:3000/cliente'; // URL del backend NestJS
   private usuariosUrl = 'http://localhost:3000/usuarios';
   private cache = new Map<string, PaginatedResponse<any>>();
 
@@ -117,5 +117,35 @@ export class ClienteService {
 
   private invalidateCache(): void {
     this.cache.clear();
+  }
+
+  // 🔹 Renovar plan de cliente
+  renovarPlan(clienteId: number, planData: {
+    planId: number;
+    fechaInicio: string;
+    duracionMeses: number;
+    diaPago?: number;
+  }): Observable<any> {
+    console.log('[ClienteService] Renovando plan para cliente:', clienteId, planData);
+    
+    // Calcular fecha fin basada en la duración en meses
+    const fechaInicio = new Date(planData.fechaInicio);
+    const fechaFin = new Date(fechaInicio);
+    fechaFin.setMonth(fechaFin.getMonth() + planData.duracionMeses);
+    
+    const dto = {
+      clienteId: clienteId,
+      planId: planData.planId,
+      fechaInicio: planData.fechaInicio,
+      fechaFin: fechaFin.toISOString().split('T')[0],
+      diaPago: planData.diaPago || fechaInicio.getDate(),
+      activado: true
+    };
+
+    console.log('[ClienteService] DTO de renovación:', dto);
+    
+    return this.http
+      .post<any>(`http://localhost:3000/cliente-plan/renovar/${clienteId}`, dto)
+      .pipe(tap(() => this.invalidateCache()));
   }
 }

@@ -9,7 +9,7 @@
 
     <!-- Título -->
     <h2 class="text-xl font-semibold text-gray-900 mb-2 text-center">
-      {{ producto?.id ? 'Editar Producto' : 'Registrar Nuevo Producto' }}
+      {{ producto.id ? 'Editar Producto' : 'Registrar Nuevo Producto' }}
     </h2>
 
     <!-- Error -->
@@ -28,7 +28,7 @@
           [(ngModel)]="producto.nombre"
           placeholder="Ej: Proteína Whey"
           required
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          class="text-black placeholder-gray-400 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
         />
       </div>
 
@@ -41,7 +41,7 @@
           [(ngModel)]="producto.precio"
           min="0"
           required
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          class="text-black placeholder-gray-400 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
         />
       </div>
 
@@ -54,7 +54,7 @@
           [(ngModel)]="producto.stock"
           min="0"
           required
-          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          class="text-black placeholder-gray-400 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
         />
       </div>
 
@@ -79,10 +79,10 @@
       <button
         type="button"
         (click)="guardar()"
-        [disabled]="isSubmitting || !productoForm.form.valid"
+        [disabled]="isSubmitting || !productoForm?.valid"
         class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg shadow-md transition"
       >
-        {{ isSubmitting ? 'Guardando...' : (producto?.id ? 'Guardar Cambios' : 'Guardar Producto') }}
+        {{ isSubmitting ? 'Guardando...' : (producto.id ? 'Guardar Cambios' : 'Guardar Producto') }}
       </button>
     </form>
   </div>

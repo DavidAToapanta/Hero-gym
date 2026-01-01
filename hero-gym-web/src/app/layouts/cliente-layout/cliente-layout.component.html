@@ -1,0 +1,31 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+  <!-- Minimal Navigation Bar -->
+  <nav class="bg-white shadow-md border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <!-- Logo y Nombre del Gym -->
+        <div class="flex items-center space-x-3">
+          <div class="text-4xl">🏋️</div>
+          <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Hero Gym
+          </h1>
+        </div>
+
+        <!-- Botón de Salir -->
+        <button 
+          (click)="logout()" 
+          class="flex items-center space-x-2 px-5 py-2.5 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all shadow-md hover:shadow-lg">
+          <span>Cerrar Sesión</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Content Area -->
+  <main class="max-w-7xl mx-auto px-6 py-8">
+    <router-outlet></router-outlet>
+  </main>
+</div>
