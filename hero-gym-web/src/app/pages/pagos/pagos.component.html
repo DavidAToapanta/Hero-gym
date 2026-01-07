@@ -3,20 +3,20 @@
   <div class="flex items-center space-x-3">
     <lucide-icon name="credit-card" class="w-6 h-6 text-gray-800"></lucide-icon>
     <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="lucide lucide-credit-card-icon lucide-credit-card"
-          >
-            <rect width="20" height="14" x="2" y="5" rx="2" />
-            <line x1="2" x2="22" y1="10" y2="10" />
-          </svg>
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-credit-card-icon lucide-credit-card"
+      >
+      <rect width="20" height="14" x="2" y="5" rx="2" />
+      <line x1="2" x2="22" y1="10" y2="10" />
+    </svg>
     <div>
       <h2 class="text-2xl font-semibold text-gray-900">Gestión de Pagos</h2>
       <p class="text-sm text-gray-500">Registra y consulta los pagos</p>
@@ -26,17 +26,18 @@
   <button
     (click)="nuevoPago()"
     class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
-  >
+    >
     Registrar Pago
   </button>
 </div>
 
 <!-- Modal formulario -->
-<app-pagos-formulario
-  *ngIf="mostrarFormulario"
-  (close)="mostrarFormulario = false"
-  (save)="onGuardarPago($event)"
-></app-pagos-formulario>
+@if (mostrarFormulario) {
+  <app-pagos-formulario
+    (close)="mostrarFormulario = false"
+    (save)="onGuardarPago($event)"
+  ></app-pagos-formulario>
+}
 
 <!-- Búsqueda y lista -->
 <div>
@@ -45,10 +46,11 @@
 </div>
 
 <!-- Toast simple -->
-<div
-  *ngIf="toastVisible"
-  class="fixed bottom-6 right-6 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg"
->
-  {{ toastMessage }}
+@if (toastVisible) {
+  <div
+    class="fixed bottom-6 right-6 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg"
+    >
+    {{ toastMessage }}
   </div>
+}
 

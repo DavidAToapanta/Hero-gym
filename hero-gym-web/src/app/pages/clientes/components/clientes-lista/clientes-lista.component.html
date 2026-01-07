@@ -1,117 +1,121 @@
 <div class="bg-white rounded-2xl shadow-lg p-6 mx-[4cm]">
-    <!-- Encabezado -->
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-gray-900">
-        Lista de Clientes ({{ totalClientes }})
-      </h3>
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold text-gray-900">
+      Lista de Clientes ({{ totalClientes }})
+    </h3>
+  </div>
+
+  <!-- Tabla -->
+  @if (!isLoading) {
+    <div class="overflow-x-auto">
+      @if (clientes.length > 0) {
+        <table class="min-w-full text-sm border-separate border-spacing-y-2">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-200">
+              <th class="py-3 font-medium">Cliente</th>
+              <th class="py-3 font-medium">Cédula</th>
+              <th class="py-3 font-medium">Objetivos</th>
+              <th class="py-3 font-medium">Estado</th>
+              <th class="py-3 font-medium">Horario</th>
+              <th class="py-3 font-medium text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of clientes; track c) {
+              <tr
+                class="bg-white border border-gray-200 hover:shadow-md transition rounded-xl"
+                >
+                <td class="py-3 px-4 font-semibold text-gray-800">
+                  {{ c.usuario?.nombres }} {{ c.usuario?.apellidos }}
+                  <p class="text-gray-500 text-xs">{{ c.sexo }}</p>
+                </td>
+                <td class="px-4">{{ c.usuario?.cedula }}</td>
+                <td class="px-4 text-gray-700">{{ c.objetivos }}</td>
+                <td class="px-4">
+                  <div class="flex flex-col gap-1">
+                    <span [ngClass]="getBadgeClasses(getEstado(c))" class="px-2 py-1 rounded-full text-xs font-medium">
+                      {{ getEstado(c) }}
+                    </span>
+                    <!-- Mostrar deuda si existe -->
+                    @if (getDeudaTotal(c) > 0) {
+                      <span class="text-red-600 text-xs font-semibold">
+                        Deuda: ${{ getDeudaTotal(c) | number:'1.2-2' }}
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td class="px-4 text-gray-700">{{ c.horario }}</td>
+                <td class="px-4">
+                  <div class="flex items-center justify-center gap-3">
+                    <!-- Botón Renovar (siempre visible) -->
+                    <button
+                      (click)="abrirRenovarModal(c)"
+                      class="text-green-600 hover:text-green-800 transition"
+                      title="Renovar Plan"
+                      >
+                      <lucide-icon name="refresh-cw"></lucide-icon>
+                    </button>
+                    <!-- Botón Eliminar -->
+                    <button
+                      (click)="eliminar(c.id)"
+                      class="text-red-600 hover:text-red-800 transition"
+                      title="Eliminar"
+                      >
+                      <lucide-icon name="trash-2"></lucide-icon>
+                    </button>
+                    <!-- Botón Productos -->
+                    <button
+                      (click)="abrirProductosModal(c)"
+                      class="text-blue-600 hover:text-blue-800 transition"
+                      title="Productos"
+                      >
+                      <lucide-icon name="shopping-cart"></lucide-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+      @if (clientes.length === 0) {
+        <div class="text-center py-6 text-gray-500">
+          No hay clientes registrados.
+        </div>
+      }
     </div>
-  
-    <!-- Tabla -->
-    <div class="overflow-x-auto" *ngIf="!isLoading; else loadingState">
-      <table class="min-w-full text-sm border-separate border-spacing-y-2" *ngIf="clientes.length > 0">
-        <thead>
-          <tr class="text-left text-gray-500 border-b border-gray-200">
-            <th class="py-3 font-medium">Cliente</th>
-            <th class="py-3 font-medium">Cédula</th>
-            <th class="py-3 font-medium">Objetivos</th>
-            <th class="py-3 font-medium">Estado</th>
-            <th class="py-3 font-medium">Horario</th>
-            <th class="py-3 font-medium text-center">Acciones</th>
-          </tr>
-        </thead>
-  
-        <tbody>
-          <tr
-            *ngFor="let c of clientes"
-            class="bg-white border border-gray-200 hover:shadow-md transition rounded-xl"
-          >
-            <td class="py-3 px-4 font-semibold text-gray-800">
-              {{ c.usuario?.nombres }} {{ c.usuario?.apellidos }}
-              <p class="text-gray-500 text-xs">{{ c.sexo }}</p>
-            </td>
-            <td class="px-4">{{ c.usuario?.cedula }}</td>
-            <td class="px-4 text-gray-700">{{ c.objetivos }}</td>
-            <td class="px-4">
-              <div class="flex flex-col gap-1">
-                <span [ngClass]="getBadgeClasses(getEstado(c))" class="px-2 py-1 rounded-full text-xs font-medium">
-                  {{ getEstado(c) }}
-                </span>
-                <!-- Mostrar deuda si existe -->
-                <span *ngIf="getDeudaTotal(c) > 0" class="text-red-600 text-xs font-semibold">
-                  Deuda: ${{ getDeudaTotal(c) | number:'1.2-2' }}
-                </span>
-              </div>
-            </td>
-            <td class="px-4 text-gray-700">{{ c.horario }}</td>
-            <td class="px-4">
-              <div class="flex items-center justify-center gap-3">
-                <!-- Botón Renovar (siempre visible) -->
-                <button
-                  (click)="abrirRenovarModal(c)"
-                  class="text-green-600 hover:text-green-800 transition"
-                  title="Renovar Plan"
-                >
-                  <lucide-icon name="refresh-cw"></lucide-icon>
-                </button>
+  } @else {
+    <div class="py-6 text-center text-gray-500">Cargando clientes...</div>
+  }
 
-                <!-- Botón Eliminar -->
-                <button
-                  (click)="eliminar(c.id)"
-                  class="text-red-600 hover:text-red-800 transition"
-                  title="Eliminar"
-                >
-                  <lucide-icon name="trash-2"></lucide-icon>
-                </button>
 
-                <!-- Botón Productos -->
-                <button
-                  (click)="abrirProductosModal(c)"
-                  class="text-blue-600 hover:text-blue-800 transition"
-                  title="Productos"
-                >
-                  <lucide-icon name="shopping-cart"></lucide-icon>
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-  
-      <div *ngIf="clientes.length === 0" class="text-center py-6 text-gray-500">
-        No hay clientes registrados.
-      </div>
-    </div>
-
-    <ng-template #loadingState>
-      <div class="py-6 text-center text-gray-500">Cargando clientes...</div>
-    </ng-template>
-  
-    <!-- Paginación -->
-    <div *ngIf="totalPages > 1" class="flex items-center justify-between mt-6 text-sm">
+  <!-- Paginación -->
+  @if (totalPages > 1) {
+    <div class="flex items-center justify-between mt-6 text-sm">
       <p class="text-gray-500">
         Página {{ currentPage }} de {{ totalPages }}
       </p>
-  
       <div class="space-x-2">
         <button
           (click)="prevPage()"
           [disabled]="currentPage === 1"
           class="px-3 py-1 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-        >
+          >
           ⏪ Anterior
         </button>
-  
         <button
           (click)="nextPage()"
           [disabled]="currentPage === totalPages"
           class="px-3 py-1 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-        >
+          >
           Siguiente ⏩
         </button>
       </div>
     </div>
-  </div>
-  
+  }
+</div>
+
 <!-- Confirmation Dialog -->
 <app-confirm-dialog
   [show]="showConfirmDialog"
@@ -133,8 +137,9 @@
 ></app-renovar>
 
 <!-- Productos Modal -->
-<app-productos-ciente
-  *ngIf="showProductosModal"
-  [cliente]="clienteForProductos"
-  (close)="cerrarProductosModal()"
-></app-productos-ciente>
+@if (showProductosModal) {
+  <app-productos-ciente
+    [cliente]="clienteForProductos"
+    (close)="cerrarProductosModal()"
+  ></app-productos-ciente>
+}

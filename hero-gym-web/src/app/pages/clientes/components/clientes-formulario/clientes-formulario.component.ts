@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ClienteService } from '../../../../core/services/cliente.service';
@@ -6,7 +6,7 @@ import { ClienteService } from '../../../../core/services/cliente.service';
 @Component({
   selector: 'app-clientes-formulario',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './clientes-formulario.component.html',
   styleUrls: ['./clientes-formulario.component.css'],
 })

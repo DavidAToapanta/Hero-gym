@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { LucideAngularModule } from 'lucide-angular';
 
 import { ClientesListaComponent } from './components/clientes-lista/clientes-lista.component';
@@ -11,7 +11,6 @@ import { RenovarComponent } from "./components/renovar/renovar.component";
   selector: 'app-clientes',
   standalone: true,
   imports: [
-    CommonModule,
     LucideAngularModule,
     ClientesListaComponent,
     ClientesBusquedaComponent,

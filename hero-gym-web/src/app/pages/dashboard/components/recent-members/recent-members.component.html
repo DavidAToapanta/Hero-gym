@@ -7,82 +7,74 @@
     <a
       routerLink="/dashboard/clientes"
       class="text-sm font-medium text-indigo-600 hover:text-indigo-700"
-    >
+      >
       Ver todos
     </a>
   </div>
 
-  
+
 
   <!-- Table -->
   <div class="overflow-x-auto">
-    <table
-      class="min-w-full text-sm"
-      *ngIf="recentMembers?.length; else emptyState"
-    >
-      <thead>
-        <tr class="text-left text-gray-500">
-          <th class="py-3 pr-6 font-medium">MIEMBRO</th>
-          <th class="py-3 pr-6 font-medium">PLAN</th>
-          <th class="py-3 pr-6 font-medium">ESTADO</th>
-          <th class="py-3 font-medium">FECHA</th>
-        </tr>
-
-        <!-- Divider -->
-      <div class="border-t border-gray-200 mt-4"></div>
-      </thead>
-
-      
-
-      <tbody class="divide-y divide-gray-200">
-        <tr *ngFor="let m of recentMembers">
-          <!-- MIEMBRO -->
-          <td class="py-3 pr-6">
-            <div class="flex items-center gap-3">
-              <div
-                class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center ring-1 ring-gray-200"
-              >
-                <span class="text-[11px] font-semibold text-gray-600">
-                  {{ getInitials(m?.usuario?.nombres, m?.usuario?.apellidos) }}
+    @if (recentMembers?.length) {
+      <table
+        class="min-w-full text-sm"
+        >
+        <thead>
+          <tr class="text-left text-gray-500">
+            <th class="py-3 pr-6 font-medium">MIEMBRO</th>
+            <th class="py-3 pr-6 font-medium">PLAN</th>
+            <th class="py-3 pr-6 font-medium">ESTADO</th>
+            <th class="py-3 font-medium">FECHA</th>
+          </tr>
+          <!-- Divider -->
+          <div class="border-t border-gray-200 mt-4"></div>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          @for (m of recentMembers; track m) {
+            <tr>
+              <!-- MIEMBRO -->
+              <td class="py-3 pr-6">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center ring-1 ring-gray-200"
+                    >
+                    <span class="text-[11px] font-semibold text-gray-600">
+                      {{ getInitials(m?.usuario?.nombres, m?.usuario?.apellidos) }}
+                    </span>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">
+                      {{ m?.usuario?.nombres }} {{ m?.usuario?.apellidos }}
+                    </div>
+                    <div class="text-xs text-gray-500">
+                      Usuario: {{ m?.usuario?.userName || "—" }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <!-- PLAN -->
+              <td class="py-3 pr-6 text-gray-700">
+                {{ m?.planNombre || '—' }}
+              </td>
+              <!-- ESTADO -->
+              <td class="py-3 pr-6">
+                <span
+                  class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ring-1 ring-inset"
+                  [ngClass]="getBadgeClasses(m?.estadoPlan)"
+                  >
+                  {{ m?.estadoPlan || '—' }}
                 </span>
-              </div>
-              <div>
-                <div class="font-medium text-gray-900">
-                  {{ m?.usuario?.nombres }} {{ m?.usuario?.apellidos }}
-                </div>
-                <div class="text-xs text-gray-500">
-                  Usuario: {{ m?.usuario?.userName || "—" }}
-                </div>
-              </div>
-            </div>
-          </td>
-
-          <!-- PLAN -->
-          <td class="py-3 pr-6 text-gray-700">
-            {{ m?.planNombre || '—' }}
-          </td>
-
-          <!-- ESTADO -->
-          <td class="py-3 pr-6">
-            <span
-              class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ring-1 ring-inset"
-              [ngClass]="getBadgeClasses(m?.estadoPlan)"
-            >
-              {{ m?.estadoPlan || '—' }}
-            </span>
-          </td>
-
-          <!-- FECHA -->
-          <td class="py-3 text-gray-700">
-            {{ m?.fechaRegistro ? (m?.fechaRegistro | date:'dd/MM/yyyy') : '—' }}
-          </td>
-          
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Empty -->
-    <ng-template #emptyState>
+              </td>
+              <!-- FECHA -->
+              <td class="py-3 text-gray-700">
+                {{ m?.fechaRegistro ? (m?.fechaRegistro | date:'dd/MM/yyyy') : '—' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
       <div class="py-10 text-center">
         <div class="flex flex-col items-center gap-2 text-gray-400">
           <svg
@@ -92,12 +84,12 @@
             viewBox="0 0 24 24"
             stroke="currentColor"
             stroke-width="2"
-          >
+            >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
               d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
-            />
+              />
             <circle cx="9" cy="7" r="4" />
             <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
@@ -105,6 +97,8 @@
           <span>No hay miembros recientes</span>
         </div>
       </div>
-    </ng-template>
+    }
+
+    <!-- Empty -->
   </div>
 </div>

@@ -46,8 +46,8 @@ export class AdminStatsComponent implements OnInit {
 
   private cargarPlanes(): void {
     this.planService.getPlanes().subscribe({
-      next: (planes) => {
-        this.stats[1].valor = planes.length;
+      next: (response) => {
+        this.stats[1].valor = response.total;
       },
       error: () => {
         this.stats[1].valor = 0;

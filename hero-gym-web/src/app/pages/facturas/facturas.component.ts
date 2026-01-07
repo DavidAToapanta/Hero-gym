@@ -1,44 +1,50 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+
 import { FacturaService, Factura } from '../../core/services/factura.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { FacturasHeaderComponent } from "./components/facturas-header/facturas-header.component";
 import { FacturasResumenComponent } from "./components/facturas-resumen/facturas-resumen.component";
+import { FacturasFiltrosComponent } from "./components/facturas-filtros/facturas-filtros.component";
+import { FacturasTablaComponent } from "./components/facturas-tabla/facturas-tabla.component";
+import { FacturaPdfService } from './services/factura-pdf.service';
 
 @Component({
   selector: 'app-facturas',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe, FacturasHeaderComponent, FacturasResumenComponent],
+  imports: [
+    CommonModule, 
+    FacturasHeaderComponent, 
+    FacturasResumenComponent,
+    FacturasFiltrosComponent,
+    FacturasTablaComponent
+  ],
   templateUrl: './facturas.component.html',
   styleUrl: './facturas.component.css'
 })
 export class FacturasComponent implements OnInit {
   facturas: Factura[] = [];
-  
-  // Filtros
-  filtroCedula: string = '';
-  filtroEstado: string = '';
-  fechaDesde: string = '';
-  fechaHasta: string = '';
 
   isLoading: boolean = false;
 
-  constructor(private facturaService: FacturaService) {}
+  constructor(
+    private facturaService: FacturaService,
+    private facturaPdfService: FacturaPdfService
+  ) {}
 
   ngOnInit(): void {
-    this.cargarFacturas();
+    this.cargarFacturas({});
   }
 
-  cargarFacturas() {
+  cargarFacturas(filtros: any) {
     this.isLoading = true;
     const filters: any = {};
     
-    if (this.filtroCedula) filters.cedula = this.filtroCedula;
-    if (this.filtroEstado) filters.estado = this.filtroEstado;
-    if (this.fechaDesde) filters.desde = this.fechaDesde;
-    if (this.fechaHasta) filters.hasta = this.fechaHasta;
+    if (filtros.cedula) filters.cedula = filtros.cedula;
+    if (filtros.estado) filters.estado = filtros.estado;
+    if (filtros.desde) filters.desde = filtros.desde;
+    if (filtros.hasta) filters.hasta = filtros.hasta;
 
     this.facturaService.findAll(filters).subscribe({
       next: (data) => {
@@ -50,14 +56,6 @@ export class FacturasComponent implements OnInit {
         this.isLoading = false;
       }
     });
-  }
-
-  limpiarFiltros() {
-    this.filtroCedula = '';
-    this.filtroEstado = '';
-    this.fechaDesde = '';
-    this.fechaHasta = '';
-    this.cargarFacturas();
   }
 
   exportarPDF() {
@@ -98,68 +96,35 @@ export class FacturasComponent implements OnInit {
   }
 
   imprimirIndividual(factura: Factura) {
-    const doc = new jsPDF();
-    
-    // Encabezado
-    doc.setFontSize(22);
-    doc.text('HERO GYM', 105, 20, { align: 'center' });
-    doc.setFontSize(12);
-    doc.text('RUC: 1234567890001', 105, 28, { align: 'center' });
-    doc.text('Dirección: Av. Principal y Calle Secundaria', 105, 34, { align: 'center' });
-    
-    doc.line(10, 40, 200, 40);
+    // Preparar datos para el servicio
+    const data = {
+      factura: {
+        numero: factura.numero,
+        fechaEmision: factura.fechaEmision,
+        estado: factura.estado,
+        subtotal: factura.subtotal,
+        iva: factura.iva,
+        total: factura.total,
+        totalPagado: factura.totalPagado,
+        saldo: factura.saldo
+      },
+      cliente: {
+        nombre: `${factura.clientePlan.cliente.usuario.nombres} ${factura.clientePlan.cliente.usuario.apellidos}`,
+        identificacion: factura.clientePlan.cliente.usuario.cedula || 'N/A'
+      },
+      items: [
+        {
+          descripcion: factura.clientePlan.plan.nombre,
+          cantidad: 1,
+          precioUnitario: factura.clientePlan.plan.precio,
+          total: factura.clientePlan.plan.precio
+        }
+      ]
+    };
 
-    // Datos Factura
-    doc.setFontSize(14);
-    doc.text(`FACTURA Nº ${factura.numero}`, 14, 50);
-    
-    doc.setFontSize(10);
-    doc.text(`Fecha de Emisión: ${new Date(factura.fechaEmision).toLocaleString()}`, 14, 58);
-    doc.text(`Estado: ${factura.estado}`, 14, 64);
-
-    // Datos Cliente
-    doc.setFontSize(12); 
-    doc.text('Datos del Cliente:', 14, 75);
-    doc.setFontSize(10);
-    doc.text(`Cliente: ${factura.clientePlan.cliente.usuario.nombres} ${factura.clientePlan.cliente.usuario.apellidos}`, 14, 82);
-    doc.text(`Cédula: ${factura.clientePlan.cliente.usuario.cedula || 'N/A'}`, 14, 88);
-
-    // Detalle
-    const items = [
-      [factura.clientePlan.plan.nombre, 1, `$${factura.clientePlan.plan.precio.toFixed(2)}`, `$${factura.clientePlan.plan.precio.toFixed(2)}`]
-    ];
-
-    autoTable(doc, {
-      head: [['Descripción', 'Cant.', 'P. Unit', 'Total']],
-      body: items,
-      startY: 100,
-      theme: 'plain',
-      headStyles: { fillColor: [220, 220, 220] }
-    });
-
-    // Totales
-    // @ts-ignore
-    const finalY = doc.lastAutoTable.finalY || 130;
-    
-    doc.text(`Subtotal: $${factura.subtotal.toFixed(2)}`, 150, finalY + 10);
-    doc.text(`IVA (12%): $${factura.iva.toFixed(2)}`, 150, finalY + 16);
-    doc.setFontSize(12);
-    doc.text(`TOTAL: $${factura.total.toFixed(2)}`, 150, finalY + 24);
-    
-    // Pagos
-    doc.setFontSize(10);
-    doc.text(`Pagado: $${factura.totalPagado.toFixed(2)}`, 150, finalY + 32);
-    doc.text(`Saldo: $${factura.saldo.toFixed(2)}`, 150, finalY + 38);
-
-    doc.save(`factura_${factura.numero}.pdf`);
+    // Delegar la generación del PDF al servicio
+    this.facturaPdfService.generarFactura(data);
   }
 
-  getClassEstado(estado: string): string {
-    switch (estado) {
-      case 'PAGADA': return 'bg-green-100 text-green-800';
-      case 'PENDIENTE': return 'bg-yellow-100 text-yellow-800';
-      case 'ANULADA': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  }
+  
 }

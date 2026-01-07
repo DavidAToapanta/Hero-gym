@@ -7,39 +7,46 @@
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
-    >
+      >
       <path
         stroke-linecap="round"
         stroke-linejoin="round"
         stroke-width="2"
         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 7.165 6 9.388 6 12v2c0 .386-.149.735-.395 1.005L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-      />
-    </svg>
-    <h2 class="text-lg font-semibold text-gray-800">Notificaciones</h2>
-  </div>
-
-
-  <div *ngIf="isLoading" class="text-gray-500 text-sm text-center py-4">
-    Cargando notificaciones...
-  </div>
-
-  
-  <!-- Lista de notificaciones -->
-   
-  <div *ngIf="notifications.length" class="space-y-3">
-    <div
-      *ngFor="let n of notifications"
-      class="flex items-start border rounded-lg p-3 transition hover:shadow-md"
-      [ngClass]="n.color"
-    >
-      <lucide-icon [name]="n.icon" class="w-5 h-5 mt-0.5 mr-2 flex-shrink-0"></lucide-icon>
-      <div>
-        <p class="font-semibold">{{ n.title }}</p>
-        <p class="text-sm">{{ n.message }}</p>
-      </div>
+        />
+      </svg>
+      <h2 class="text-lg font-semibold text-gray-800">Notificaciones</h2>
     </div>
+
+
+    @if (isLoading) {
+      <div class="text-gray-500 text-sm text-center py-4">
+        Cargando notificaciones...
+      </div>
+    }
+
+
+    <!-- Lista de notificaciones -->
+
+    @if (notifications.length) {
+      <div class="space-y-3">
+        @for (n of notifications; track n) {
+          <div
+            class="flex items-start border rounded-lg p-3 transition hover:shadow-md"
+            [ngClass]="n.color"
+            >
+            <lucide-icon [name]="n.icon" class="w-5 h-5 mt-0.5 mr-2 flex-shrink-0"></lucide-icon>
+            <div>
+              <p class="font-semibold">{{ n.title }}</p>
+              <p class="text-sm">{{ n.message }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    }
+    @if (!isLoading && !notifications.length) {
+      <div class="text-gray-500 text-sm text-center py-4">
+        Sin notificaciones.
+      </div>
+    }
   </div>
-  <div *ngIf="!isLoading && !notifications.length" class="text-gray-500 text-sm text-center py-4">
-    Sin notificaciones.
-  </div>
-</div>

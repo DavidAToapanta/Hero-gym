@@ -1,185 +1,187 @@
 <!-- Fondo oscuro -->
 <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-    <!-- Modal -->
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-2 relative ">
-      <!-- Botón cerrar -->
-      <button
-        (click)="cerrar()"
-        class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+  <!-- Modal -->
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-2 relative ">
+    <!-- Botón cerrar -->
+    <button
+      (click)="cerrar()"
+      class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
       >
-        ✕
-      </button>
-  
-      <h2 class="text-xl font-semibold text-gray-900 mb-4">
-        Registrar Nuevo Cliente
-      </h2>
+      ✕
+    </button>
 
-      <div *ngIf="errorMessage" class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">
+      Registrar Nuevo Cliente
+    </h2>
+
+    @if (errorMessage) {
+      <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
         {{ errorMessage }}
       </div>
+    }
 
-      <form
-        (ngSubmit)="guardar()"
-        #clienteForm="ngForm"
-        class="grid grid-cols-2 gap-4"
+    <form
+      (ngSubmit)="guardar()"
+      #clienteForm="ngForm"
+      class="grid grid-cols-2 gap-4"
       >
-        <!-- Nombres -->
-        <div>
-          <label class="label">Nombres</label>
-          <input
-            type="text"
-            [(ngModel)]="cliente.nombres"
-            name="nombres"
-            required
-            class="input text-black placeholder-gray-400"
-            placeholder="Juan Carlos"
+      <!-- Nombres -->
+      <div>
+        <label class="label">Nombres</label>
+        <input
+          type="text"
+          [(ngModel)]="cliente.nombres"
+          name="nombres"
+          required
+          class="input text-black placeholder-gray-400"
+          placeholder="Juan Carlos"
           />
-        </div>
-  
-        <!-- Apellidos -->
-        <div>
-          <label class="label">Apellidos</label>
-          <input
-            type="text"
-            [(ngModel)]="cliente.apellidos"
-            name="apellidos"
-            required
-            class="input text-black placeholder-gray-400"
-            placeholder="García López"
-          />
-        </div>
-  
-        <!-- Cédula -->
-        <div>
-          <label class="label">Cédula</label>
-          <input
-            type="text"
-            [(ngModel)]="cliente.cedula"
-            name="cedula"
-            required
-            class="input text-black placeholder-gray-400"
-            placeholder="1234567890"
-          />
-        </div>
+      </div>
 
-        <!-- Fecha de nacimiento -->
-        <div>
-          <label class="label">Fecha de Nacimiento</label>
-          <input
-            type="date"
-            [(ngModel)]="cliente.fechaNacimiento"
-            name="fechaNacimiento"
-            required
-            class="input text-black placeholder-gray-400"
+      <!-- Apellidos -->
+      <div>
+        <label class="label">Apellidos</label>
+        <input
+          type="text"
+          [(ngModel)]="cliente.apellidos"
+          name="apellidos"
+          required
+          class="input text-black placeholder-gray-400"
+          placeholder="García López"
           />
-        </div>
+      </div>
 
-        <!-- Usuario -->
-        <div>
-          <label class="label">Usuario</label>
-          <input
-            type="text"
-            [(ngModel)]="cliente.usuario"
-            name="usuario"
-            required
-            class="input text-black placeholder-gray-400"
-            placeholder="jgarcia"
+      <!-- Cédula -->
+      <div>
+        <label class="label">Cédula</label>
+        <input
+          type="text"
+          [(ngModel)]="cliente.cedula"
+          name="cedula"
+          required
+          class="input text-black placeholder-gray-400"
+          placeholder="1234567890"
           />
-        </div>
+      </div>
 
-        <!-- Contraseña -->
-        <div>
-          <label class="label">Contraseña</label>
-          <input
-            type="password"
-            [(ngModel)]="cliente.contrasena"
-            name="contrasena"
-            required
-            minlength="6"
-            class="input text-black placeholder-gray-400"
-            placeholder="••••••"
+      <!-- Fecha de nacimiento -->
+      <div>
+        <label class="label">Fecha de Nacimiento</label>
+        <input
+          type="date"
+          [(ngModel)]="cliente.fechaNacimiento"
+          name="fechaNacimiento"
+          required
+          class="input text-black placeholder-gray-400"
           />
-        </div>
+      </div>
 
-        <!-- Horario -->
-        <div class="col-span-2">
-          <label class="label">Horario</label>
-          <input
-            type="text"
-            [(ngModel)]="cliente.horario"
-            name="horario"
-            required
-            class="input text-black placeholder-gray-400"
-            placeholder="Ej: Lunes a Viernes 6:00-8:00"
+      <!-- Usuario -->
+      <div>
+        <label class="label">Usuario</label>
+        <input
+          type="text"
+          [(ngModel)]="cliente.usuario"
+          name="usuario"
+          required
+          class="input text-black placeholder-gray-400"
+          placeholder="jgarcia"
           />
-        </div>
+      </div>
 
-        <!-- Sexo -->
-        <div>
-          <label class="label">Sexo</label>
-          <select
-            [(ngModel)]="cliente.sexo"
-            name="sexo"
-            required
-            class="input text-black placeholder-gray-400"
+      <!-- Contraseña -->
+      <div>
+        <label class="label">Contraseña</label>
+        <input
+          type="password"
+          [(ngModel)]="cliente.contrasena"
+          name="contrasena"
+          required
+          minlength="6"
+          class="input text-black placeholder-gray-400"
+          placeholder="••••••"
+          />
+      </div>
+
+      <!-- Horario -->
+      <div class="col-span-2">
+        <label class="label">Horario</label>
+        <input
+          type="text"
+          [(ngModel)]="cliente.horario"
+          name="horario"
+          required
+          class="input text-black placeholder-gray-400"
+          placeholder="Ej: Lunes a Viernes 6:00-8:00"
+          />
+      </div>
+
+      <!-- Sexo -->
+      <div>
+        <label class="label">Sexo</label>
+        <select
+          [(ngModel)]="cliente.sexo"
+          name="sexo"
+          required
+          class="input text-black placeholder-gray-400"
           >
-            <option value="">Seleccionar sexo</option>
-            <option value="M">Masculino</option>
-            <option value="F">Femenino</option>
-          </select>
-        </div>
+          <option value="">Seleccionar sexo</option>
+          <option value="M">Masculino</option>
+          <option value="F">Femenino</option>
+        </select>
+      </div>
 
-        <!-- Observaciones -->
-        <div>
-          <label class="label">Observaciones</label>
-          <textarea
-            [(ngModel)]="cliente.observaciones"
-            name="observaciones"
-            required
-            rows="2"
-            class="input resize-none text-black placeholder-gray-400"
-            placeholder="Observaciones relevantes del cliente"
-          ></textarea>
-        </div>
+      <!-- Observaciones -->
+      <div>
+        <label class="label">Observaciones</label>
+        <textarea
+          [(ngModel)]="cliente.observaciones"
+          name="observaciones"
+          required
+          rows="2"
+          class="input resize-none text-black placeholder-gray-400"
+          placeholder="Observaciones relevantes del cliente"
+        ></textarea>
+      </div>
 
-        <!-- Objetivos -->
-        <div>
-          <label class="label">Objetivos</label>
-          <input
-            type="text"
-            [(ngModel)]="cliente.objetivos"
-            name="objetivos"
-            required
-            class="input text-black placeholder-gray-400"
-            placeholder="Perder peso, ganar músculo..."
+      <!-- Objetivos -->
+      <div>
+        <label class="label">Objetivos</label>
+        <input
+          type="text"
+          [(ngModel)]="cliente.objetivos"
+          name="objetivos"
+          required
+          class="input text-black placeholder-gray-400"
+          placeholder="Perder peso, ganar músculo..."
           />
-        </div>
+      </div>
 
-        <!-- Tiempo de entrenamiento -->
-        <div class="col-span-2">
-          <label class="label">Tiempo de Entrenamiento (minutos)</label>
-          <input
-            type="number"
-            [(ngModel)]="cliente.tiempoEntrenamiento"
-            name="tiempoEntrenamiento"
-            required
-            min="0"
-            class="input text-black placeholder-gray-400"
-            placeholder="0"
+      <!-- Tiempo de entrenamiento -->
+      <div class="col-span-2">
+        <label class="label">Tiempo de Entrenamiento (minutos)</label>
+        <input
+          type="number"
+          [(ngModel)]="cliente.tiempoEntrenamiento"
+          name="tiempoEntrenamiento"
+          required
+          min="0"
+          class="input text-black placeholder-gray-400"
+          placeholder="0"
           />
-        </div>
+      </div>
 
-        <!-- Botones -->
-        <div class="col-span-2 flex justify-end mt-4">
-          <button
-            type="submit"
-            [disabled]="!clienteForm.valid || isSubmitting"
-            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+      <!-- Botones -->
+      <div class="col-span-2 flex justify-end mt-4">
+        <button
+          type="submit"
+          [disabled]="!clienteForm.valid || isSubmitting"
+          class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
-            {{ isSubmitting ? 'Guardando...' : 'Guardar Cliente' }}
-          </button>
-        </div>
-      </form>
-    </div>
+          {{ isSubmitting ? 'Guardando...' : 'Guardar Cliente' }}
+        </button>
+      </div>
+    </form>
   </div>
-  
+</div>
+

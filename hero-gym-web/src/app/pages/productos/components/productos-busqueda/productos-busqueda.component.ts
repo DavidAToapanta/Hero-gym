@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from "lucide-angular";
 
 @Component({
   selector: 'app-productos-busqueda',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule],
   templateUrl: './productos-busqueda.component.html',
   styleUrls: ['./productos-busqueda.component.css'],
 })

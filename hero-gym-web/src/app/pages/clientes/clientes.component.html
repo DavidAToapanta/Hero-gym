@@ -13,17 +13,18 @@
   <button
     (click)="mostrarFormulario = true"
     class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
-  >
+    >
     + Nuevo Cliente
   </button>
 </div>
 
 <!-- Formulario -->
-<app-clientes-formulario
-  *ngIf="mostrarFormulario"
-  (close)="mostrarFormulario = false"
-  (save)="onGuardarCliente($event)"
-></app-clientes-formulario>
+@if (mostrarFormulario) {
+  <app-clientes-formulario
+    (close)="mostrarFormulario = false"
+    (save)="onGuardarCliente($event)"
+  ></app-clientes-formulario>
+}
 
 <!-- Búsqueda y lista -->
 <div>

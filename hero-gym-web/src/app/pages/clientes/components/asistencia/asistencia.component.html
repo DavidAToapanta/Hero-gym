@@ -1,74 +1,78 @@
 <div class="asistencia-container">
   <!-- Loading State -->
-  <div *ngIf="cargando" class="loading-state">
-    <div class="spinner"></div>
-    <p>Cargando estadísticas...</p>
-  </div>
+  @if (cargando) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando estadísticas...</p>
+    </div>
+  }
 
   <!-- Error State -->
-  <div *ngIf="error && !cargando" class="error-state">
-    <div class="error-icon">⚠️</div>
-    <h3>Error al cargar estadísticas</h3>
-    <p>No se pudieron cargar tus datos de asistencia</p>
-  </div>
+  @if (error && !cargando) {
+    <div class="error-state">
+      <div class="error-icon">⚠️</div>
+      <h3>Error al cargar estadísticas</h3>
+      <p>No se pudieron cargar tus datos de asistencia</p>
+    </div>
+  }
 
   <!-- No Plan Activo -->
-  <div *ngIf="!cargando && !error && estadisticas && !estadisticas.tienePlanActivo" class="no-plan-state">
-    <div class="no-plan-icon">📋</div>
-    <h3>Sin Plan Activo</h3>
-    <p>{{ estadisticas.mensaje }}</p>
-    <p class="suggestion">Contacta con recepción para activar un plan</p>
-  </div>
+  @if (!cargando && !error && estadisticas && !estadisticas.tienePlanActivo) {
+    <div class="no-plan-state">
+      <div class="no-plan-icon">📋</div>
+      <h3>Sin Plan Activo</h3>
+      <p>{{ estadisticas.mensaje }}</p>
+      <p class="suggestion">Contacta con recepción para activar un plan</p>
+    </div>
+  }
 
   <!-- Estadísticas de Asistencia -->
-  <div *ngIf="!cargando && !error && estadisticas && estadisticas.tienePlanActivo" class="stats-card">
-    <div class="card-header">
-      <h2>📊 Tu Asistencia</h2>
-      <span class="plan-badge">{{ estadisticas.nombrePlan }}</span>
-    </div>
-
-    <div class="stats-content">
-      <!-- Contador Principal -->
-      <div class="main-counter">
-        <div class="counter-display">
-          <span class="dias-asistidos">{{ estadisticas.diasAsistidos }}</span>
-          <span class="separator">/</span>
-          <span class="dias-totales">{{ estadisticas.diasTotales }}</span>
-        </div>
-        <p class="counter-label">Días asistidos en tu plan</p>
+  @if (!cargando && !error && estadisticas && estadisticas.tienePlanActivo) {
+    <div class="stats-card">
+      <div class="card-header">
+        <h2>📊 Tu Asistencia</h2>
+        <span class="plan-badge">{{ estadisticas.nombrePlan }}</span>
       </div>
-
-      <!-- Barra de Progreso -->
-      <div class="progress-section">
-        <div class="progress-bar-container">
-          <div 
-            class="progress-bar-fill" 
-            [style.width.%]="estadisticas.porcentajeAsistencia"
-            [class.excellent]="(estadisticas.porcentajeAsistencia || 0) >= 80"
-            [class.good]="(estadisticas.porcentajeAsistencia || 0) >= 60 && (estadisticas.porcentajeAsistencia || 0) < 80"
-            [class.moderate]="(estadisticas.porcentajeAsistencia || 0) >= 40 && (estadisticas.porcentajeAsistencia || 0) < 60"
-            [class.low]="(estadisticas.porcentajeAsistencia || 0) < 40">
+      <div class="stats-content">
+        <!-- Contador Principal -->
+        <div class="main-counter">
+          <div class="counter-display">
+            <span class="dias-asistidos">{{ estadisticas.diasAsistidos }}</span>
+            <span class="separator">/</span>
+            <span class="dias-totales">{{ estadisticas.diasTotales }}</span>
+          </div>
+          <p class="counter-label">Días asistidos en tu plan</p>
+        </div>
+        <!-- Barra de Progreso -->
+        <div class="progress-section">
+          <div class="progress-bar-container">
+            <div
+              class="progress-bar-fill"
+              [style.width.%]="estadisticas.porcentajeAsistencia"
+              [class.excellent]="(estadisticas.porcentajeAsistencia || 0) >= 80"
+              [class.good]="(estadisticas.porcentajeAsistencia || 0) >= 60 && (estadisticas.porcentajeAsistencia || 0) < 80"
+              [class.moderate]="(estadisticas.porcentajeAsistencia || 0) >= 40 && (estadisticas.porcentajeAsistencia || 0) < 60"
+              [class.low]="(estadisticas.porcentajeAsistencia || 0) < 40">
+            </div>
+          </div>
+          <div class="percentage-display">{{ estadisticas.porcentajeAsistencia }}%</div>
+        </div>
+        <!-- Mensaje Motivacional -->
+        <div class="motivational-message">
+          <p>{{ getMensajeMotivacional() }}</p>
+        </div>
+        <!-- Información del Plan -->
+        <div class="plan-info">
+          <div class="info-item">
+            <span class="info-label">Inicio:</span>
+            <span class="info-value">{{ estadisticas.fechaInicio | date: 'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Fin:</span>
+            <span class="info-value">{{ estadisticas.fechaFin | date: 'dd/MM/yyyy' }}</span>
           </div>
         </div>
-        <div class="percentage-display">{{ estadisticas.porcentajeAsistencia }}%</div>
-      </div>
-
-      <!-- Mensaje Motivacional -->
-      <div class="motivational-message">
-        <p>{{ getMensajeMotivacional() }}</p>
-      </div>
-
-      <!-- Información del Plan -->
-      <div class="plan-info">
-        <div class="info-item">
-          <span class="info-label">Inicio:</span>
-          <span class="info-value">{{ estadisticas.fechaInicio | date: 'dd/MM/yyyy' }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">Fin:</span>
-          <span class="info-value">{{ estadisticas.fechaFin | date: 'dd/MM/yyyy' }}</span>
-        </div>
       </div>
     </div>
-  </div>
+  }
 </div>

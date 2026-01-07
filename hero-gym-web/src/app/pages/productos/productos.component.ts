@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { LucideAngularModule } from 'lucide-angular';
 import { ProductosListaComponent } from './components/productos-lista/productos-lista.component';
 import { ProductosBusquedaComponent } from "./components/productos-busqueda/productos-busqueda.component";
@@ -9,12 +9,11 @@ import { ProductosFormularioComponent } from "./components/productos-formulario/
   selector: 'app-productos',
   standalone: true,
   imports: [
-    CommonModule,
     LucideAngularModule,
     ProductosListaComponent,
     ProductosBusquedaComponent,
-    ProductosFormularioComponent,
-  ],
+    ProductosFormularioComponent
+],
   templateUrl: './productos.component.html',
   styleUrls: ['./productos.component.css']
 })

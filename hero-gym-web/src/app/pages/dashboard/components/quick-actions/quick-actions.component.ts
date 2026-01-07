@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserPlus, CreditCard, Dumbbell, Boxes } from 'lucide-angular';
@@ -6,7 +6,7 @@ import { UserPlus, CreditCard, Dumbbell, Boxes } from 'lucide-angular';
 @Component({
   selector: 'app-quick-actions',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './quick-actions.component.html',
   styleUrls: ['./quick-actions.component.css']
 })

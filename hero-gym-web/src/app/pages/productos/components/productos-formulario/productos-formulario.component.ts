@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ProductoService } from '../../../../core/services/producto.service';
@@ -6,7 +6,7 @@ import { ProductoService } from '../../../../core/services/producto.service';
 @Component({
   selector: 'app-productos-formulario',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './productos-formulario.component.html',
   styleUrls: ['./productos-formulario.component.css'],
 })

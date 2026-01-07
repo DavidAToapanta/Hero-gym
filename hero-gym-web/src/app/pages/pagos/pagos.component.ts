@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, ViewChild } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { ClientesBusquedaComponent } from "../clientes/components/clientes-busqueda/clientes-busqueda.component";
@@ -9,7 +9,7 @@ import { PagosFormularioComponent } from "./components/pagos-formulario/pagos-fo
 @Component({
   selector: 'app-pagos',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, PagosBusquedaComponent, PagosListaComponent, PagosFormularioComponent],
+  imports: [LucideAngularModule, PagosBusquedaComponent, PagosListaComponent, PagosFormularioComponent],
   templateUrl: './pagos.component.html',
   styleUrls: ['./pagos.component.css']
 })

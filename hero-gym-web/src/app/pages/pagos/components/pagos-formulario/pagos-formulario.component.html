@@ -8,7 +8,7 @@
       (click)="cerrar()"
       class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
       aria-label="Cerrar"
-    >
+      >
       ×
     </button>
 
@@ -17,9 +17,11 @@
     </h2>
 
     <!-- Error -->
-    <div *ngIf="errorMessage" class="mb-3 p-3 rounded bg-red-50 text-red-700 text-sm">
-      {{ errorMessage }}
-    </div>
+    @if (errorMessage) {
+      <div class="mb-3 p-3 rounded bg-red-50 text-red-700 text-sm">
+        {{ errorMessage }}
+      </div>
+    }
 
     <!-- Formulario -->
     <form #pagoForm="ngForm" (ngSubmit)="guardar()" class="space-y-5">
@@ -32,9 +34,11 @@
           [(ngModel)]="selectedClienteId"
           (ngModelChange)="onClienteChange()"
           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-        >
+          >
           <option [ngValue]="null" disabled>Seleccionar cliente...</option>
-          <option *ngFor="let c of clientes" [ngValue]="c.id">{{ c.nombre }}</option>
+          @for (c of clientes; track c) {
+            <option [ngValue]="c.id">{{ c.nombre }}</option>
+          }
         </select>
       </div>
 
@@ -48,47 +52,55 @@
           [(ngModel)]="selectedPlanId"
           (ngModelChange)="onPlanChange()"
           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none disabled:bg-gray-100"
-        >
+          >
           <option [ngValue]="null" disabled>Seleccionar plan...</option>
-          <option *ngFor="let p of planes" [ngValue]="p.id">
-            {{ p?.nombre }} ({{ p?.mesesPagar }} mes(es))
-          </option>
+          @for (p of planes; track p) {
+            <option [ngValue]="p.id">
+              {{ p?.nombre }} ({{ p?.mesesPagar }} mes(es))
+            </option>
+          }
         </select>
-        <div *ngIf="planActivoMensaje" class="mt-2 text-sm p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800">
-          {{ planActivoMensaje }}
-        </div>
+        @if (planActivoMensaje) {
+          <div class="mt-2 text-sm p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800">
+            {{ planActivoMensaje }}
+          </div>
+        }
       </div>
 
       <!-- Detalles del Plan -->
-      <div *ngIf="detallesPlan" class="rounded-xl border border-gray-200 p-4 bg-gray-50">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-sm text-gray-500">Plan</div>
-            <div class="font-medium text-gray-900">{{ detallesPlan?.nombre }}</div>
+      @if (detallesPlan) {
+        <div class="rounded-xl border border-gray-200 p-4 bg-gray-50">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-gray-500">Plan</div>
+              <div class="font-medium text-gray-900">{{ detallesPlan?.nombre }}</div>
+            </div>
+            <div>
+              <span
+                class="text-xs px-2 py-1 rounded-full"
+                [ngClass]="detallesPlan?.activado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                >
+                {{ detallesPlan?.activado ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
           </div>
-          <div>
-            <span
-              class="text-xs px-2 py-1 rounded-full"
-              [ngClass]="detallesPlan?.activado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-            >
-              {{ detallesPlan?.activado ? 'Activo' : 'Inactivo' }}
-            </span>
+          <div class="mt-3 grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <div class="text-gray-500">Inicio</div>
+              <div class="text-gray-900">{{ detallesPlan?.fechaInicio | date:'yyyy-MM-dd' }}</div>
+            </div>
+            <div>
+              <div class="text-gray-500">Fin</div>
+              <div class="text-gray-900">{{ detallesPlan?.fechaFin | date:'yyyy-MM-dd' }}</div>
+            </div>
           </div>
+          @if (detallesPlan?.precio !== undefined) {
+            <div class="mt-3 text-sm text-gray-700">
+              Precio del plan: <span class="font-medium">{{ detallesPlan?.precio }}</span>
+            </div>
+          }
         </div>
-        <div class="mt-3 grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <div class="text-gray-500">Inicio</div>
-            <div class="text-gray-900">{{ detallesPlan?.fechaInicio | date:'yyyy-MM-dd' }}</div>
-          </div>
-          <div>
-            <div class="text-gray-500">Fin</div>
-            <div class="text-gray-900">{{ detallesPlan?.fechaFin | date:'yyyy-MM-dd' }}</div>
-          </div>
-        </div>
-        <div *ngIf="detallesPlan?.precio !== undefined" class="mt-3 text-sm text-gray-700">
-          Precio del plan: <span class="font-medium">{{ detallesPlan?.precio }}</span>
-        </div>
-      </div>
+      }
 
       <!-- Monto -->
       <div>
@@ -101,25 +113,29 @@
           [(ngModel)]="pago.monto"
           (ngModelChange)="calcularDeuda()"
           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-        />
+          />
         <div class="mt-1 text-xs text-gray-500">Se autocompleta con el precio del plan, pero puedes ajustarlo.</div>
-        
+
         <!-- Advertencia si el pago supera el precio del plan -->
-        <div *ngIf="mensajeAdvertencia" class="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p class="text-xs text-yellow-700">
-            ⚠️ <strong>{{ mensajeAdvertencia }}</strong>
-          </p>
-        </div>
+        @if (mensajeAdvertencia) {
+          <div class="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p class="text-xs text-yellow-700">
+              ⚠️ <strong>{{ mensajeAdvertencia }}</strong>
+            </p>
+          </div>
+        }
 
         <!-- Mostrar deuda si el monto es menor al precio -->
-        <div *ngIf="deudaCalculada > 0" class="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-          <p class="text-xs text-red-700">
-            ⚠️ <strong>Se generará una deuda de ${{ deudaCalculada | number:'1.2-2' }}</strong>
-          </p>
-          <p class="text-xs text-red-600 mt-1">
-            Precio del plan: ${{ selectedPlan?.precio }} - Monto a pagar: ${{ pago.monto }}
-          </p>
-        </div>
+        @if (deudaCalculada > 0) {
+          <div class="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+            <p class="text-xs text-red-700">
+              ⚠️ <strong>Se generará una deuda de ${{ deudaCalculada | number:'1.2-2' }}</strong>
+            </p>
+            <p class="text-xs text-red-600 mt-1">
+              Precio del plan: ${{ selectedPlan?.precio }} - Monto a pagar: ${{ pago.monto }}
+            </p>
+          </div>
+        }
       </div>
 
       <!-- Fecha de Pago -->
@@ -131,7 +147,7 @@
           required
           [(ngModel)]="pago.fecha"
           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-        />
+          />
       </div>
 
       <!-- Botones -->
@@ -140,14 +156,14 @@
           type="button"
           (click)="cerrar()"
           class="px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-        >
+          >
           Cancelar
         </button>
         <button
           type="submit"
           [disabled]="isSubmitting || !pagoForm.form.valid"
           class="px-5 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-60"
-        >
+          >
           {{ isSubmitting ? 'Guardando...' : 'Registrar' }}
         </button>
       </div>

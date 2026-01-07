@@ -17,7 +17,8 @@ export class PlanModalComponent {
     nombre: '',
     descripcion: '',
     precio: '',
-    duracion: ''
+    duracion: '',
+    unidadDuracion: 'MESES' as 'MESES' | 'DIAS'
   };
 
   guardar() {
@@ -29,7 +30,8 @@ export class PlanModalComponent {
       nombre: '',
       descripcion: '',
       precio: '',
-      duracion: ''
+      duracion: '',
+      unidadDuracion: 'MESES' as 'MESES' | 'DIAS'
     };
   }
 }

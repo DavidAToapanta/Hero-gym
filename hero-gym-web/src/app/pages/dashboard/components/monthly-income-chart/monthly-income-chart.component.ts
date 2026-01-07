@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { EstadisticasService } from '../../../../core/services/estadisticas.service';
@@ -10,7 +10,7 @@ type Modo = 'line' | 'bar';
 @Component({
   selector: 'app-monthly-income-chart',
   standalone: true,
-  imports: [CommonModule, BaseChartDirective],
+  imports: [BaseChartDirective],
   templateUrl: './monthly-income-chart.component.html',
 })
 export class MonthlyIncomeChartComponent {

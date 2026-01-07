@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { Factura } from '../../../../core/services/factura.service';
+
 
 @Component({
   selector: 'app-facturas-header',

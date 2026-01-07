@@ -13,24 +13,25 @@
   <button
     (click)="nuevoProducto()"
     class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
-  >
+    >
     + Nuevo Producto
   </button>
-  
+
 </div>
 
 <!-- Formulario -->
-<app-productos-formulario
-  *ngIf="mostrarFormulario"
-  (close)="mostrarFormulario = false"
-  (save)="onGuardarProducto($event)"
-  [initialData]="productoEditando"
-></app-productos-formulario>
+@if (mostrarFormulario) {
+  <app-productos-formulario
+    (close)="mostrarFormulario = false"
+    (save)="onGuardarProducto($event)"
+    [initialData]="productoEditando"
+  ></app-productos-formulario>
+}
 
 <!-- Búsqueda y lista -->
 <div>
   <app-productos-busqueda (buscar)="buscarProductos($event)"></app-productos-busqueda>
-  <app-productos-lista 
+  <app-productos-lista
     [searchTerm]="terminoActual"
     (edit)="onEditarProducto($event)"
     (deleted)="onProductoEliminado()"
@@ -38,9 +39,10 @@
 </div>
 
 <!-- Toast de éxito -->
-<div 
-  *ngIf="toastVisible"
-  class="fixed top-6 right-6 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50"
->
-  {{ toastMessage }}
+@if (toastVisible) {
+  <div
+    class="fixed top-6 right-6 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50"
+    >
+    {{ toastMessage }}
   </div>
+}

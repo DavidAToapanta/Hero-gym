@@ -1,178 +1,180 @@
 <div class="container mx-auto">
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="flex items-center justify-center min-h-[400px]">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-      <p class="text-gray-600 font-medium">Cargando tu información...</p>
+  @if (isLoading) {
+    <div class="flex items-center justify-center min-h-[400px]">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+        <p class="text-gray-600 font-medium">Cargando tu información...</p>
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Error State -->
-  <div *ngIf="!isLoading && errorMessage" class="bg-red-50 border-2 border-red-300 rounded-xl p-6 text-center">
-    <p class="text-red-700 font-semibold">{{ errorMessage }}</p>
-  </div>
+  @if (!isLoading && errorMessage) {
+    <div class="bg-red-50 border-2 border-red-300 rounded-xl p-6 text-center">
+      <p class="text-red-700 font-semibold">{{ errorMessage }}</p>
+    </div>
+  }
 
   <!-- Dashboard Content -->
-  <div *ngIf="!isLoading && clienteData" class="space-y-6">
-    
-    <!-- Header con Información Personal -->
-    <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl p-8 text-white">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-4xl font-bold mb-2">
-            ¡Hola, {{ clienteData.nombres }} {{ clienteData.apellidos }}! 👋
-          </h1>
-          <p class="text-blue-100 text-lg">Cédula: {{ clienteData.cedula }}</p>
-        </div>
-        <div class="text-6xl">💪</div>
-      </div>
-    </div>
-
-    <!-- Componente de Asistencia -->
-    <app-asistencia></app-asistencia>
-
-    <!-- Grid de Información Principal -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
-      <!-- Tarjeta de Plan -->
-      <div class="bg-white rounded-2xl shadow-xl p-6 border-2 border-gray-100 hover:shadow-2xl transition-all">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-gray-800 flex items-center">
-            <span class="mr-3 text-3xl">📋</span>
-            Mi Plan
-          </h2>
-          <span [class]="'px-4 py-2 rounded-full text-sm font-bold border-2 ' + getEstadoClasses()">
-            {{ getEstadoTexto() }}
-          </span>
-        </div>
-
-        <div class="space-y-4">
-          <!-- Nombre del Plan -->
-          <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
-            <p class="text-sm text-gray-600 mb-1">Tipo de Plan</p>
-            <p class="text-2xl font-bold text-blue-700">{{ clienteData.plan.nombre }}</p>
-          </div>
-
-          <!-- Fechas -->
-          <div class="grid grid-cols-2 gap-4">
-            <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <p class="text-xs text-gray-500 mb-1">Fecha Inicio</p>
-              <p class="text-lg font-semibold text-gray-800">
-                {{ clienteData.plan.fechaInicio | date:'dd/MM/yyyy' }}
-              </p>
-            </div>
-            <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <p class="text-xs text-gray-500 mb-1">Fecha Fin</p>
-              <p class="text-lg font-semibold text-gray-800">
-                {{ clienteData.plan.fechaFin | date:'dd/MM/yyyy' }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tarjeta de Progreso de Días -->
-      <div class="bg-white rounded-2xl shadow-xl p-6 border-2 border-gray-100 hover:shadow-2xl transition-all">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-          <span class="mr-3 text-3xl">📅</span>
-          Progreso del Plan
-        </h2>
-
-        <div class="space-y-6">
-          <!-- Barra de Progreso -->
+  @if (!isLoading && clienteData) {
+    <div class="space-y-6">
+      <!-- Header con Información Personal -->
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl p-8 text-white">
+        <div class="flex items-center justify-between">
           <div>
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-sm font-medium text-gray-600">Días Completados</span>
-              <span class="text-sm font-bold text-blue-600">{{ getProgresoPorcentaje() | number:'1.0-0' }}%</span>
+            <h1 class="text-4xl font-bold mb-2">
+              ¡Hola, {{ clienteData.nombres }} {{ clienteData.apellidos }}! 👋
+            </h1>
+            <p class="text-blue-100 text-lg">Cédula: {{ clienteData.cedula }}</p>
+          </div>
+          <div class="text-6xl">💪</div>
+        </div>
+      </div>
+      <!-- Componente de Asistencia -->
+      <app-asistencia></app-asistencia>
+      <!-- Grid de Información Principal -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Tarjeta de Plan -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 border-2 border-gray-100 hover:shadow-2xl transition-all">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+              <span class="mr-3 text-3xl">📋</span>
+              Mi Plan
+            </h2>
+            <span [class]="'px-4 py-2 rounded-full text-sm font-bold border-2 ' + getEstadoClasses()">
+              {{ getEstadoTexto() }}
+            </span>
+          </div>
+          <div class="space-y-4">
+            <!-- Nombre del Plan -->
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
+              <p class="text-sm text-gray-600 mb-1">Tipo de Plan</p>
+              <p class="text-2xl font-bold text-blue-700">{{ clienteData.plan.nombre }}</p>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-              <div 
-                class="bg-gradient-to-r from-blue-500 to-purple-500 h-4 rounded-full transition-all duration-500 shadow-lg"
-                [style.width.%]="getProgresoPorcentaje()">
+            <!-- Fechas -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <p class="text-xs text-gray-500 mb-1">Fecha Inicio</p>
+                <p class="text-lg font-semibold text-gray-800">
+                  {{ clienteData.plan.fechaInicio | date:'dd/MM/yyyy' }}
+                </p>
+              </div>
+              <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <p class="text-xs text-gray-500 mb-1">Fecha Fin</p>
+                <p class="text-lg font-semibold text-gray-800">
+                  {{ clienteData.plan.fechaFin | date:'dd/MM/yyyy' }}
+                </p>
               </div>
             </div>
           </div>
-
-          <!-- Estadísticas de Días -->
-          <div class="grid grid-cols-3 gap-3">
-            <div class="bg-blue-50 rounded-xl p-4 text-center border-2 border-blue-200">
-              <p class="text-3xl font-bold text-blue-600">{{ clienteData.plan.diasTranscurridos }}</p>
-              <p class="text-xs text-gray-600 mt-1">Días Idos</p>
+        </div>
+        <!-- Tarjeta de Progreso de Días -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 border-2 border-gray-100 hover:shadow-2xl transition-all">
+          <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <span class="mr-3 text-3xl">📅</span>
+            Progreso del Plan
+          </h2>
+          <div class="space-y-6">
+            <!-- Barra de Progreso -->
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-medium text-gray-600">Días Completados</span>
+                <span class="text-sm font-bold text-blue-600">{{ getProgresoPorcentaje() | number:'1.0-0' }}%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                <div
+                  class="bg-gradient-to-r from-blue-500 to-purple-500 h-4 rounded-full transition-all duration-500 shadow-lg"
+                  [style.width.%]="getProgresoPorcentaje()">
+                </div>
+              </div>
             </div>
-            <div class="bg-green-50 rounded-xl p-4 text-center border-2 border-green-200">
-              <p class="text-3xl font-bold text-green-600">{{ clienteData.plan.diasRestantes }}</p>
-              <p class="text-xs text-gray-600 mt-1">Días Restantes</p>
+            <!-- Estadísticas de Días -->
+            <div class="grid grid-cols-3 gap-3">
+              <div class="bg-blue-50 rounded-xl p-4 text-center border-2 border-blue-200">
+                <p class="text-3xl font-bold text-blue-600">{{ clienteData.plan.diasTranscurridos }}</p>
+                <p class="text-xs text-gray-600 mt-1">Días Idos</p>
+              </div>
+              <div class="bg-green-50 rounded-xl p-4 text-center border-2 border-green-200">
+                <p class="text-3xl font-bold text-green-600">{{ clienteData.plan.diasRestantes }}</p>
+                <p class="text-xs text-gray-600 mt-1">Días Restantes</p>
+              </div>
+              <div class="bg-purple-50 rounded-xl p-4 text-center border-2 border-purple-200">
+                <p class="text-3xl font-bold text-purple-600">{{ clienteData.plan.totalDias }}</p>
+                <p class="text-xs text-gray-600 mt-1">Total Días</p>
+              </div>
             </div>
-            <div class="bg-purple-50 rounded-xl p-4 text-center border-2 border-purple-200">
-              <p class="text-3xl font-bold text-purple-600">{{ clienteData.plan.totalDias }}</p>
-              <p class="text-xs text-gray-600 mt-1">Total Días</p>
-            </div>
-          </div>
-
-          <!-- Mensaje según estado -->
-          <div *ngIf="clienteData.plan.estado === 'por_vencer'" 
-               class="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4">
-            <p class="text-yellow-800 font-semibold text-center">
-              ⚠️ Tu plan vence en {{ clienteData.plan.diasRestantes }} días
-            </p>
-          </div>
-          <div *ngIf="clienteData.plan.estado === 'vencido'" 
-               class="bg-red-50 border-2 border-red-300 rounded-xl p-4">
-            <p class="text-red-800 font-semibold text-center">
-              ❌ Tu plan ha vencido. Por favor, renueva tu membresía.
-            </p>
-          </div>
-          <div *ngIf="clienteData.plan.estado === 'activo' && clienteData.plan.diasRestantes > 3" 
-               class="bg-green-50 border-2 border-green-300 rounded-xl p-4">
-            <p class="text-green-800 font-semibold text-center">
-              ✅ Tu plan está activo. ¡Sigue entrenando!
-            </p>
+            <!-- Mensaje según estado -->
+            @if (clienteData.plan.estado === 'por_vencer') {
+              <div
+                class="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4">
+                <p class="text-yellow-800 font-semibold text-center">
+                  ⚠️ Tu plan vence en {{ clienteData.plan.diasRestantes }} días
+                </p>
+              </div>
+            }
+            @if (clienteData.plan.estado === 'vencido') {
+              <div
+                class="bg-red-50 border-2 border-red-300 rounded-xl p-4">
+                <p class="text-red-800 font-semibold text-center">
+                  ❌ Tu plan ha vencido. Por favor, renueva tu membresía.
+                </p>
+              </div>
+            }
+            @if (clienteData.plan.estado === 'activo' && clienteData.plan.diasRestantes > 3) {
+              <div
+                class="bg-green-50 border-2 border-green-300 rounded-xl p-4">
+                <p class="text-green-800 font-semibold text-center">
+                  ✅ Tu plan está activo. ¡Sigue entrenando!
+                </p>
+              </div>
+            }
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Tarjeta de Deuda (si existe) -->
-    <div *ngIf="clienteData.deuda > 0" 
-         class="bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl shadow-xl p-8 border-2 border-red-300">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <div class="bg-red-500 text-white rounded-full p-4 text-4xl">
-            💳
-          </div>
-          <div>
-            <h2 class="text-2xl font-bold text-red-800 mb-1">Deuda Pendiente</h2>
-            <p class="text-red-600">Por favor, regulariza tu pago lo antes posible</p>
+      <!-- Tarjeta de Deuda (si existe) -->
+      @if (clienteData.deuda > 0) {
+        <div
+          class="bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl shadow-xl p-8 border-2 border-red-300">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <div class="bg-red-500 text-white rounded-full p-4 text-4xl">
+                💳
+              </div>
+              <div>
+                <h2 class="text-2xl font-bold text-red-800 mb-1">Deuda Pendiente</h2>
+                <p class="text-red-600">Por favor, regulariza tu pago lo antes posible</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-sm text-red-600 mb-1">Monto Adeudado</p>
+              <p class="text-5xl font-bold text-red-700">
+                ${{ clienteData.deuda | number:'1.2-2' }}
+              </p>
+            </div>
           </div>
         </div>
-        <div class="text-right">
-          <p class="text-sm text-red-600 mb-1">Monto Adeudado</p>
-          <p class="text-5xl font-bold text-red-700">
-            ${{ clienteData.deuda | number:'1.2-2' }}
-          </p>
+      }
+      <!-- Tarjeta de Sin Deuda -->
+      @if (clienteData.deuda === 0) {
+        <div
+          class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-xl p-8 border-2 border-green-300">
+          <div class="flex items-center justify-center space-x-4">
+            <div class="bg-green-500 text-white rounded-full p-4 text-4xl">
+              ✅
+            </div>
+            <div class="text-center">
+              <h2 class="text-3xl font-bold text-green-800">¡Estás al día con tus pagos!</h2>
+              <p class="text-green-600 mt-2">No tienes deudas pendientes</p>
+            </div>
+          </div>
         </div>
+      }
+      <!-- Mensaje Motivacional -->
+      <div class="bg-gradient-to-r from-orange-400 to-pink-500 rounded-2xl shadow-xl p-8 text-white text-center">
+        <p class="text-3xl font-bold mb-2">💪 ¡Sigue así, campeón!</p>
+        <p class="text-lg text-orange-100">Cada día de entrenamiento te acerca más a tus objetivos</p>
       </div>
     </div>
-
-    <!-- Tarjeta de Sin Deuda -->
-    <div *ngIf="clienteData.deuda === 0" 
-         class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-xl p-8 border-2 border-green-300">
-      <div class="flex items-center justify-center space-x-4">
-        <div class="bg-green-500 text-white rounded-full p-4 text-4xl">
-          ✅
-        </div>
-        <div class="text-center">
-          <h2 class="text-3xl font-bold text-green-800">¡Estás al día con tus pagos!</h2>
-          <p class="text-green-600 mt-2">No tienes deudas pendientes</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mensaje Motivacional -->
-    <div class="bg-gradient-to-r from-orange-400 to-pink-500 rounded-2xl shadow-xl p-8 text-white text-center">
-      <p class="text-3xl font-bold mb-2">💪 ¡Sigue así, campeón!</p>
-      <p class="text-lg text-orange-100">Cada día de entrenamiento te acerca más a tus objetivos</p>
-    </div>
-
-  </div>
+  }
 </div>

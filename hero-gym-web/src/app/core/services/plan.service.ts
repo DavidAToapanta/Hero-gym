@@ -6,7 +6,15 @@ export interface Plan {
   id?: number;
   nombre: string;
   precio: number;
-  mesesPagar: number;
+  duracion: number;
+  unidadDuracion: 'MESES' | 'DIAS';
+}
+
+export interface PaginatedPlans {
+  data: Plan[];
+  total: number;
+  page: number;
+  totalPages: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -15,8 +23,8 @@ export class PlanService {
 
   constructor(private http: HttpClient) {}
 
-  getPlanes(): Observable<Plan[]> {
-    return this.http.get<Plan[]>(this.baseUrl);
+  getPlanes(page: number = 1, limit: number = 10): Observable<PaginatedPlans> {
+    return this.http.get<PaginatedPlans>(`${this.baseUrl}?page=${page}&limit=${limit}`);
   }
 
   createPlan(plan: Plan): Observable<Plan> {
@@ -25,5 +33,9 @@ export class PlanService {
 
   deletePlan(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  deletePlanWithCascade(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}/cascade`);
   }
 }

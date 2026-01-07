@@ -1,1 +1,169 @@
-<p>facturas-tabla works!</p>
+<div class="bg-white rounded-2xl shadow-lg p-6">
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm border-separate border-spacing-y-2">
+      <thead>
+        <tr class="text-left text-gray-500 border-b border-gray-200">
+          <th class="py-3 font-medium px-4">Nº Factura</th>
+          <th class="py-3 font-medium px-4">Fecha</th>
+          <th class="py-3 font-medium px-4">Cliente</th>
+          <th class="py-3 font-medium px-4">Plan</th>
+          <th class="py-3 font-medium px-4">Total</th>
+          <th class="py-3 font-medium px-4">Saldo</th>
+          <th class="py-3 font-medium px-4">Estado</th>
+          <th class="py-3 font-medium px-4 text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (factura of facturas; track factura) {
+          <tr class="bg-white border border-gray-200 hover:shadow-md transition rounded-xl">
+            <td class="py-3 px-4 whitespace-nowrap text-sm font-medium text-gray-900 rounded-l-xl">{{ factura.numero }}</td>
+            <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-500">
+              {{ factura.fechaEmision | date:'dd/MM/yyyy' }}
+            </td>
+            <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-500">
+              <div class="font-medium">{{ factura.clientePlan.cliente.usuario.nombres }} {{ factura.clientePlan.cliente.usuario.apellidos }}</div>
+              <div class="text-xs text-gray-400">{{ factura.clientePlan.cliente.usuario.cedula }}</div>
+            </td>
+            <td class="py-3 px-4 whitespace-nowrap text-sm text-gray-500">{{ factura.clientePlan.plan.nombre }}</td>
+            <td class="py-3 px-4 whitespace-nowrap text-sm font-bold text-gray-900">${{ factura.total.toFixed(2) }}</td>
+            <td class="py-3 px-4 whitespace-nowrap text-sm font-medium text-red-600">${{ factura.saldo.toFixed(2) }}</td>
+            <td class="py-3 px-4 whitespace-nowrap">
+              <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" [ngClass]="getClassEstado(factura.estado)">
+                {{ factura.estado }}
+              </span>
+            </td>
+            <td class="py-3 px-4 whitespace-nowrap text-center text-sm font-medium rounded-r-xl">
+              <button (click)="onImprimir(factura)" class="text-blue-600 hover:text-blue-900 mx-2" title="Imprimir PDF">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+              </button>
+              <button (click)="onPagarDeuda(factura)" class="text-green-600 hover:text-green-900 mx-2" title="Pagar Deuda">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+        }
+        @if (facturas.length === 0 && !isLoading) {
+          <tr>
+            <td colspan="8" class="px-6 py-10 text-center text-gray-500">
+              No se encontraron facturas con los filtros seleccionados.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Payment Dialog Modal -->
+@if (showPaymentDialog && selectedFactura) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-bold text-gray-900">Pagar Deuda</h3>
+        <button (click)="cerrarDialogo()" class="text-gray-400 hover:text-gray-600">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Factura Info -->
+      <div class="bg-gray-50 rounded-lg p-4 mb-6">
+        <div class="text-sm text-gray-600 mb-2">
+          <span class="font-semibold">Factura:</span> {{ selectedFactura.numero }}
+        </div>
+        <div class="text-sm text-gray-600 mb-2">
+          <span class="font-semibold">Cliente:</span> 
+          {{ selectedFactura.clientePlan.cliente.usuario.nombres }} 
+          {{ selectedFactura.clientePlan.cliente.usuario.apellidos }}
+        </div>
+        <div class="text-sm text-gray-600 mb-2">
+          <span class="font-semibold">Total:</span> 
+          <span class="text-gray-900">${{ selectedFactura.total.toFixed(2) }}</span>
+        </div>
+        <div class="text-sm text-gray-600 mb-2">
+          <span class="font-semibold">Pagado:</span> 
+          <span class="text-green-600">${{ selectedFactura.totalPagado.toFixed(2) }}</span>
+        </div>
+        <div class="text-lg font-bold text-red-600 mt-3">
+          Saldo Pendiente: ${{ selectedFactura.saldo.toFixed(2) }}
+        </div>
+      </div>
+
+      <!-- Payment Form -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Monto a Pagar
+        </label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+          <input 
+            type="number" 
+            [(ngModel)]="montoPago"
+            [max]="selectedFactura.saldo"
+            min="0.01"
+            step="0.01"
+            class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            placeholder="0.00"
+          />
+        </div>
+        <p class="text-xs text-gray-500 mt-2">
+          Máximo: ${{ selectedFactura.saldo.toFixed(2) }}
+        </p>
+      </div>
+
+      <!-- Error Message -->
+      @if (errorMessage) {
+        <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p class="text-sm text-red-600">{{ errorMessage }}</p>
+        </div>
+      }
+
+      <!-- Success Message -->
+      @if (successMessage) {
+        <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p class="text-sm text-green-600">{{ successMessage }}</p>
+        </div>
+      }
+
+      <!-- Actions -->
+      <div class="flex gap-3">
+        <button 
+          (click)="cerrarDialogo()" 
+          [disabled]="isProcessing"
+          class="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        >
+          Cancelar
+        </button>
+        <button 
+          (click)="procesarPago()" 
+          [disabled]="isProcessing || montoPago <= 0"
+          class="flex-1 px-4 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        >
+          @if (isProcessing) {
+            <span>Procesando...</span>
+          } @else {
+            <span>Pagar</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Error Toast (for no debt message) -->
+@if (errorMessage && !showPaymentDialog) {
+  <div class="fixed top-4 right-4 z-50 bg-red-50 border border-red-200 rounded-lg shadow-lg p-4 max-w-sm">
+    <div class="flex items-start">
+      <svg class="h-5 w-5 text-red-600 mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <p class="text-sm text-red-600 font-medium">{{ errorMessage }}</p>
+    </div>
+  </div>
+}

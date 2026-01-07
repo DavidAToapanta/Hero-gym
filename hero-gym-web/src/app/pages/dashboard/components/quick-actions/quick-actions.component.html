@@ -2,93 +2,98 @@
   <h2 class="text-lg font-semibold mb-4 text-gray-800">Acciones Rápidas</h2>
 
   <div class="flex flex-col space-y-3">
-    <button
-      *ngFor="let action of actions"
-      (click)="navigateTo(action.route)"
-      class="flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition"
-    >
-      <div class="flex items-center space-x-3">
-        <ng-container [ngSwitch]="action.icon">
-          <svg
-            *ngSwitchCase="UserPlus"
-            [class]="action.color + ' w-5 h-5'"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
-          <svg
-            *ngSwitchCase="CreditCard"
-            [class]="action.color + ' w-5 h-5'"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-            />
-          </svg>
-          <svg
-            *ngSwitchCase="Dumbbell"
-            [class]="action.color + ' w-5 h-5'"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 6h.01M6 12h.01M6 18h.01M12 6h.01M12 12h.01M12 18h.01M18 6h.01M18 12h.01M18 18h.01"
-            />
-          </svg>
-          <svg
-            *ngSwitchCase="Boxes"
-            [class]="action.color + ' w-5 h-5'"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-            />
-          </svg>
-        </ng-container>
-        <div class="text-left">
-          <p class="font-medium text-gray-800">{{ action.title }}</p>
-          <p class="text-sm text-gray-500">{{ action.description }}</p>
-        </div>
-      </div>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="w-4 h-4 text-gray-400"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M9 5l7 7-7 7"
-        />
-      </svg>
-    </button>
-  </div>
-</div>
+    @for (action of actions; track action) {
+      <button
+        (click)="navigateTo(action.route)"
+        class="flex items-center justify-between px-4 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition"
+        >
+        <div class="flex items-center space-x-3">
+          @switch (action.icon) {
+            @case (UserPlus) {
+              <svg
+                [class]="action.color + ' w-5 h-5'"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+                >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              }
+              @case (CreditCard) {
+                <svg
+                  [class]="action.color + ' w-5 h-5'"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                    />
+                  </svg>
+                }
+                @case (Dumbbell) {
+                  <svg
+                    [class]="action.color + ' w-5 h-5'"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 6h.01M6 12h.01M6 18h.01M12 6h.01M12 12h.01M12 18h.01M18 6h.01M18 12h.01M18 18h.01"
+                      />
+                    </svg>
+                  }
+                  @case (Boxes) {
+                    <svg
+                      [class]="action.color + ' w-5 h-5'"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                      >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                        />
+                      </svg>
+                    }
+                  }
+                  <div class="text-left">
+                    <p class="font-medium text-gray-800">{{ action.title }}</p>
+                    <p class="text-sm text-gray-500">{{ action.description }}</p>
+                  </div>
+                </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-4 h-4 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              }
+            </div>
+          </div>

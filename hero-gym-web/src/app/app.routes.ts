@@ -7,7 +7,6 @@ import { RoleGuard } from './core/guards/role.guard';
 import { ClientesComponent } from './pages/clientes/clientes.component';
 import { ProductosComponent } from './pages/productos/productos.component';
 import { PagosComponent } from './pages/pagos/pagos.component';
-import { PlanesComponent } from './pages/planes/planes.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { AdministracionComponent } from './pages/administracion/administracion.component';
 
@@ -42,12 +41,6 @@ export const routes: Routes = [
       { 
         path: 'pagos', 
         component: PagosComponent,
-        canActivate: [RoleGuard],
-        data: { roles: ['ADMIN'] }
-      },
-      { 
-        path: 'planes', 
-        component: PlanesComponent,
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] }
       },

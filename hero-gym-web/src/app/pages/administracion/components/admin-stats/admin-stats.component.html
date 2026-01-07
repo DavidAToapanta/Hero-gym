@@ -1,8 +1,8 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+  @for (item of stats; track item) {
     <div
-      *ngFor="let item of stats"
       class="bg-white rounded-2xl shadow-md p-6 flex items-center justify-between border border-gray-100 hover:shadow-lg transition"
-    >
+      >
       <div>
         <p class="text-sm text-gray-500">{{ item.titulo }}</p>
         <h3 class="text-2xl font-bold text-gray-900 mt-1">{{ item.valor }}</h3>
@@ -10,9 +10,10 @@
       <div
         class="w-12 h-12 flex items-center justify-center rounded-xl"
         [ngClass]="item.color"
-      >
+        >
         <lucide-icon [name]="item.icono" class="w-6 h-6"></lucide-icon>
       </div>
     </div>
-  </div>
-  
+  }
+</div>
+
