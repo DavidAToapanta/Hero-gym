@@ -87,8 +87,8 @@ export class ClienteService {
       .pipe(tap(() => this.invalidateCache()));
   }
 
-  // 🔹 Eliminar cliente
-  deleteCliente(id: number): Observable<any> {
+  // 🔹 Desactivar cliente (Soft Delete)
+  desactivarCliente(id: number): Observable<any> {
     return this.http
       .delete(`${this.apiUrl}/${id}`)
       .pipe(tap(() => this.invalidateCache()));
@@ -123,15 +123,22 @@ export class ClienteService {
   renovarPlan(clienteId: number, planData: {
     planId: number;
     fechaInicio: string;
-    duracionMeses: number;
+    duracion: number;
+    unidad: 'MESES' | 'DIAS';
     diaPago?: number;
   }): Observable<any> {
     console.log('[ClienteService] Renovando plan para cliente:', clienteId, planData);
     
-    // Calcular fecha fin basada en la duración en meses
+    // Calcular fecha fin basada en la duración y unidad
     const fechaInicio = new Date(planData.fechaInicio);
     const fechaFin = new Date(fechaInicio);
-    fechaFin.setMonth(fechaFin.getMonth() + planData.duracionMeses);
+
+    if (planData.unidad === 'DIAS') {
+      fechaFin.setDate(fechaFin.getDate() + planData.duracion);
+    } else {
+      // Por defecto MESES
+      fechaFin.setMonth(fechaFin.getMonth() + planData.duracion);
+    }
     
     const dto = {
       clienteId: clienteId,

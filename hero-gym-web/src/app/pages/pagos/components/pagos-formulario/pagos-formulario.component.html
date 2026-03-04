@@ -3,12 +3,8 @@
   <!-- Modal -->
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative">
     <!-- Botón cerrar -->
-    <button
-      type="button"
-      (click)="cerrar()"
-      class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
-      aria-label="Cerrar"
-      >
+    <button type="button" (click)="cerrar()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-xl"
+      aria-label="Cerrar">
       ×
     </button>
 
@@ -18,152 +14,149 @@
 
     <!-- Error -->
     @if (errorMessage) {
-      <div class="mb-3 p-3 rounded bg-red-50 text-red-700 text-sm">
-        {{ errorMessage }}
-      </div>
+    <div class="mb-3 p-3 rounded bg-red-50 text-red-700 text-sm">
+      {{ errorMessage }}
+    </div>
     }
 
     <!-- Formulario -->
     <form #pagoForm="ngForm" (ngSubmit)="guardar()" class="space-y-5">
       <!-- Cliente -->
-      <div>
+      <div class="relative">
         <label class="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
-        <select
-          name="clienteId"
-          required
-          [(ngModel)]="selectedClienteId"
-          (ngModelChange)="onClienteChange()"
-          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-          >
-          <option [ngValue]="null" disabled>Seleccionar cliente...</option>
-          @for (c of clientes; track c) {
-            <option [ngValue]="c.id">{{ c.nombre }}</option>
+
+        <!-- Buscador Autocomplete -->
+        <input type="text" placeholder="Buscar por cédula o nombre..."
+          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          [(ngModel)]="searchTermCliente" (input)="filtrarClientes()" (focus)="showSuggestions = true"
+          [ngModelOptions]="{standalone: true}">
+
+        <!-- Lista de sugerencias -->
+        @if (showSuggestions && clientes.length > 0) {
+        <ul
+          class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+          @for (c of clientes; track c.id) {
+          <li (click)="selectCliente(c)"
+            class="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-gray-700 text-sm transition">
+            <div class="font-medium">{{ c.nombre }}</div>
+            <div class="text-xs text-gray-500">{{ c.cedula }}</div>
+          </li>
           }
-        </select>
+        </ul>
+        }
+
+        <!-- Mensaje si no hay resultados -->
+        @if (showSuggestions && clientes.length === 0 && searchTermCliente) {
+        <div
+          class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-3 text-sm text-gray-500 text-center">
+          No se encontraron clientes.
+        </div>
+        }
       </div>
 
       <!-- Plan -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Plan</label>
-        <select
-          name="planId"
-          required
-          [disabled]="!selectedClienteId || !planes?.length"
-          [(ngModel)]="selectedPlanId"
+        <select name="planId" required [disabled]="!selectedClienteId || !planes.length" [(ngModel)]="selectedPlanId"
           (ngModelChange)="onPlanChange()"
-          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none disabled:bg-gray-100"
-          >
+          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none disabled:bg-gray-100">
           <option [ngValue]="null" disabled>Seleccionar plan...</option>
-          @for (p of planes; track p) {
-            <option [ngValue]="p.id">
-              {{ p?.nombre }} ({{ p?.mesesPagar }} mes(es))
-            </option>
+          @for (p of planes; track p.id) {
+          <option [ngValue]="p.id">
+            {{ p?.nombre }} ({{ p?.duracion }}
+            {{ p?.unidadDuracion === 'MESES'
+            ? (p?.duracion === 1 ? 'mes' : 'meses')
+            : (p?.duracion === 1 ? 'día' : 'días')
+            }})
+          </option>
           }
         </select>
+
         @if (planActivoMensaje) {
-          <div class="mt-2 text-sm p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800">
-            {{ planActivoMensaje }}
-          </div>
+        <div class="mt-2 text-sm p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800">
+          {{ planActivoMensaje }}
+        </div>
         }
       </div>
 
       <!-- Detalles del Plan -->
       @if (detallesPlan) {
-        <div class="rounded-xl border border-gray-200 p-4 bg-gray-50">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-sm text-gray-500">Plan</div>
-              <div class="font-medium text-gray-900">{{ detallesPlan?.nombre }}</div>
-            </div>
-            <div>
-              <span
-                class="text-xs px-2 py-1 rounded-full"
-                [ngClass]="detallesPlan?.activado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-                >
-                {{ detallesPlan?.activado ? 'Activo' : 'Inactivo' }}
-              </span>
-            </div>
+      <div class="rounded-xl border border-gray-200 p-4 bg-gray-50">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm text-gray-500">Plan</div>
+            <div class="font-medium text-gray-900">{{ detallesPlan.nombre }}</div>
           </div>
-          <div class="mt-3 grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <div class="text-gray-500">Inicio</div>
-              <div class="text-gray-900">{{ detallesPlan?.fechaInicio | date:'yyyy-MM-dd' }}</div>
-            </div>
-            <div>
-              <div class="text-gray-500">Fin</div>
-              <div class="text-gray-900">{{ detallesPlan?.fechaFin | date:'yyyy-MM-dd' }}</div>
-            </div>
+          <div>
+            <span class="text-xs px-2 py-1 rounded-full"
+              [ngClass]="detallesPlan.activado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+              {{ detallesPlan.activado ? 'Activo' : 'Inactivo' }}
+            </span>
           </div>
-          @if (detallesPlan?.precio !== undefined) {
-            <div class="mt-3 text-sm text-gray-700">
-              Precio del plan: <span class="font-medium">{{ detallesPlan?.precio }}</span>
-            </div>
-          }
         </div>
+        <div class="mt-3 grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <div class="text-gray-500">Inicio</div>
+            <div class="text-gray-900">{{ detallesPlan.fechaInicio | date:'yyyy-MM-dd' }}</div>
+          </div>
+          <div>
+            <div class="text-gray-500">Fin</div>
+            <div class="text-gray-900">{{ detallesPlan.fechaFin | date:'yyyy-MM-dd' }}</div>
+          </div>
+        </div>
+        @if (detallesPlan.precio !== undefined) {
+        <div class="mt-3 text-sm text-gray-700">
+          Precio del plan: <span class="font-medium">{{ detallesPlan.precio }}</span>
+        </div>
+        }
+      </div>
       }
 
       <!-- Monto -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Monto</label>
-        <input
-          name="monto"
-          type="number"
-          step="0.01"
-          required
-          [(ngModel)]="pago.monto"
+        <input name="monto" type="number" step="0.01" required [(ngModel)]="pago.monto"
           (ngModelChange)="calcularDeuda()"
-          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-          />
+          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" />
         <div class="mt-1 text-xs text-gray-500">Se autocompleta con el precio del plan, pero puedes ajustarlo.</div>
 
         <!-- Advertencia si el pago supera el precio del plan -->
         @if (mensajeAdvertencia) {
-          <div class="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p class="text-xs text-yellow-700">
-              ⚠️ <strong>{{ mensajeAdvertencia }}</strong>
-            </p>
-          </div>
+        <div class="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p class="text-xs text-yellow-700">
+            ⚠️ <strong>{{ mensajeAdvertencia }}</strong>
+          </p>
+        </div>
         }
 
         <!-- Mostrar deuda si el monto es menor al precio -->
         @if (deudaCalculada > 0) {
-          <div class="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-            <p class="text-xs text-red-700">
-              ⚠️ <strong>Se generará una deuda de ${{ deudaCalculada | number:'1.2-2' }}</strong>
-            </p>
-            <p class="text-xs text-red-600 mt-1">
-              Precio del plan: ${{ selectedPlan?.precio }} - Monto a pagar: ${{ pago.monto }}
-            </p>
-          </div>
+        <div class="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg">
+          <p class="text-xs text-red-700">
+            ⚠️ <strong>Se generará una deuda de ${{ deudaCalculada | number:'1.2-2' }}</strong>
+          </p>
+          <p class="text-xs text-red-600 mt-1">
+            Precio del plan: ${{ selectedPlan?.precio }} - Monto a pagar: ${{ pago.monto }}
+          </p>
+        </div>
         }
       </div>
 
       <!-- Fecha de Pago -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de pago</label>
-        <input
-          name="fecha"
-          type="date"
-          required
-          [(ngModel)]="pago.fecha"
-          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-          />
+        <input name="fecha" type="date" required [(ngModel)]="pago.fecha"
+          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" />
       </div>
 
       <!-- Botones -->
       <div class="flex justify-end space-x-3 pt-4">
-        <button
-          type="button"
-          (click)="cerrar()"
-          class="px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-          >
+        <button type="button" (click)="cerrar()"
+          class="px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition">
           Cancelar
         </button>
-        <button
-          type="submit"
-          [disabled]="isSubmitting || !pagoForm.form.valid"
-          class="px-5 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-60"
-          >
+        <button type="submit" [disabled]="isSubmitting || !pagoForm.form.valid || !selectedClienteId"
+          class="px-5 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-60">
           {{ isSubmitting ? 'Guardando...' : 'Registrar' }}
         </button>
       </div>

@@ -25,6 +25,13 @@ import { FacturaPdfService } from './services/factura-pdf.service';
 })
 export class FacturasComponent implements OnInit {
   facturas: Factura[] = [];
+  resumenStats: any = {};
+  
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalItems = 0;
+  totalPages = 0;
 
   isLoading: boolean = false;
 
@@ -34,29 +41,62 @@ export class FacturasComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cargarFacturas({});
+    this.cargarDatos();
   }
 
-  cargarFacturas(filtros: any) {
-    this.isLoading = true;
-    const filters: any = {};
-    
-    if (filtros.cedula) filters.cedula = filtros.cedula;
-    if (filtros.estado) filters.estado = filtros.estado;
-    if (filtros.desde) filters.desde = filtros.desde;
-    if (filtros.hasta) filters.hasta = filtros.hasta;
+  cargarDatos() {
+    this.cargarFacturas({});
+    this.cargarResumen();
+  }
 
-    this.facturaService.findAll(filters).subscribe({
-      next: (data) => {
-        this.facturas = data;
+  cargarResumen() {
+    this.facturaService.getResumen().subscribe({
+      next: (stats) => this.resumenStats = stats,
+      error: (err) => console.error('Error cargando resumen', err)
+    });
+  }
+
+  // Mantener referencia a los filtros actuales para la paginación
+  currentFilters: any = {};
+
+  cargarFacturas(filtros: any, page: number = 1) {
+    this.isLoading = true;
+    
+    // Si vienen nuevos filtros (no es solo cambio de página), reiniciamos a página 1
+    if (filtros !== this.currentFilters) {
+      this.currentFilters = { ...filtros };
+      // Si el objeto filtros es nuevo, asumimos que es una nueva búsqueda, pero si es null (recarga), mantenemos page
+      // Aquí simplificamos: si se llama explícitamente con filtros, actualizamos currentFilters.
+    }
+
+    const filters: any = {};
+    if (this.currentFilters.cedula) filters.cedula = this.currentFilters.cedula;
+    if (this.currentFilters.estado) filters.estado = this.currentFilters.estado;
+    if (this.currentFilters.desde) filters.desde = this.currentFilters.desde;
+    if (this.currentFilters.hasta) filters.hasta = this.currentFilters.hasta;
+
+    this.facturaService.findAll(filters, page, this.itemsPerPage).subscribe({
+      next: (response) => {
+        this.facturas = response.data;
+        const meta = response.meta;
+        this.totalItems = meta.totalItems;
+        this.totalPages = meta.totalPages;
+        this.currentPage = meta.currentPage;
         this.isLoading = false;
       },
       error: (err) => {
         console.error('Error cargando facturas', err);
         this.isLoading = false;
+        this.facturas = [];
+        this.totalItems = 0;
       }
     });
   }
+
+  onPageChange(page: number) {
+    this.cargarFacturas(this.currentFilters, page);
+  }
+
 
   exportarPDF() {
     const doc = new jsPDF();
@@ -124,6 +164,11 @@ export class FacturasComponent implements OnInit {
 
     // Delegar la generación del PDF al servicio
     this.facturaPdfService.generarFactura(data);
+  }
+  
+  onPagoRealizado() {
+    this.cargarFacturas(this.currentFilters, this.currentPage);
+    this.cargarResumen();
   }
 
   

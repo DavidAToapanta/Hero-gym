@@ -10,18 +10,18 @@ export class ProductoService {
 
   constructor(private http: HttpClient) {}
 
-  // 🔹 Obtener productos con filtro opcional por nombre
-  getProductos(page = 1, limit = 100, searchTerm = ''): Observable<any> {
-  let params = new HttpParams()
-    .set('page', page)
-    .set('limit', limit);
+  // 🔹 Obtener productos con filtro opcional por nombre y paginación
+  getProductos(page = 1, limit = 10, searchTerm = ''): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('limit', limit);
 
-  if (searchTerm) {
-    params = params.set('search', searchTerm);
+    if (searchTerm) {
+      params = params.set('search', searchTerm);
+    }
+
+    return this.http.get<any>(this.apiUrl, { params });
   }
-
-  return this.http.get<any>(this.apiUrl, { params });
-}
 
 
   // 🔹 Crear nuevo producto

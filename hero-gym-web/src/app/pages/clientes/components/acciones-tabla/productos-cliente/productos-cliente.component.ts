@@ -2,16 +2,16 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { ProductoService } from '../../../../core/services/producto.service';
-import { CompraService } from '../../../../core/services/compra.service';
+import { ProductoService } from '../../../../../core/services/producto.service';
+import { CompraService } from '../../../../../core/services/compra.service';
 import { jsPDF } from 'jspdf';
 
 @Component({
   selector: 'app-productos-ciente',
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
-  templateUrl: './productos-ciente.component.html',
-  styleUrl: './productos-ciente.component.css',
+  templateUrl: './productos-cliente.component.html',
+  styleUrl: './productos-cliente.component.css',
 })
 export class ProductosCienteComponent implements OnInit {
   @Input() cliente: any;
@@ -37,7 +37,7 @@ export class ProductosCienteComponent implements OnInit {
     this.isLoading = true;
     this.productoService.getProductos(1, 100, this.searchTerm).subscribe({
       next: (res: any) => {
-        this.productos = res || [];
+        this.productos = res.data || [];
         this.isLoading = false;
       },
       error: (err) => {

@@ -13,8 +13,15 @@ import { PagoService } from '../../../../core/services/pago.service';
 export class FacturasTablaComponent {
   @Input() facturas: Factura[] = [];
   @Input() isLoading: boolean = false;
+  // Pagination Inputs
+  @Input() totalItems: number = 0;
+  @Input() currentPage: number = 1;
+  @Input() itemsPerPage: number = 10;
+  @Input() totalPages: number = 0;
+
   @Output() imprimir = new EventEmitter<Factura>();
   @Output() pagoRealizado = new EventEmitter<void>();
+  @Output() pageChange = new EventEmitter<number>();
 
   // Payment dialog state
   showPaymentDialog = false;
@@ -115,6 +122,18 @@ export class FacturasTablaComponent {
       case 'PENDIENTE': return 'bg-yellow-100 text-yellow-800';
       case 'ANULADA': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.pageChange.emit(this.currentPage + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.pageChange.emit(this.currentPage - 1);
     }
   }
 }

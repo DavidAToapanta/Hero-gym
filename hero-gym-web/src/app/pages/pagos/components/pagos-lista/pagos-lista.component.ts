@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { Pago, PagoService } from '../../../../core/services/pago.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SkeletonTableComponent } from '../../../../shared/loaders/skeleton-table/skeleton-table.component';
 
 @Component({
   selector: 'app-pagos-lista',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, ConfirmDialogComponent],
+  imports: [CommonModule, LucideAngularModule, ConfirmDialogComponent, SkeletonTableComponent],
   templateUrl: './pagos-lista.component.html',
   styleUrl: './pagos-lista.component.css',
 })
@@ -19,6 +20,9 @@ export class PagosListaComponent implements OnInit, OnChanges {
   filteredPagos: Pago[] = [];
   isLoading = true;
   totalPagos = 0;
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalPages = 0;
   
   // Confirmation dialog state
   showConfirmDialog = false;
@@ -36,13 +40,16 @@ export class PagosListaComponent implements OnInit, OnChanges {
     }
   }
 
-  cargarPagos(): void {
+  cargarPagos(page = 1): void {
     this.isLoading = true;
-    this.pagoService.getPagos().subscribe({
-      next: (pagos) => {
-        this.pagos = Array.isArray(pagos) ? pagos : [];
-        this.totalPagos = this.pagos.length;
-        this.aplicarFiltro();
+    this.pagoService.getPagos(page, this.itemsPerPage, this.searchTerm).subscribe({
+      next: (response) => {
+        this.pagos = response.data || [];
+        this.filteredPagos = this.pagos; // No client-side filter needed for list view, but keeping variable for template compatibility
+        const meta = response.meta;
+        this.totalPagos = meta?.totalItems || 0;
+        this.totalPages = meta?.totalPages || 0;
+        this.currentPage = meta?.currentPage || page;
         this.isLoading = false;
       },
       error: (err) => {
@@ -58,24 +65,20 @@ export class PagosListaComponent implements OnInit, OnChanges {
   }
 
   private aplicarFiltro(): void {
-    const termino = (this.searchTerm || '').toLowerCase();
-    if (!termino) {
-      this.filteredPagos = this.pagos;
-      return;
-    }
+    // Client-side filtering replaced by server-side search
+    this.cargarPagos(1);
+  }
 
-    this.filteredPagos = this.pagos.filter((p) => {
-      const monto = String(p?.monto ?? '').toLowerCase();
-      const fecha = String(p?.fecha ?? '').toLowerCase();
-      const nombres = `${p?.clientePlan?.cliente?.usuario?.nombres ?? ''} ${p?.clientePlan?.cliente?.usuario?.apellidos ?? ''}`.toLowerCase();
-      const plan = String(p?.clientePlan?.plan?.nombre ?? '').toLowerCase();
-      return (
-        monto.includes(termino) ||
-        fecha.includes(termino) ||
-        nombres.includes(termino) ||
-        plan.includes(termino)
-      );
-    });
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.cargarPagos(this.currentPage + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.cargarPagos(this.currentPage - 1);
+    }
   }
 
   eliminar(id: number) {

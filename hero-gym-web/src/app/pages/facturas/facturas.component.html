@@ -1,23 +1,20 @@
 <div class="container mx-auto p-6">
 
   <div class="mb-6">
-    <app-facturas-header
-      (exportar)="exportarPDF()">
+    <app-facturas-header (exportar)="exportarPDF()">
     </app-facturas-header>
   </div>
 
   <!-- Resumen -->
-  <app-facturas-resumen [facturas]="facturas"></app-facturas-resumen>
+  <app-facturas-resumen [stats]="resumenStats"></app-facturas-resumen>
 
   <!-- Filtros -->
-  <app-facturas-filtros (filtrosChange)="cargarFacturas($event)"></app-facturas-filtros>
+  <app-facturas-filtros (filtrosChange)="cargarFacturas($event, 1)"></app-facturas-filtros>
 
   <!-- Tabla -->
-  <app-facturas-tabla 
-    [facturas]="facturas" 
-    [isLoading]="isLoading"
-    (imprimir)="imprimirIndividual($event)"
-    (pagoRealizado)="cargarFacturas({})">
+  <app-facturas-tabla [facturas]="facturas" [isLoading]="isLoading" [totalItems]="totalItems"
+    [currentPage]="currentPage" [itemsPerPage]="itemsPerPage" [totalPages]="totalPages"
+    (imprimir)="imprimirIndividual($event)" (pagoRealizado)="onPagoRealizado()" (pageChange)="onPageChange($event)">
   </app-facturas-tabla>
 
 </div>

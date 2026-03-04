@@ -25,9 +25,15 @@ export class PagoService {
 
   constructor(private http: HttpClient) {}
 
-  getPagos(searchTerm = ''): Observable<Pago[]> {
-    const params = searchTerm ? new HttpParams().set('search', searchTerm) : undefined;
-    return this.http.get<Pago[]>(this.apiUrl, { params });
+  getPagos(page = 1, limit = 10, searchTerm = ''): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('limit', limit);
+      
+    if (searchTerm) {
+        params = params.set('search', searchTerm);
+    }
+    return this.http.get<any>(this.apiUrl, { params });
   }
 
   createPago(data: { clientePlanId: number; monto: number; fecha: string }): Observable<any> {
@@ -38,8 +44,11 @@ export class PagoService {
     return this.http.get<any[]>('http://localhost:3000/cliente-plan');
   }
 
-  getPlanes(): Observable<any[]> {
-    return this.http.get<any[]>('http://localhost:3000/plan');
+  getPlanes(page = 1, limit = 100): Observable<any[]> {
+    const params = new HttpParams().set('page', page).set('limit', limit);
+    return this.http.get<any>('http://localhost:3000/plan', { params }).pipe(
+      map(response => response.data || [])
+    );
   }
 
   createClientePlan(data: {

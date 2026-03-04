@@ -18,6 +18,9 @@ export class ProductosListaComponent implements OnInit, OnChanges {
 
   productos: any[] = [];
   totalProductos = 0;
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalPages = 0;
   isLoading = true;
   
   // Confirmation dialog state
@@ -36,13 +39,16 @@ export class ProductosListaComponent implements OnInit, OnChanges {
     }
   }
 
-  cargarProductos() {
+  cargarProductos(page = 1) {
     this.isLoading = true;
 
-    this.productoService.getProductos(1, 100, this.searchTerm.trim()).subscribe({
-      next: (productos) => {
-        this.productos = productos;
-        this.totalProductos = productos.length;
+    this.productoService.getProductos(page, this.itemsPerPage, this.searchTerm.trim()).subscribe({
+      next: (response) => {
+        this.productos = response.data || [];
+        const meta = response.meta;
+        this.totalProductos = meta?.totalItems || 0;
+        this.totalPages = meta?.totalPages || 0;
+        this.currentPage = meta?.currentPage || page;
         this.isLoading = false;
       },
       error: (err) => {
@@ -53,7 +59,19 @@ export class ProductosListaComponent implements OnInit, OnChanges {
   }
 
   recargar() {
-    this.cargarProductos();
+    this.cargarProductos(this.currentPage);
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.cargarProductos(this.currentPage + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.cargarProductos(this.currentPage - 1);
+    }
   }
 
   eliminarProducto(id: number) {

@@ -22,7 +22,10 @@ export class PagosFormularioComponent implements OnInit {
 
   pago = this.crearPagoInicial();
   clientePlanes: any[] = [];
-  clientes: { id: number; nombre: string }[] = [];
+  clientes: { id: number; nombre: string; cedula: string }[] = [];
+  todosLosClientes: { id: number; nombre: string; cedula: string }[] = [];
+  searchTermCliente: string = '';
+  showSuggestions = false;
   selectedClienteId: number | null = null;
   planes: any[] = [];
   selectedPlan: any | null = null;
@@ -56,9 +59,15 @@ export class PagosFormularioComponent implements OnInit {
               const rest = pages.flatMap((r) => (Array.isArray(r?.data) ? r.data : []));
               const all = page1.concat(rest);
               this.clientes = all
-                .map((c: any) => ({ id: c?.id, nombre: `${c?.usuario?.nombres ?? ''} ${c?.usuario?.apellidos ?? ''}`.trim() }))
+                .map((c: any) => ({ 
+                  id: c?.id, 
+                  nombre: `${c?.usuario?.nombres ?? ''} ${c?.usuario?.apellidos ?? ''}`.trim(),
+                  cedula: c?.usuario?.cedula || ''
+                }))
                 .filter((x: any) => x.id)
                 .sort((a: any, b: any) => a.nombre.localeCompare(b.nombre));
+              
+              this.todosLosClientes = [...this.clientes]; // Guardar copia completa
             },
             error: () => this.setClientes(page1),
           });
@@ -118,7 +127,12 @@ export class PagosFormularioComponent implements OnInit {
     } else {
       // No existe relación todavía: proponer fechas con base en el plan
       const inicio = this.pago.fecha || this.hoyISO();
-      const fin = this.sumarMesesISO(inicio, Number(this.selectedPlan?.mesesPagar ?? 1));
+      // Usar duracion y unidadDuracion del plan
+      const duracion = Number(this.selectedPlan?.duracion ?? 1);
+      const unidad = this.selectedPlan?.unidadDuracion ?? 'MESES';
+      
+      const fin = this.sumarDuracionISO(inicio, duracion, unidad);
+      
       this.pago.clientePlanId = null as unknown as number;
       this.detallesPlan = {
         nombre: this.selectedPlan?.nombre ?? '—',
@@ -181,8 +195,10 @@ export class PagosFormularioComponent implements OnInit {
       }
 
       const fechaInicio = this.detallesPlan?.fechaInicio || this.hoyISO();
-      const meses = Number(this.selectedPlan?.mesesPagar ?? 1);
-      const fechaFin = this.sumarMesesISO(fechaInicio, meses);
+      const duracion = Number(this.selectedPlan?.duracion ?? 1);
+      const unidad = this.selectedPlan?.unidadDuracion ?? 'MESES';
+      const fechaFin = this.sumarDuracionISO(fechaInicio, duracion, unidad);
+      
       const diaPago = new Date(fechaInicio).getDate();
       this.pagoService
         .createClientePlan({ clienteId, planId, fechaInicio, fechaFin, diaPago, activado: true })
@@ -227,14 +243,51 @@ export class PagosFormularioComponent implements OnInit {
 
   private setClientes(data: any[]) {
     this.clientes = (Array.isArray(data) ? data : [])
-      .map((c: any) => ({ id: c?.id, nombre: `${c?.usuario?.nombres ?? ''} ${c?.usuario?.apellidos ?? ''}`.trim() }))
+      .map((c: any) => ({ 
+        id: c?.id, 
+        nombre: `${c?.usuario?.nombres ?? ''} ${c?.usuario?.apellidos ?? ''}`.trim(),
+        cedula: c?.usuario?.cedula || ''
+      }))
       .filter((x: any) => x.id)
       .sort((a: any, b: any) => a.nombre.localeCompare(b.nombre));
+      
+    this.todosLosClientes = [...this.clientes];
   }
 
-  private sumarMesesISO(fechaISO: string, meses: number): string {
+  filtrarClientes() {
+    const term = (this.searchTermCliente || '').toLowerCase().trim();
+    this.showSuggestions = true; // Mostrar sugerencias al escribir
+    
+    if (!term) {
+      this.clientes = [...this.todosLosClientes];
+      return;
+    }
+    
+    this.clientes = this.todosLosClientes.filter(c => 
+      c.nombre.toLowerCase().includes(term) || 
+      c.cedula.toLowerCase().includes(term)
+    );
+  }
+
+  selectCliente(cliente: { id: number; nombre: string; cedula: string }) {
+    this.selectedClienteId = cliente.id;
+    this.searchTermCliente = `${cliente.nombre} - ${cliente.cedula}`;
+    this.showSuggestions = false;
+    this.onClienteChange();
+  }
+
+  private sumarDuracionISO(fechaISO: string, cantidad: number, unidad: 'MESES' | 'DIAS'): string {
     const [y, m, d] = fechaISO.split('-').map((x) => Number(x));
-    const dt = new Date(y, (m - 1) + meses, d);
+    // El mes en Date es 0-indexado, por eso (m - 1)
+    const dt = new Date(y, m - 1, d);
+
+    if (unidad === 'DIAS') {
+      dt.setDate(dt.getDate() + cantidad);
+    } else {
+      // Default: MESES
+      dt.setMonth(dt.getMonth() + cantidad);
+    }
+    
     const yyyy = dt.getFullYear();
     const mm = String(dt.getMonth() + 1).padStart(2, '0');
     const dd = String(dt.getDate()).padStart(2, '0');

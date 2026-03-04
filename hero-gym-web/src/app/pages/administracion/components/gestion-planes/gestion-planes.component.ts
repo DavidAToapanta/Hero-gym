@@ -15,6 +15,8 @@ import { CommonModule } from '@angular/common';
 export class GestionPlanesComponent implements OnInit {
   @ViewChild(PlanModalComponent) planModal?: PlanModalComponent;
   mostrarModal = false;
+  mostrarModalConfirmacion = false;
+  planParaEliminar: Plan | null = null;
   planes: Plan[] = [];
   
   // Paginación
@@ -108,42 +110,27 @@ export class GestionPlanesComponent implements OnInit {
 
   eliminarPlan(plan: Plan): void {
     if (!plan.id) return;
-
-    const confirmar = confirm(`¿Está seguro de que desea eliminar el plan "${plan.nombre}"?`);
-    if (!confirmar) return;
-
-    this.planService.deletePlan(plan.id).subscribe({
-      next: () => {
-        alert('Plan eliminado exitosamente');
-        this.cargarPlanes();
-      },
-      error: (err) => {
-        if (err.error?.requiresConfirmation) {
-          // El plan tiene clientes asignados
-          const confirmarCascade = confirm(
-            `${err.error.message}\n\n¿Está seguro de que desea eliminar el plan? Esto removerá el plan de todos los clientes afectados.`
-          );
-          
-          if (confirmarCascade && plan.id) {
-            this.eliminarPlanConCascada(plan.id);
-          }
-        } else {
-          console.error('Error al eliminar plan:', err);
-          alert('Error al eliminar el plan. Por favor intente nuevamente.');
-        }
-      }
-    });
+    this.planParaEliminar = plan;
+    this.mostrarModalConfirmacion = true;
   }
 
-  private eliminarPlanConCascada(planId: number): void {
-    this.planService.deletePlanWithCascade(planId).subscribe({
+  cerrarModalConfirmacion(): void {
+    this.mostrarModalConfirmacion = false;
+    this.planParaEliminar = null;
+  }
+
+  confirmarDesactivacion(): void {
+    if (!this.planParaEliminar?.id) return;
+
+    this.planService.deletePlan(this.planParaEliminar.id).subscribe({
       next: () => {
-        alert('Plan eliminado exitosamente junto con todas sus relaciones');
+        alert('Plan desactivado exitosamente (permanece visible para clientes actuales)');
         this.cargarPlanes();
+        this.cerrarModalConfirmacion();
       },
       error: (err) => {
-        console.error('Error al eliminar plan con cascada:', err);
-        alert('Error al eliminar el plan. Por favor intente nuevamente.');
+        console.error('Error al desactivar plan:', err);
+        alert('Error al desactivar el plan. Por favor intente nuevamente.');
       }
     });
   }

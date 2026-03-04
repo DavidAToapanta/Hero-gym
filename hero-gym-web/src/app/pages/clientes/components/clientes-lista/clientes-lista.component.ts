@@ -3,11 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ClienteService } from '../../../../core/services/cliente.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { RenovarComponent } from '../renovar/renovar.component';
-
-
-
-import { ProductosCienteComponent } from '../productos-ciente/productos-ciente.component';
+import { RenovarComponent } from '../acciones-tabla/renovar/renovar.component';
+import { ProductosCienteComponent } from '../acciones-tabla/productos-cliente/productos-cliente.component';
 
 @Component({
   selector: 'app-clientes-lista',
@@ -23,6 +20,18 @@ export class ClientesListaComponent implements OnInit, OnChanges {
   totalPages = 0;
   isLoading = false;
   @Input() searchTerm: string = '';
+  // Control del menú de acciones
+accionesAbiertas: number | null = null;
+
+toggleAcciones(clienteId: number) {
+  this.accionesAbiertas =
+    this.accionesAbiertas === clienteId ? null : clienteId;
+}
+
+cerrarAcciones() {
+  this.accionesAbiertas = null;
+}
+
   
   // Confirmation dialog state
   showConfirmDialog = false;
@@ -129,35 +138,35 @@ export class ClientesListaComponent implements OnInit, OnChanges {
     }
   }
 
-  eliminar(id: number) {
+  desactivar(id: number) {
     this.clienteToDelete = id;
     this.showConfirmDialog = true;
   }
 
-  onConfirmDelete() {
+  onConfirmDesactivar() {
     if (this.clienteToDelete === null) return;
     
-    console.log('[ClientesLista] Eliminando cliente con ID:', this.clienteToDelete);
-    this.clienteService.deleteCliente(this.clienteToDelete).subscribe({
+    console.log('[ClientesLista] Desactivando cliente con ID:', this.clienteToDelete);
+    this.clienteService.desactivarCliente(this.clienteToDelete).subscribe({
       next: () => {
-        console.log('[ClientesLista] Cliente eliminado exitosamente');
-        alert('Cliente eliminado exitosamente');
+        console.log('[ClientesLista] Cliente desactivado exitosamente');
+        alert('Cliente desactivado (marcado como inactivo) correctamente');
         this.cargarClientes(this.currentPage, true);
         this.showConfirmDialog = false;
         this.clienteToDelete = null;
       },
       error: (err) => {
-        console.error('[ClientesLista] Error al eliminar cliente:', err);
-        const mensaje = err.error?.message || err.message || 'Error desconocido al eliminar el cliente';
-        alert(`Error al eliminar el cliente: ${mensaje}`);
+        console.error('[ClientesLista] Error al desactivar cliente:', err);
+        const mensaje = err.error?.message || err.message || 'Error desconocido al desactivar el cliente';
+        alert(`Error al desactivar el cliente: ${mensaje}`);
         this.showConfirmDialog = false;
         this.clienteToDelete = null;
       },
     });
   }
 
-  onCancelDelete() {
-    console.log('[ClientesLista] Eliminación cancelada');
+  onCancelDesactivar() {
+    console.log('[ClientesLista] Desactivación cancelada');
     this.showConfirmDialog = false;
     this.clienteToDelete = null;
   }
@@ -185,6 +194,9 @@ export class ClientesListaComponent implements OnInit, OnChanges {
     const ahora = new Date();
     return fin < ahora;
   }
+
+  //Abrir menu de Acciones
+
 
   // Abrir modal de renovación
   abrirRenovarModal(cliente: any) {

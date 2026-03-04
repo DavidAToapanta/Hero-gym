@@ -6,7 +6,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
-import { LucideAngularModule, Users, Search, X, Trash2, Pencil, Package, AlertTriangle, Clock, Info, AlertCircle, Repeat, Edit, RefreshCw, Check, ShoppingCart, Plus, Minus, PlusCircle, MinusCircle, Printer } from 'lucide-angular';
+import { LucideAngularModule, Users, Search, X, Trash2, Pencil, Package, AlertTriangle, Clock, Info, AlertCircle, Repeat, Edit, RefreshCw, Check, ShoppingCart, Plus, Minus, PlusCircle, MinusCircle, Printer, CreditCard } from 'lucide-angular';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -36,6 +36,7 @@ export const appConfig: ApplicationConfig = {
         PlusCircle,
         MinusCircle,
         Printer,
+        CreditCard,
       }),
     ),
   ]

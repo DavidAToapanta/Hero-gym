@@ -5,7 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { ClientesListaComponent } from './components/clientes-lista/clientes-lista.component';
 import { ClientesBusquedaComponent } from './components/clientes-busqueda/clientes-busqueda.component';
 import { ClientesFormularioComponent } from "./components/clientes-formulario/clientes-formulario.component";
-import { RenovarComponent } from "./components/renovar/renovar.component";
+import { RenovarComponent } from "./components/acciones-tabla/renovar/renovar.component";
 
 @Component({
   selector: 'app-clientes',
