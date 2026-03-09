@@ -1,6 +1,7 @@
 <!-- Modal Overlay -->
 @if (show) {
-<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" (click)="cerrarModal()">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+  (click)="cerrarModal()">
   <!-- Modal Content -->
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden" (click)="$event.stopPropagation()">
     <!-- Header -->

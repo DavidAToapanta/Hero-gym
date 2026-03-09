@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
+
 export interface Plan {
   id?: number;
   nombre: string;
@@ -19,7 +21,7 @@ export interface PaginatedPlans {
 
 @Injectable({ providedIn: 'root' })
 export class PlanService {
-  private baseUrl = 'http://localhost:3000/plan';
+  private baseUrl = `${environment.apiUrl}/plan`;
 
   constructor(private http: HttpClient) {}
 

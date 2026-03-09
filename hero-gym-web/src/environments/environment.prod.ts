@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:3000' // Update this with production URL when deploying
+  apiUrl: 'http://localhost:3000'
 };

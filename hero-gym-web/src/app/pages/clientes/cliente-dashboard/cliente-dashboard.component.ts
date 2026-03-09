@@ -4,6 +4,8 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../auth/auth.service';
 import { AsistenciaComponent } from '../components/asistencia/asistencia.component';
 
+import { environment } from '../../../../environments/environment';
+
 interface ClienteData {
   nombres: string;
   apellidos: string;
@@ -51,7 +53,7 @@ export class ClienteDashboardComponent implements OnInit {
     }
 
     // Usar el endpoint específico para clientes
-    this.http.get<any>('http://localhost:3000/cliente/mi-perfil').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/cliente/mi-perfil`).subscribe({
       next: (response) => {
         console.log('Datos del cliente:', response);
         this.procesarDatosCliente(response);
@@ -126,31 +128,31 @@ export class ClienteDashboardComponent implements OnInit {
 
   getEstadoClasses() {
     if (!this.clienteData) return '';
-    
+
     switch (this.clienteData.plan.estado) {
       case 'activo':
         return 'bg-green-100 text-green-800 border-green-300';
       case 'por_vencer':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+        return 'bg-amber-100 text-amber-800 border-amber-300';
       case 'vencido':
         return 'bg-red-100 text-red-800 border-red-300';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
+        return 'bg-slate-100 text-slate-700 border-slate-300';
     }
   }
 
   getEstadoTexto() {
     if (!this.clienteData) return '';
-    
+
     switch (this.clienteData.plan.estado) {
       case 'activo':
-        return '✓ Activo';
+        return 'Activo';
       case 'por_vencer':
-        return '⚠ Por Vencer';
+        return 'Por vencer';
       case 'vencido':
-        return '✗ Vencido';
+        return 'Vencido';
       default:
-        return 'Sin Estado';
+        return 'Sin estado';
     }
   }
 

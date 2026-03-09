@@ -1,16 +1,14 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClienteService } from '../../../../core/services/cliente.service';
-import { LucideAngularModule } from 'lucide-angular';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { RenovarComponent } from '../acciones-tabla/renovar/renovar.component';
-import { ProductosCienteComponent } from '../acciones-tabla/productos-cliente/productos-cliente.component';
+import { AccionesTablaComponent } from '../acciones-tabla/acciones-tabla.component';
 
 @Component({
   selector: 'app-clientes-lista',
   standalone: true,
   templateUrl: './clientes-lista.component.html',
-  imports: [CommonModule, LucideAngularModule, ConfirmDialogComponent, RenovarComponent, ProductosCienteComponent],
+  imports: [CommonModule, ConfirmDialogComponent, AccionesTablaComponent],
 })
 export class ClientesListaComponent implements OnInit, OnChanges {
   clientes: any[] = [];
@@ -20,30 +18,22 @@ export class ClientesListaComponent implements OnInit, OnChanges {
   totalPages = 0;
   isLoading = false;
   @Input() searchTerm: string = '';
+
   // Control del menú de acciones
-accionesAbiertas: number | null = null;
+  accionesAbiertas: number | null = null;
 
-toggleAcciones(clienteId: number) {
-  this.accionesAbiertas =
-    this.accionesAbiertas === clienteId ? null : clienteId;
-}
+  toggleAcciones(clienteId: number) {
+    this.accionesAbiertas =
+      this.accionesAbiertas === clienteId ? null : clienteId;
+  }
 
-cerrarAcciones() {
-  this.accionesAbiertas = null;
-}
+  cerrarAcciones() {
+    this.accionesAbiertas = null;
+  }
 
-  
   // Confirmation dialog state
   showConfirmDialog = false;
   clienteToDelete: number | null = null;
-  
-  // Renovar modal state
-  showRenovarModal = false;
-  clienteToRenovar: any = null;
-
-  // Productos modal state
-  showProductosModal = false;
-  clienteForProductos: any = null;
 
   constructor(private clienteService: ClienteService) {}
 
@@ -68,7 +58,7 @@ cerrarAcciones() {
     this.isLoading = true;
     const searchTerm = this.searchTerm?.trim() || '';
     console.log('[ClientesLista] cargarClientes llamado:', { page, searchTerm, forceRefresh });
-    
+
     const startTime = Date.now();
     this.clienteService
       .getClientes(page, this.itemsPerPage, searchTerm, forceRefresh)
@@ -124,14 +114,12 @@ cerrarAcciones() {
     this.cargarClientes(1, true);
   }
 
-  // ⏩ Avanzar de página
   nextPage() {
     if (this.currentPage < this.totalPages) {
       this.cargarClientes(this.currentPage + 1);
     }
   }
 
-  // ⏪ Retroceder de página
   prevPage() {
     if (this.currentPage > 1) {
       this.cargarClientes(this.currentPage - 1);
@@ -145,7 +133,7 @@ cerrarAcciones() {
 
   onConfirmDesactivar() {
     if (this.clienteToDelete === null) return;
-    
+
     console.log('[ClientesLista] Desactivando cliente con ID:', this.clienteToDelete);
     this.clienteService.desactivarCliente(this.clienteToDelete).subscribe({
       next: () => {
@@ -174,19 +162,16 @@ cerrarAcciones() {
   getDeudaTotal(cliente: any): number {
     const cp = cliente?.planes?.[0];
     if (!cp?.deudas || !Array.isArray(cp.deudas)) {
-      console.log('[ClientesLista] No hay deudas para cliente:', cliente?.usuario?.nombres, cp);
       return 0;
     }
-    
+
     const total = cp.deudas
       .filter((d: any) => !d.solventada)
       .reduce((sum: number, d: any) => sum + (Number(d.monto) || 0), 0);
-    
-    console.log('[ClientesLista] Deuda total para', cliente?.usuario?.nombres, ':', total, 'Deudas:', cp.deudas);
+
     return total;
   }
 
-  // Verificar si el plan ha terminado
   planHaTerminado(cliente: any): boolean {
     const cp = cliente?.planes?.[0];
     if (!cp?.fechaFin) return false;
@@ -195,39 +180,7 @@ cerrarAcciones() {
     return fin < ahora;
   }
 
-  //Abrir menu de Acciones
-
-
-  // Abrir modal de renovación
-  abrirRenovarModal(cliente: any) {
-    console.log('[ClientesLista] Abriendo modal de renovación para:', cliente?.usuario?.nombres);
-    this.clienteToRenovar = cliente;
-    this.showRenovarModal = true;
-  }
-
-  // Cerrar modal de renovación
-  cerrarRenovarModal() {
-    console.log('[ClientesLista] Cerrando modal de renovación');
-    this.showRenovarModal = false;
-    this.clienteToRenovar = null;
-  }
-
-  // Manejar renovación confirmada
-  onRenovacionConfirmada(response: any) {
-    console.log('[ClientesLista] Renovación confirmada:', response);
-    this.cerrarRenovarModal();
-    this.recargar();
-  }
-
-  // Abrir modal de productos
-  abrirProductosModal(cliente: any) {
-    this.clienteForProductos = cliente;
-    this.showProductosModal = true;
-  }
-
-  // Cerrar modal de productos
-  cerrarProductosModal() {
-    this.showProductosModal = false;
-    this.clienteForProductos = null;
+  getDevolucionPendiente(cliente: any): number {
+    return Number(cliente?.devolucionPendiente) || 0;
   }
 }

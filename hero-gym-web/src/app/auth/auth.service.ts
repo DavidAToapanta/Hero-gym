@@ -4,13 +4,15 @@ import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private loginUrl = 'http://localhost:3000/auth/login';
-  private apiUrl = 'http://localhost:3000'; // <- para asistencia
+  private loginUrl = `${environment.apiUrl}/auth/login`;
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient, private router: Router) {}
 

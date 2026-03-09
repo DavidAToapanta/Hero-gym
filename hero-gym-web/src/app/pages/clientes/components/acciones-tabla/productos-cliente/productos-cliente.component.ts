@@ -14,6 +14,7 @@ import { jsPDF } from 'jspdf';
   styleUrl: './productos-cliente.component.css',
 })
 export class ProductosCienteComponent implements OnInit {
+  @Input() show: boolean = false;
   @Input() cliente: any;
   @Output() close = new EventEmitter<void>();
 

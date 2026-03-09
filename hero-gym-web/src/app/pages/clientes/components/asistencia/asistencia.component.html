@@ -1,78 +1,114 @@
-<div class="asistencia-container">
-  <!-- Loading State -->
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+  <!-- ===== CARGANDO ===== -->
   @if (cargando) {
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Cargando estadísticas...</p>
-    </div>
+  <div class="flex flex-col items-center justify-center py-10 gap-3" aria-live="polite"
+    aria-label="Cargando estadísticas de asistencia">
+    <div class="w-8 h-8 rounded-full border-4 border-slate-200 border-t-teal-500 animate-spin" role="status"></div>
+    <p class="text-slate-400 text-sm">Cargando asistencia…</p>
+  </div>
   }
 
-  <!-- Error State -->
+  <!-- ===== ERROR ===== -->
   @if (error && !cargando) {
-    <div class="error-state">
-      <div class="error-icon">⚠️</div>
-      <h3>Error al cargar estadísticas</h3>
-      <p>No se pudieron cargar tus datos de asistencia</p>
+  <div class="flex items-center gap-3 px-6 py-5" role="alert" aria-live="assertive">
+    <div class="bg-red-100 text-red-500 rounded-lg p-2 flex-shrink-0">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+      </svg>
     </div>
+    <div>
+      <p class="text-sm font-medium text-slate-700">No se pudo cargar la asistencia</p>
+      <p class="text-xs text-slate-400">Intenta de nuevo o contacta a recepción.</p>
+    </div>
+  </div>
   }
 
-  <!-- No Plan Activo -->
+  <!-- ===== SIN PLAN ===== -->
   @if (!cargando && !error && estadisticas && !estadisticas.tienePlanActivo) {
-    <div class="no-plan-state">
-      <div class="no-plan-icon">📋</div>
-      <h3>Sin Plan Activo</h3>
-      <p>{{ estadisticas.mensaje }}</p>
-      <p class="suggestion">Contacta con recepción para activar un plan</p>
+  <div class="flex items-center gap-3 px-6 py-5">
+    <div class="bg-slate-100 text-slate-400 rounded-lg p-2 flex-shrink-0">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
     </div>
+    <div>
+      <p class="text-sm font-medium text-slate-700">Sin plan activo</p>
+      <p class="text-xs text-slate-400">{{ estadisticas.mensaje || 'Contacta a recepción para activar un plan.' }}</p>
+    </div>
+  </div>
   }
 
-  <!-- Estadísticas de Asistencia -->
+  <!-- ===== ESTADÍSTICAS ===== -->
   @if (!cargando && !error && estadisticas && estadisticas.tienePlanActivo) {
-    <div class="stats-card">
-      <div class="card-header">
-        <h2>📊 Tu Asistencia</h2>
-        <span class="plan-badge">{{ estadisticas.nombrePlan }}</span>
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-100">
+    <div class="flex items-center gap-2.5">
+      <div class="bg-teal-50 text-teal-600 rounded-lg p-2">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
       </div>
-      <div class="stats-content">
-        <!-- Contador Principal -->
-        <div class="main-counter">
-          <div class="counter-display">
-            <span class="dias-asistidos">{{ estadisticas.diasAsistidos }}</span>
-            <span class="separator">/</span>
-            <span class="dias-totales">{{ estadisticas.diasTotales }}</span>
-          </div>
-          <p class="counter-label">Días asistidos en tu plan</p>
-        </div>
-        <!-- Barra de Progreso -->
-        <div class="progress-section">
-          <div class="progress-bar-container">
-            <div
-              class="progress-bar-fill"
-              [style.width.%]="estadisticas.porcentajeAsistencia"
-              [class.excellent]="(estadisticas.porcentajeAsistencia || 0) >= 80"
-              [class.good]="(estadisticas.porcentajeAsistencia || 0) >= 60 && (estadisticas.porcentajeAsistencia || 0) < 80"
-              [class.moderate]="(estadisticas.porcentajeAsistencia || 0) >= 40 && (estadisticas.porcentajeAsistencia || 0) < 60"
-              [class.low]="(estadisticas.porcentajeAsistencia || 0) < 40">
-            </div>
-          </div>
-          <div class="percentage-display">{{ estadisticas.porcentajeAsistencia }}%</div>
-        </div>
-        <!-- Mensaje Motivacional -->
-        <div class="motivational-message">
-          <p>{{ getMensajeMotivacional() }}</p>
-        </div>
-        <!-- Información del Plan -->
-        <div class="plan-info">
-          <div class="info-item">
-            <span class="info-label">Inicio:</span>
-            <span class="info-value">{{ estadisticas.fechaInicio | date: 'dd/MM/yyyy' }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Fin:</span>
-            <span class="info-value">{{ estadisticas.fechaFin | date: 'dd/MM/yyyy' }}</span>
-          </div>
-        </div>
+      <h2 class="text-base font-semibold text-slate-700">Tu Asistencia</h2>
+    </div>
+    <span class="text-xs font-medium bg-teal-50 text-teal-700 border border-teal-100 px-3 py-1 rounded-full">
+      {{ estadisticas.nombrePlan }}
+    </span>
+  </div>
+
+  <div class="px-6 py-5 space-y-5">
+    <!-- Contador principal -->
+    <div class="flex items-end justify-between">
+      <div>
+        <p class="text-xs text-slate-400 mb-1">Días asistidos</p>
+        <p class="text-slate-700 font-bold leading-none">
+          <span class="text-4xl">{{ estadisticas.diasAsistidos }}</span>
+          <span class="text-xl text-slate-400 mx-1">/</span>
+          <span class="text-xl text-slate-400">{{ estadisticas.diasTotales }}</span>
+        </p>
+      </div>
+      <!-- Porcentaje grande -->
+      <p class="text-3xl font-bold" [ngClass]="{
+          'text-teal-600':  (estadisticas.porcentajeAsistencia || 0) >= 80,
+          'text-green-500': (estadisticas.porcentajeAsistencia || 0) >= 60 && (estadisticas.porcentajeAsistencia || 0) < 80,
+          'text-amber-500': (estadisticas.porcentajeAsistencia || 0) >= 40 && (estadisticas.porcentajeAsistencia || 0) < 60,
+          'text-red-400':   (estadisticas.porcentajeAsistencia || 0) < 40
+        }">{{ estadisticas.porcentajeAsistencia }}%</p>
+    </div>
+
+    <!-- Barra de progreso accesible -->
+    <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden" role="progressbar"
+      [attr.aria-valuenow]="estadisticas.porcentajeAsistencia" aria-valuemin="0" aria-valuemax="100"
+      [attr.aria-label]="'Asistencia: ' + estadisticas.porcentajeAsistencia + '%'">
+      <div class="h-2.5 rounded-full transition-all duration-500" [style.width.%]="estadisticas.porcentajeAsistencia"
+        [ngClass]="{
+            'bg-teal-500':  (estadisticas.porcentajeAsistencia || 0) >= 80,
+            'bg-green-400': (estadisticas.porcentajeAsistencia || 0) >= 60 && (estadisticas.porcentajeAsistencia || 0) < 80,
+            'bg-amber-400': (estadisticas.porcentajeAsistencia || 0) >= 40 && (estadisticas.porcentajeAsistencia || 0) < 60,
+            'bg-red-400':   (estadisticas.porcentajeAsistencia || 0) < 40
+          }"></div>
+    </div>
+
+    <!-- Mensaje motivacional -->
+    <p class="text-sm text-slate-500 font-medium">{{ getMensajeMotivacional() }}</p>
+
+    <!-- Fechas del plan -->
+    <div class="flex items-center gap-6 pt-1 border-t border-slate-100">
+      <div>
+        <p class="text-[10px] text-slate-400 uppercase tracking-wide">Inicio</p>
+        <p class="text-sm font-semibold text-slate-600 tabular-nums">{{ estadisticas.fechaInicio | date: 'd MMM yyyy' }}
+        </p>
+      </div>
+      <div>
+        <p class="text-[10px] text-slate-400 uppercase tracking-wide">Fin</p>
+        <p class="text-sm font-semibold text-slate-600 tabular-nums">{{ estadisticas.fechaFin | date: 'd MMM yyyy' }}
+        </p>
       </div>
     </div>
+  </div>
   }
+
 </div>

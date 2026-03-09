@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, tap } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
+
 interface PaginationMeta {
   totalItems: number;
   itemCount: number;
@@ -19,8 +21,9 @@ export interface PaginatedResponse<T> {
   providedIn: 'root',
 })
 export class ClienteService {
-  private apiUrl = 'http://localhost:3000/cliente'; // URL del backend NestJS
-  private usuariosUrl = 'http://localhost:3000/usuarios';
+  private apiUrl = `${environment.apiUrl}/cliente`;
+  private usuariosUrl = `${environment.apiUrl}/usuarios`;
+  private clientePlanUrl = `${environment.apiUrl}/cliente-plan`;
   private cache = new Map<string, PaginatedResponse<any>>();
 
   constructor(private http: HttpClient) {}
@@ -152,7 +155,7 @@ export class ClienteService {
     console.log('[ClienteService] DTO de renovación:', dto);
     
     return this.http
-      .post<any>(`http://localhost:3000/cliente-plan/renovar/${clienteId}`, dto)
+      .post<any>(`${this.clientePlanUrl}/renovar/${clienteId}`, dto)
       .pipe(tap(() => this.invalidateCache()));
   }
 }

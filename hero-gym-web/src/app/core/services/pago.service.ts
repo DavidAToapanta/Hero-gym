@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { environment } from '../../../environments/environment';
+
 export interface Pago {
   id: number;
   monto: number;
@@ -21,7 +23,9 @@ interface IngresosMesResponse {
 
 @Injectable({ providedIn: 'root' })
 export class PagoService {
-  private apiUrl = 'http://localhost:3000/pago';
+  private apiUrl = `${environment.apiUrl}/pago`;
+  private clientePlanUrl = `${environment.apiUrl}/cliente-plan`;
+  private planUrl = `${environment.apiUrl}/plan`;
 
   constructor(private http: HttpClient) {}
 
@@ -41,12 +45,12 @@ export class PagoService {
   }
 
   getClientePlanes(): Observable<any[]> {
-    return this.http.get<any[]>('http://localhost:3000/cliente-plan');
+    return this.http.get<any[]>(this.clientePlanUrl);
   }
 
   getPlanes(page = 1, limit = 100): Observable<any[]> {
     const params = new HttpParams().set('page', page).set('limit', limit);
-    return this.http.get<any>('http://localhost:3000/plan', { params }).pipe(
+    return this.http.get<any>(this.planUrl, { params }).pipe(
       map(response => response.data || [])
     );
   }
@@ -59,11 +63,11 @@ export class PagoService {
     diaPago: number;
     activado: boolean;
   }): Observable<any> {
-    return this.http.post<any>('http://localhost:3000/cliente-plan', data);
+    return this.http.post<any>(this.clientePlanUrl, data);
   }
 
   getPlanById(id: number): Observable<any> {
-    return this.http.get<any>(`http://localhost:3000/plan/${id}`);
+    return this.http.get<any>(`${this.planUrl}/${id}`);
   }
 
   getIngresosDelMes() {

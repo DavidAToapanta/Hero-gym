@@ -58,10 +58,10 @@ export class AsistenciaComponent implements OnInit {
     
     const porcentaje = this.estadisticas.porcentajeAsistencia || 0;
     
-    if (porcentaje >= 80) return '¡Excelente constancia! 💪';
-    if (porcentaje >= 60) return '¡Muy bien! Sigue así 🔥';
-    if (porcentaje >= 40) return '¡Buen progreso! 👍';
-    if (porcentaje >= 20) return 'Vamos, tú puedes mejorar 💪';
-    return '¡Es hora de retomar el ritmo! 🚀';
+    if (porcentaje >= 80) return '¡Excelente constancia! Sigue así.';
+    if (porcentaje >= 60) return '¡Muy bien! Mantén el ritmo.';
+    if (porcentaje >= 40) return 'Buen progreso, sigue adelante.';
+    if (porcentaje >= 20) return 'Puedes mejorar tu asistencia, ánimo.';
+    return 'Es hora de retomar el ritmo.';
   }
 }

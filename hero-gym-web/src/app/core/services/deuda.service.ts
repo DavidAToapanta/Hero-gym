@@ -1,13 +1,15 @@
-import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 
-@Injectable({ providedIn: 'root'})
+import { environment } from '../../../environments/environment';
+
+@Injectable({ providedIn: 'root' })
 export class DeudaService {
-    private apiUrl = 'http://localhost:3000/deuda'; // Cambia esto según tu configuración
+  private apiUrl = `${environment.apiUrl}/deuda`;
 
-    constructor(private http: HttpClient){}
+  constructor(private http: HttpClient) {}
 
-    getDeudoresCount(){
-        return this.http.get<{ total: number}>(`${this.apiUrl}/deudores/count`);
-    }
+  getDeudoresCount() {
+    return this.http.get<{ total: number }>(`${this.apiUrl}/deudores/count`);
+  }
 }

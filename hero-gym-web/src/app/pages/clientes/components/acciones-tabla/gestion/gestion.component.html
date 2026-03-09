@@ -1,1 +1,329 @@
-<p>gestion works!</p>
+<!-- Modal Overlay -->
+@if (show) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" (click)="cerrar()">
+    <!-- Modal Content -->
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden max-h-[90vh] flex flex-col"
+        (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-4 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-3">
+                <!-- User icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.879 2.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <h2 class="text-xl font-semibold text-white">Gestión de Cliente</h2>
+            </div>
+            <button (click)="cerrar()" class="text-white hover:bg-white/20 rounded-lg p-2 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Body (scrollable) -->
+        <div class="p-6 space-y-5 overflow-y-auto flex-1">
+
+            <!-- Datos personales -->
+            <section>
+                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Datos personales</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="text-gray-500">Nombre completo</span>
+                        <p class="font-semibold text-gray-800">
+                            {{ cliente?.usuario?.nombres }} {{ cliente?.usuario?.apellidos }}
+                        </p>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Cédula</span>
+                        <p class="font-semibold text-gray-800">{{ cliente?.usuario?.cedula || '—' }}</p>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Sexo</span>
+                        <p class="font-semibold text-gray-800">{{ cliente?.sexo || '—' }}</p>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Horario</span>
+                        <p class="font-semibold text-gray-800">{{ cliente?.horario || '—' }}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <span class="text-gray-500">Objetivos</span>
+                        <p class="font-semibold text-gray-800">{{ cliente?.objetivos || '—' }}</p>
+                    </div>
+                </div>
+            </section>
+
+            <hr class="border-gray-100" />
+
+            <!-- Plan actual -->
+            <section>
+                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Plan actual</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="text-gray-500">Plan</span>
+                        <p class="font-semibold text-gray-800">{{ getPlanActual()?.plan?.nombre || 'Sin plan' }}</p>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Estado</span>
+                        <p class="font-semibold" [class.text-green-600]="getEstadoPlan() === 'Activo'"
+                            [class.text-red-600]="getEstadoPlan() !== 'Activo'">
+                            {{ getEstadoPlan() }}
+                        </p>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">Fecha de vencimiento</span>
+                        <p class="font-semibold text-gray-800">{{ getFechaFin() }}</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Deuda pendiente -->
+            @if (getDeudaTotal() > 0) {
+            <div class="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-500 shrink-0" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+                <div>
+                    <p class="text-sm font-semibold text-red-700">Deuda pendiente</p>
+                    <p class="text-xl font-bold text-red-600">${{ getDeudaTotal() | number:'1.2-2' }}</p>
+                </div>
+            </div>
+            }
+
+            <!-- ── Formulario cambio de plan ── -->
+            @if (showCambioPlan) {
+            <div class="bg-teal-50 border border-teal-200 rounded-xl p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-semibold text-teal-800">Cambio de plan</h4>
+                    <span class="text-xs text-teal-600 bg-teal-100 rounded-full px-2 py-0.5">
+                        Disponible solo dentro de las primeras 72 h del plan activo
+                    </span>
+                </div>
+
+                <!-- Selector de nuevo plan -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Nuevo plan</label>
+                    <select [(ngModel)]="nuevoPlanId"
+                        class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400">
+                        <option [ngValue]="null" disabled>Selecciona un plan…</option>
+                        @for (plan of planesDisponibles; track plan.id) {
+                        <option [ngValue]="plan.id">{{ plan.nombre }} — ${{ plan.precio | number:'1.2-2' }}</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Fecha de inicio -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Fecha de inicio</label>
+                    <input type="date" [(ngModel)]="fechaInicio"
+                        class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400" />
+                </div>
+
+                <!-- Motivo (opcional) -->
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Motivo <span
+                            class="text-gray-400">(opcional)</span></label>
+                    <textarea [(ngModel)]="motivo" rows="2" placeholder="Describe el motivo del cambio…"
+                        class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400"></textarea>
+                </div>
+
+                <!-- Error -->
+                @if (cambioPlanError) {
+                <div class="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-sm text-red-700">
+                    {{ cambioPlanError }}
+                </div>
+                }
+
+                <!-- CTAs -->
+                <div class="flex gap-2 pt-1">
+                    <button (click)="confirmarCambioPlan()" [disabled]="isChangingPlan"
+                        class="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition disabled:opacity-60">
+                        @if (isChangingPlan) {
+                        <span
+                            class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        Procesando…
+                        } @else {
+                        Confirmar cambio
+                        }
+                    </button>
+                    <button (click)="cancelarCambioPlan()" [disabled]="isChangingPlan"
+                        class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-60">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+            }
+
+            <!-- ── Resultado financiero ── -->
+            @if (resultadoCambio) {
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                <div class="flex items-center gap-2 mb-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-teal-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h4 class="text-sm font-semibold text-slate-800">Resumen del cambio</h4>
+                </div>
+
+                <!-- Planes -->
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <span class="text-xs text-gray-500">Plan anterior</span>
+                        <p class="font-medium text-gray-800">{{ resultadoCambio.planAnterior.nombre }}</p>
+                        <p class="text-xs text-gray-500">${{ resultadoCambio.planAnterior.precio | number:'1.2-2' }}</p>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-500">Plan nuevo</span>
+                        <p class="font-medium text-teal-700">{{ resultadoCambio.planNuevo.nombre }}</p>
+                        <p class="text-xs text-teal-600">${{ resultadoCambio.financiero.precioNuevoPlan | number:'1.2-2'
+                            }}</p>
+                    </div>
+                </div>
+
+                <hr class="border-slate-200" />
+
+                <!-- Financiero -->
+                <div class="space-y-1.5 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Crédito total generado</span>
+                        <span class="font-medium text-slate-700">${{ resultadoCambio.financiero.creditoTotal |
+                            number:'1.2-2' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Crédito aplicado</span>
+                        <span class="font-medium text-teal-700">${{ resultadoCambio.financiero.creditoAplicado |
+                            number:'1.2-2' }}</span>
+                    </div>
+                    @if (resultadoCambio.financiero.devolucionPendiente > 0) {
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Devolución pendiente</span>
+                        <span class="font-semibold text-green-600">${{ resultadoCambio.financiero.devolucionPendiente |
+                            number:'1.2-2' }}</span>
+                    </div>
+                    }
+                    @if (resultadoCambio.financiero.faltante > 0) {
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Saldo pendiente</span>
+                        <span class="font-semibold text-amber-600">${{ resultadoCambio.financiero.faltante |
+                            number:'1.2-2' }}</span>
+                    </div>
+                    }
+                </div>
+
+                <!-- Avisos -->
+                @if (resultadoCambio.financiero.devolucionPendiente > 0) {
+                <p class="text-xs text-green-700 bg-green-50 rounded-lg px-3 py-2">
+                    Queda una devolución pendiente de ${{ resultadoCambio.financiero.devolucionPendiente |
+                    number:'1.2-2' }} para el cliente.
+                </p>
+                }
+                @if (resultadoCambio.financiero.faltante > 0) {
+                <p class="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">
+                    El nuevo plan genera un saldo pendiente de ${{ resultadoCambio.financiero.faltante | number:'1.2-2'
+                    }}.
+                </p>
+                }
+            </div>
+            }
+
+            <hr class="border-gray-100" />
+
+            <!-- Asistencia -->
+            <section>
+                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Asistencia del plan</h3>
+
+                <!-- Cargando -->
+                @if (loadingStats) {
+                <div class="flex items-center gap-2 text-gray-400 text-sm py-2">
+                    <span
+                        class="inline-block w-4 h-4 border-2 border-gray-300 border-t-teal-500 rounded-full animate-spin"></span>
+                    Cargando estadísticas...
+                </div>
+                }
+
+                <!-- Sin plan activo -->
+                @if (!loadingStats && stats && !stats.tienePlanActivo) {
+                <p class="text-sm text-gray-500 italic">{{ stats.mensaje || 'El cliente no tiene un plan activo.' }}</p>
+                }
+
+                <!-- Con datos de asistencia -->
+                @if (!loadingStats && stats && stats.tienePlanActivo) {
+                <div class="space-y-3">
+                    <!-- Contador -->
+                    <div class="flex items-end justify-between">
+                        <span class="text-2xl font-bold" [class]="getTextColor()">
+                            {{ stats.diasAsistidos ?? 0 }}
+                            <span class="text-base font-normal text-gray-400">/ {{ stats.diasTotales ?? 0 }} días</span>
+                        </span>
+                        <span class="text-lg font-semibold" [class]="getTextColor()">
+                            {{ getPorcentaje() | number:'1.0-0' }}%
+                        </span>
+                    </div>
+                    <!-- Barra de progreso -->
+                    <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                        <div class="h-2.5 rounded-full transition-all duration-500" [class]="getBarColor()"
+                            [style.width.%]="getPorcentaje()">
+                        </div>
+                    </div>
+                    <!-- Etiqueta -->
+                    <p class="text-xs text-gray-500">
+                        Plan: <span class="font-medium text-gray-700">{{ stats.nombrePlan || '—' }}</span>
+                        &nbsp;·&nbsp;
+                        Vence: <span class="font-medium text-gray-700">{{ stats.fechaFin ? (stats.fechaFin |
+                            date:'dd/MM/yyyy') : '—' }}</span>
+                    </p>
+                </div>
+                }
+
+                <!-- Error / sin datos -->
+                @if (!loadingStats && !stats) {
+                <p class="text-sm text-gray-400 italic">No se pudieron cargar las estadísticas.</p>
+                }
+            </section>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gray-50 px-6 py-4 flex items-center justify-between shrink-0 border-t border-gray-100">
+            <!-- Acción destructiva -->
+            <button (click)="solicitarDesactivar()"
+                class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+                Desactivar
+            </button>
+
+            <!-- Acciones centrales -->
+            <div class="flex items-center gap-2">
+                <!-- Cambiar plan -->
+                @if (!showCambioPlan && !resultadoCambio) {
+                <button (click)="abrirCambioPlan()"
+                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-700 border border-amber-300 rounded-lg hover:bg-amber-50 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                    Cambiar plan
+                </button>
+                }
+                <!-- Cerrar -->
+                <button (click)="cerrar()"
+                    class="px-5 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition font-medium text-sm">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+}

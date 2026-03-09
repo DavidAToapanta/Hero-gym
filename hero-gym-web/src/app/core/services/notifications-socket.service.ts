@@ -1,6 +1,8 @@
-import { Injectable, OnDestroy } from "@angular/core";
-import { Observable } from "rxjs";
+import { Injectable, OnDestroy } from '@angular/core';
+import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+
+import { environment } from '../../../environments/environment';
 
 @Injectable({
     providedIn: 'root',
@@ -9,13 +11,13 @@ export class NotificationsSocketService implements OnDestroy{
     private socket: Socket;
 
     constructor() {
-        this.socket = io('http://localhost:3000/notifications', {
+        this.socket = io(`${environment.apiUrl}/notifications`, {
             transports: ['websocket', 'polling'],
             reconnection: true,
             reconnectionAttempts: Infinity,
             reconnectionDelay: 1000,
             timeout: 20000,
-            withCredentials: true,
+            withCredentials: false,
             autoConnect: true,
         });
 
