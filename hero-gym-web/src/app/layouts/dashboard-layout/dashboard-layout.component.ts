@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
+import { NavigationStart, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Subscription } from 'rxjs';
+
 import { AuthService } from '../../auth/auth.service';
 
 @Component({
@@ -10,15 +12,20 @@ import { AuthService } from '../../auth/auth.service';
   templateUrl: './dashboard-layout.component.html',
   styleUrls: ['./dashboard-layout.component.css']
 })
-export class DashboardLayoutComponent {
+export class DashboardLayoutComponent implements OnDestroy {
+  @ViewChild('settingsMenuContainer') settingsMenuContainer?: ElementRef<HTMLElement>;
+
   userName = '';
   roleLabel = 'Usuario';
   isAdmin = false;
+  showSettingsMenu = false;
+
+  private readonly routerEventsSubscription: Subscription;
 
   constructor(
     private authService: AuthService,
     private router: Router
-  ){
+  ) {
     const token = this.authService.getToken();
     if (token) {
       try {
@@ -28,11 +35,54 @@ export class DashboardLayoutComponent {
       } catch {}
     }
     this.isAdmin = this.authService.hasRole(['ADMIN']);
+
+    this.routerEventsSubscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        this.closeSettingsMenu();
+      }
+    });
   }
-  
+
+  ngOnDestroy(): void {
+    this.routerEventsSubscription.unsubscribe();
+  }
+
+  toggleSettingsMenu(): void {
+    this.showSettingsMenu = !this.showSettingsMenu;
+  }
+
+  closeSettingsMenu(): void {
+    this.showSettingsMenu = false;
+  }
+
+  goToClientesAnulados(): void {
+    this.closeSettingsMenu();
+    this.router.navigate(['/dashboard/clientes-anulados']);
+  }
+
   logout() {
+    this.closeSettingsMenu();
     this.authService.logout();
-    this.router.navigateByUrl('/login', { replaceUrl: true});
+    this.router.navigateByUrl('/login', { replaceUrl: true });
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.showSettingsMenu) {
+      return;
+    }
+
+    const target = event.target as Node | null;
+    const menuContainer = this.settingsMenuContainer?.nativeElement;
+
+    if (target && menuContainer && !menuContainer.contains(target)) {
+      this.closeSettingsMenu();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    this.closeSettingsMenu();
   }
 
   private mapRole(roleCode?: string | null): string {
@@ -47,5 +97,4 @@ export class DashboardLayoutComponent {
         return 'Usuario';
     }
   }
-  
 }

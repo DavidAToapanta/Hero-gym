@@ -183,4 +183,16 @@ export class ClientesListaComponent implements OnInit, OnChanges {
   getDevolucionPendiente(cliente: any): number {
     return Number(cliente?.devolucionPendiente) || 0;
   }
+
+  tieneDevolucionPendiente(cliente: any): boolean {
+    return this.getDevolucionPendiente(cliente) > 0;
+  }
+
+  tieneDeuda(cliente: any): boolean {
+    // Front defensivo: no mezclar deuda y devolucion aunque backend lo garantice.
+    if (this.tieneDevolucionPendiente(cliente)) {
+      return false;
+    }
+    return this.getDeudaTotal(cliente) > 0;
+  }
 }

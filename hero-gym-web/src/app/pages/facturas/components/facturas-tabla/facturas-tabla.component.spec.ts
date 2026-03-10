@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FacturasTablaComponent } from './facturas-tabla.component';
+import { FacturaService } from '../../../../core/services/factura.service';
+import { PagoService } from '../../../../core/services/pago.service';
 
 describe('FacturasTablaComponent', () => {
   let component: FacturasTablaComponent;
@@ -8,7 +10,21 @@ describe('FacturasTablaComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FacturasTablaComponent]
+      imports: [FacturasTablaComponent],
+      providers: [
+        {
+          provide: PagoService,
+          useValue: {
+            createPago: jasmine.createSpy('createPago'),
+          },
+        },
+        {
+          provide: FacturaService,
+          useValue: {
+            devolver: jasmine.createSpy('devolver'),
+          },
+        },
+      ],
     })
     .compileComponents();
 

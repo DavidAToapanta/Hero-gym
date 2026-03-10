@@ -1,0 +1,106 @@
+﻿<div class="max-w-6xl mx-auto">
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h2 class="text-2xl font-semibold text-gray-900">Clientes anulados</h2>
+      <p class="text-sm text-gray-500">
+        Gestiona clientes desactivados y vuelve a activarlos cuando sea necesario.
+      </p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl shadow-lg p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">
+        Lista de clientes inactivos ({{ totalClientes }})
+      </h3>
+    </div>
+
+    @if (!isLoading) {
+      <div class="overflow-x-auto">
+        @if (clientes.length > 0) {
+          <table class="min-w-full text-sm border-separate border-spacing-y-2">
+            <thead>
+              <tr class="text-left text-gray-500 border-b border-gray-200">
+                <th class="py-3 font-medium">Cliente</th>
+                <th class="py-3 font-medium">Cédula</th>
+                <th class="py-3 font-medium">Objetivos</th>
+                <th class="py-3 font-medium">Horario</th>
+                <th class="py-3 font-medium">Estado</th>
+                <th class="py-3 font-medium text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (cliente of clientes; track cliente.id) {
+                <tr class="bg-white border border-gray-200 hover:shadow-md transition rounded-xl">
+                  <td class="py-3 px-4 font-semibold text-gray-800">
+                    {{ getNombreCompleto(cliente) }}
+                  </td>
+                  <td class="px-4 text-gray-700">{{ cliente.usuario?.cedula || '-' }}</td>
+                  <td class="px-4 text-gray-700">{{ cliente.objetivos || '-' }}</td>
+                  <td class="px-4 text-gray-700">{{ cliente.horario || '-' }}</td>
+                  <td class="px-4">
+                    <span
+                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ring-1 ring-inset bg-gray-100 text-gray-700 ring-gray-300"
+                    >
+                      Inactivo
+                    </span>
+                  </td>
+                  <td class="px-4 text-center">
+                    <button
+                      type="button"
+                      (click)="reactivar(cliente.id)"
+                      class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 transition"
+                    >
+                      Reactivar
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div class="text-center py-6 text-gray-500">
+            No hay clientes anulados.
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="py-6 text-center text-gray-500">Cargando clientes anulados...</div>
+    }
+
+    @if (totalPages > 1 && !isLoading) {
+      <div class="flex items-center justify-between mt-6 text-sm">
+        <p class="text-gray-500">Página {{ currentPage }} de {{ totalPages }}</p>
+        <div class="space-x-2">
+          <button
+            type="button"
+            (click)="prevPage()"
+            [disabled]="currentPage === 1"
+            class="px-3 py-1 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+          >
+            Anterior
+          </button>
+          <button
+            type="button"
+            (click)="nextPage()"
+            [disabled]="currentPage === totalPages"
+            class="px-3 py-1 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<app-confirm-dialog
+  [show]="showConfirmDialog"
+  title="¿Reactivar cliente?"
+  message="El cliente volverá a estar activo en el sistema."
+  confirmText="Reactivar"
+  cancelText="Cancelar"
+  type="info"
+  (confirmed)="onConfirmReactivar()"
+  (cancelled)="onCancelReactivar()"
+></app-confirm-dialog>

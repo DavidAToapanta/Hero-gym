@@ -36,13 +36,13 @@
                 {{ getEstado(c) }}
               </span>
               <!-- Mostrar deuda si existe -->
-              @if (getDeudaTotal(c) > 0) {
+              @if (tieneDeuda(c)) {
               <span class="text-red-600 text-xs font-semibold">
                 Deuda: ${{ getDeudaTotal(c) | number:'1.2-2' }}
               </span>
               }
               <!-- Mostrar devolución pendiente -->
-              @if (getDevolucionPendiente(c) > 0) {
+              @if (tieneDevolucionPendiente(c)) {
               <span class="text-green-600 text-xs font-semibold">
                 Devolver: ${{ getDevolucionPendiente(c) | number:'1.2-2' }}
               </span>
@@ -66,7 +66,7 @@
             <!-- Menú desplegable delegado a AccionesTablaComponent -->
             @if (accionesAbiertas === c.id) {
             <app-acciones-tabla [cliente]="c" (desactivar)="desactivar($event)" (cerrado)="cerrarAcciones()"
-              (renovado)="recargar()" (planCambiado)="recargar()">
+              (renovado)="recargar()" (planCambiado)="recargar()" (planQuitado)="recargar()">
             </app-acciones-tabla>
             }
           </td>

@@ -3,6 +3,7 @@
 ## Scope
 - Repository area: `hero-gym-web` (Angular frontend).
 - Git root also contains `backend_hero`; do not assume backend and frontend share tooling.
+- Treat `backend_hero` as a reference, not a guaranteed mirror of the live backend contract.
 - Prefer changes that fit current Angular standalone-component architecture.
 
 ## Rule Sources Checked
@@ -21,6 +22,8 @@
 - App bootstrap: `src/main.ts`.
 - Global providers/icons: `src/app/app.config.ts`.
 - Routes: `src/app/app.routes.ts` and `src/app/pages/clientes/cliente.routes.ts`.
+- Dashboard page content: `src/app/pages/dashboard/dashboard.component.html`.
+- Dashboard shell/global navbar: `src/app/layouts/dashboard-layout/dashboard-layout.component.html`.
 - Core services/guards/interceptors: `src/app/core`.
 - Shared UI: `src/app/shared`.
 - Environment config: `src/environments/environment*.ts`.
@@ -99,12 +102,19 @@ npx ng test --watch=false --browsers=ChromeHeadless --include=src/app/pages/clie
 - Prefer `@Input()`/`@Output()` for parent-child communication.
 - Keep lifecycle hooks minimal; move heavy logic into private methods.
 
+## Layout Ownership
+- Keep page-level content in feature pages like `src/app/pages/dashboard/dashboard.component.html`.
+- Put global navigation, settings menus, session/logout actions, and cross-dashboard shell UI in `src/app/layouts/dashboard-layout/dashboard-layout.component.html`.
+- Avoid adding app-wide controls directly into page components when they belong to the shared layout.
+
 ## Templates and Styling
 - Tailwind utility classes are the primary styling approach.
 - Global utility/component classes live in `src/styles.css`.
 - Many templates already use Angular control flow blocks (`@if`, `@for`); follow local file style.
 - Keep templates readable: avoid huge inline logic and repeated long expressions.
 - Preserve Spanish UI/domain language unless feature requirements say otherwise.
+- Avoid rigid layout hacks like `mx-[4cm]` in primary screens; prefer responsive containers and padding scales.
+- Keep semantic color meaning consistent: green for paid/positive, amber for return/admin-pending, red for debt/error/destructive actions.
 
 ## Services and HTTP
 - Prefer `environment.apiUrl` for new endpoints; some legacy services still hardcode localhost.
@@ -112,6 +122,10 @@ npx ng test --watch=false --browsers=ChromeHeadless --include=src/app/pages/clie
 - Build query params with `HttpParams` for pagination/filter endpoints.
 - Keep transformation logic (`map`, `tap`) in service layer when it is data-shaping.
 - Avoid duplicating endpoint strings; centralize constants per service.
+- Validate financial and `cliente-plan` response shapes against the active backend API; local `backend_hero` code may lag behind deployed behavior.
+- When backend expects ISO date strings for workflows like `cambiar-plan`, align frontend payloads exactly; prefer full ISO/UTC strings when required by contract.
+- Do not keep obsolete payload fields in frontend service DTOs once backend removes them (for example `diaPago` from `cambiar-plan`).
+- If a screen needs derived financial state, prefer exposing it directly in that endpoint rather than inferring it from unrelated endpoints.
 
 ## Error Handling and Logging
 - Handle both `next` and `error` branches for user-triggered HTTP actions.
@@ -119,12 +133,24 @@ npx ng test --watch=false --browsers=ChromeHeadless --include=src/app/pages/clie
 - Normalize backend message shapes (`string | string[]`) before showing.
 - Use `console.error`/`console.warn` for diagnostics; avoid noisy logs in stable code paths.
 - Never swallow errors silently unless there is an explicit UX reason.
+- Be defensive with Nest-style validation errors; `error.message` may be a string or an array.
 
 ## Naming and Domain Conventions
 - Keep route and role identifiers consistent with backend contracts (`ADMIN`, `RECEPCIONISTA`, `CLIENTE`).
 - Keep component selectors with `app-` prefix.
 - Keep event handler names action-oriented (`onGuardarX`, `onCancelY`, `cargarZ`).
 - Keep boolean flags readable (`isLoading`, `mostrarModal`, `toastVisible`).
+- Prefer explicit business event names like `planCambiado`, `planQuitado`, `pagoRealizado`, `devolucionRegistrada`.
+
+## Client Plan and Financial Rules
+- `Cambiar plan` and `Quitar plan` are distinct actions; do not blur them in labels, payloads, or event names.
+- Actions that remove or alter a plan (`Quitar plan`, `Desactivar`, partial returns) should ask for explicit confirmation.
+- Do not assume `cliente.planes[0]` is always the current plan unless the backend endpoint explicitly orders/selects it as current.
+- Keep money-in flows (`Pagos`) separate from money-out flows (`Devoluciones`).
+- Never show debt and refund (`devolucionPendiente`) at the same time for the same client or invoice row.
+- In client tables, show debt summaries in red and refund summaries in green.
+- In facturas, show the visual state `DEVOLVER` in amber and switch the action button from `Pagar` to `Devolver` when refund is pending.
+- Partial refunds belong to the factura/financial adjustment flow, not the pagos flow.
 
 ## Testing Guidelines
 - Co-locate specs with source files as `*.spec.ts`.

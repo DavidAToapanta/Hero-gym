@@ -49,6 +49,21 @@
                 </button>
             </li>
 
+            @if (tienePlanActual()) {
+            <!-- Quitar Plan -->
+            <li>
+                <button (click)="abrirConfirmacionQuitarPlan()"
+                    class="flex items-center w-full gap-3 px-4 py-2 text-sm text-amber-700 hover:bg-amber-50 hover:text-amber-800 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Quitar plan
+                </button>
+            </li>
+            }
+
             <li class="my-1 border-t border-gray-100"></li>
 
             <!-- Desactivar -->
@@ -80,3 +95,8 @@
 <app-gestion [show]="showGestionModal" [cliente]="cliente" (close)="cerrarGestion()"
     (desactivar)="solicitarDesactivar($event)" (planCambiado)="onPlanCambiado()">
 </app-gestion>
+
+<app-confirm-dialog [show]="showQuitarPlanConfirm" title="¿Quitar plan actual?"
+    [message]="removePlanError || 'El cliente quedará sin plan asignado.'" confirmText="Quitar plan"
+    cancelText="Cancelar" type="warning" (confirmed)="confirmarQuitarPlan()" (cancelled)="cancelarQuitarPlan()">
+</app-confirm-dialog>

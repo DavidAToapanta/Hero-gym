@@ -13,7 +13,10 @@ export interface Factura {
   totalPagado: number;
   saldo: number;
   estado: 'PENDIENTE' | 'PAGADA' | 'ANULADA';
+  estadoDevolucion?: 'PENDIENTE' | 'PARCIAL' | 'COMPLETADO' | 'NO_APLICA';
   fechaEmision: string;
+  devolucionPendiente: number;
+  devolucionDevueltaAcumulada: number;
   clientePlan: {
     cliente: {
       usuario: {
@@ -27,6 +30,14 @@ export interface Factura {
       precio: number;
     };
   };
+}
+
+export interface DevolucionFacturaResponse {
+  facturaId: number;
+  cambioPlanId: number;
+  devolucionPendiente: number;
+  devolucionDevueltaAcumulada: number;
+  estadoDevolucion: 'PENDIENTE' | 'PARCIAL' | 'COMPLETADO' | 'NO_APLICA';
 }
 
 @Injectable({
@@ -70,5 +81,22 @@ export class FacturaService {
 
   findOne(id: number): Observable<Factura> {
     return this.http.get<Factura>(`${this.apiUrl}/${id}`);
+  }
+
+  devolver(
+    facturaId: number,
+    monto: number,
+    motivo?: string,
+  ): Observable<DevolucionFacturaResponse> {
+    const payload: { monto: number; motivo?: string } = { monto };
+
+    if (motivo?.trim()) {
+      payload.motivo = motivo.trim();
+    }
+
+    return this.http.post<DevolucionFacturaResponse>(
+      `${this.apiUrl}/${facturaId}/devolver`,
+      payload,
+    );
   }
 }

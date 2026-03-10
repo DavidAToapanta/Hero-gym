@@ -5,6 +5,7 @@ import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-l
 import { AuthGuard } from './core/guards/auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 import { ClientesComponent } from './pages/clientes/clientes.component';
+import { ClientesAnuladosComponent } from './pages/clientes/clientes-anulados/clientes-anulados.component';
 import { ProductosComponent } from './pages/productos/productos.component';
 import { PagosComponent } from './pages/pagos/pagos.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
@@ -29,6 +30,12 @@ export const routes: Routes = [
       { 
         path: 'clientes', 
         component: ClientesComponent,
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'RECEPCIONISTA'] }
+      },
+      {
+        path: 'clientes-anulados',
+        component: ClientesAnuladosComponent,
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'RECEPCIONISTA'] }
       },

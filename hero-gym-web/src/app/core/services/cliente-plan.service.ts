@@ -33,6 +33,10 @@ export interface CambioPlanResponse {
   };
 }
 
+export interface QuitarPlanResponse {
+  mensaje: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -50,5 +54,9 @@ export class ClientePlanService {
       `${this.apiUrl}/${clientePlanId}/cambiar-plan`,
       dto
     );
+  }
+
+  quitarPlan(clientePlanId: number): Observable<QuitarPlanResponse> {
+    return this.http.delete<QuitarPlanResponse>(`${this.apiUrl}/${clientePlanId}`);
   }
 }
