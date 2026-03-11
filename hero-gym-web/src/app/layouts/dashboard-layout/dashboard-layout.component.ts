@@ -19,6 +19,7 @@ export class DashboardLayoutComponent implements OnDestroy {
   roleLabel = 'Usuario';
   isAdmin = false;
   showSettingsMenu = false;
+  showMobileMenu = false;
 
   private readonly routerEventsSubscription: Subscription;
 
@@ -39,6 +40,7 @@ export class DashboardLayoutComponent implements OnDestroy {
     this.routerEventsSubscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
         this.closeSettingsMenu();
+        this.closeMobileMenu();
       }
     });
   }
@@ -48,6 +50,7 @@ export class DashboardLayoutComponent implements OnDestroy {
   }
 
   toggleSettingsMenu(): void {
+    this.showMobileMenu = false;
     this.showSettingsMenu = !this.showSettingsMenu;
   }
 
@@ -55,13 +58,24 @@ export class DashboardLayoutComponent implements OnDestroy {
     this.showSettingsMenu = false;
   }
 
+  toggleMobileMenu(): void {
+    this.closeSettingsMenu();
+    this.showMobileMenu = !this.showMobileMenu;
+  }
+
+  closeMobileMenu(): void {
+    this.showMobileMenu = false;
+  }
+
   goToClientesAnulados(): void {
     this.closeSettingsMenu();
+    this.closeMobileMenu();
     this.router.navigate(['/dashboard/clientes-anulados']);
   }
 
   logout() {
     this.closeSettingsMenu();
+    this.closeMobileMenu();
     this.authService.logout();
     this.router.navigateByUrl('/login', { replaceUrl: true });
   }
@@ -83,6 +97,7 @@ export class DashboardLayoutComponent implements OnDestroy {
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     this.closeSettingsMenu();
+    this.closeMobileMenu();
   }
 
   private mapRole(roleCode?: string | null): string {

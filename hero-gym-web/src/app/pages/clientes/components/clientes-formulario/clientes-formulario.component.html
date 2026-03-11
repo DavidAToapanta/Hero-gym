@@ -1,7 +1,7 @@
 <!-- Fondo oscuro -->
-<div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+<div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm sm:items-center sm:p-6">
   <!-- Modal -->
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-2 relative ">
+  <div class="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white p-4 shadow-2xl sm:p-6">
     <!-- Botón cerrar -->
     <button
       (click)="cerrar()"
@@ -23,7 +23,7 @@
     <form
       (ngSubmit)="guardar()"
       #clienteForm="ngForm"
-      class="grid grid-cols-2 gap-4"
+      class="grid grid-cols-1 gap-4 sm:grid-cols-2"
       >
       <!-- Nombres -->
       <div>
@@ -172,16 +172,22 @@
       </div>
 
       <!-- Botones -->
-      <div class="col-span-2 flex justify-end mt-4">
+      <div class="mt-4 flex flex-col-reverse gap-3 sm:col-span-2 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          (click)="cerrar()"
+          class="rounded-lg border border-gray-300 px-6 py-3 text-gray-700 transition hover:bg-gray-50"
+        >
+          Cancelar
+        </button>
         <button
           type="submit"
           [disabled]="!clienteForm.valid || isSubmitting"
           class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-          >
+        >
           {{ isSubmitting ? 'Guardando...' : 'Guardar Cliente' }}
         </button>
       </div>
     </form>
   </div>
 </div>
-

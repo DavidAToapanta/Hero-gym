@@ -1,32 +1,37 @@
-<!-- Encabezado -->
-<div class="flex items-center justify-between mx-[4cm] mb-[0.5cm]">
-  <div class="flex items-center space-x-3">
-    <lucide-icon name="credit-card" class="w-6 h-6 text-gray-800"></lucide-icon>
-    <div>
-      <h2 class="text-2xl font-semibold text-gray-900">Gestión de Pagos</h2>
-      <p class="text-sm text-gray-500">Registra y consulta los pagos</p>
+<div class="mx-auto flex w-full max-w-7xl flex-col gap-6">
+  <!-- Encabezado -->
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="flex min-w-0 items-start gap-3">
+      <lucide-icon name="credit-card" class="mt-1 h-6 w-6 flex-shrink-0 text-gray-800"></lucide-icon>
+      <div class="min-w-0">
+        <h2 class="text-2xl font-semibold text-gray-900">Gestión de Pagos</h2>
+        <p class="text-sm text-gray-500">Registra y consulta los pagos</p>
+      </div>
     </div>
+
+    <button
+      (click)="nuevoPago()"
+      class="inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-white transition hover:bg-indigo-700 sm:w-auto"
+    >
+      Registrar Pago
+    </button>
   </div>
 
-  <button (click)="nuevoPago()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
-    Registrar Pago
-  </button>
-</div>
+  <!-- Modal formulario -->
+  @if (mostrarFormulario) {
+  <app-pagos-formulario (close)="mostrarFormulario = false" (save)="onGuardarPago($event)"></app-pagos-formulario>
+  }
 
-<!-- Modal formulario -->
-@if (mostrarFormulario) {
-<app-pagos-formulario (close)="mostrarFormulario = false" (save)="onGuardarPago($event)"></app-pagos-formulario>
-}
-
-<!-- Búsqueda y lista -->
-<div>
-  <app-pagos-busqueda (buscar)="buscarPagos($event)"></app-pagos-busqueda>
-  <app-pagos-lista [searchTerm]="terminoActual" (error)="onErrorLista($event)"></app-pagos-lista>
+  <!-- Búsqueda y lista -->
+  <div>
+    <app-pagos-busqueda (buscar)="buscarPagos($event)"></app-pagos-busqueda>
+    <app-pagos-lista [searchTerm]="terminoActual" (error)="onErrorLista($event)"></app-pagos-lista>
+  </div>
 </div>
 
 <!-- Toast simple -->
 @if (toastVisible) {
-<div class="fixed bottom-6 right-6 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg">
+<div class="fixed inset-x-4 bottom-4 z-50 rounded-lg bg-gray-900 px-4 py-2 text-white shadow-lg sm:inset-x-auto sm:right-6 sm:bottom-6">
   {{ toastMessage }}
 </div>
 }

@@ -1,6 +1,6 @@
-<div class="bg-white rounded-2xl shadow-lg p-6 mx-[4cm]">
+<div class="rounded-2xl bg-white p-4 shadow-lg sm:p-6">
   <!-- Encabezado -->
-  <div class="flex items-center justify-between mb-4">
+  <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
     <h3 class="text-lg font-semibold text-gray-900">
       Lista de Productos ({{ totalProductos }})
     </h3>
@@ -8,8 +8,53 @@
 
   <!-- Tabla -->
   @if (!isLoading) {
-  <div class="overflow-x-auto">
     @if (productos.length > 0) {
+    <div class="space-y-3 md:hidden">
+      @for (p of productos; track p) {
+      <article class="rounded-2xl border border-gray-200 p-4 shadow-sm">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <h4 class="font-semibold text-gray-900">{{ p.nombre }}</h4>
+            <p class="mt-1 text-sm text-gray-500">${{ p.precio | number: '1.2-2' }}</p>
+          </div>
+
+          <span class="rounded-full px-2 py-1 text-xs font-medium" [ngClass]="
+                p.estado
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-red-100 text-red-700'
+              ">
+            {{ p.estado ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+
+        <div class="mt-4 grid gap-3 text-sm text-gray-700 sm:grid-cols-2">
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wide text-gray-400">Stock</p>
+            <p class="mt-1">{{ p.stock }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wide text-gray-400">Acciones</p>
+            <div class="mt-1 flex flex-wrap items-center gap-3">
+              <button (click)="editarProducto(p)"
+                class="inline-flex items-center gap-1 rounded-lg bg-indigo-50 px-3 py-2 text-indigo-700 transition hover:bg-indigo-100"
+                title="Editar">
+                <lucide-icon name="pencil"></lucide-icon>
+                Editar
+              </button>
+              <button (click)="eliminarProducto(p.id)"
+                class="inline-flex items-center gap-1 rounded-lg bg-red-50 px-3 py-2 text-red-700 transition hover:bg-red-100"
+                title="Eliminar">
+                <lucide-icon name="trash-2"></lucide-icon>
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+      }
+    </div>
+
+    <div class="hidden overflow-x-auto md:block">
     <table class="min-w-full text-sm border-separate border-spacing-y-2">
       <thead>
         <tr class="text-left text-gray-500 border-b border-gray-200">
@@ -49,13 +94,13 @@
         }
       </tbody>
     </table>
+    </div>
     } @else {
     <div class="flex flex-col items-center justify-center text-gray-500 py-10">
       <lucide-icon name="package" class="w-10 h-10 mb-3"></lucide-icon>
       <p>No se encontraron productos</p>
     </div>
     }
-  </div>
   } @else {
   <p class="text-center text-gray-500 py-6">Cargando productos...</p>
   }

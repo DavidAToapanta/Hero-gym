@@ -1,48 +1,45 @@
-<!-- Encabezado -->
-<div class="flex items-center justify-between mx-[4cm] mb-[0.5cm]">
-  <!-- Título -->
-  <div class="flex items-center space-x-3">
-    <lucide-icon name="package" class="w-6 h-6 text-gray-800"></lucide-icon>
-    <div>
-      <h2 class="text-2xl font-semibold text-gray-900">Gestión de Productos</h2>
-      <p class="text-sm text-gray-500">Administra los productos del gimnasio</p>
+<div class="mx-auto flex w-full max-w-7xl flex-col gap-6">
+  <!-- Encabezado -->
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="flex min-w-0 items-start gap-3">
+      <lucide-icon name="package" class="mt-1 h-6 w-6 flex-shrink-0 text-gray-800"></lucide-icon>
+      <div class="min-w-0">
+        <h2 class="text-2xl font-semibold text-gray-900">Gestión de Productos</h2>
+        <p class="text-sm text-gray-500">Administra los productos del gimnasio</p>
+      </div>
     </div>
+
+    <button
+      (click)="nuevoProducto()"
+      class="inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-white transition hover:bg-indigo-700 sm:w-auto"
+    >
+      + Nuevo Producto
+    </button>
   </div>
 
-  <!-- Botón -->
-  <button
-    (click)="nuevoProducto()"
-    class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
-    >
-    + Nuevo Producto
-  </button>
+  <!-- Formulario -->
+  @if (mostrarFormulario) {
+    <app-productos-formulario
+      (close)="mostrarFormulario = false"
+      (save)="onGuardarProducto($event)"
+      [initialData]="productoEditando"
+    ></app-productos-formulario>
+  }
 
-</div>
-
-<!-- Formulario -->
-@if (mostrarFormulario) {
-  <app-productos-formulario
-    (close)="mostrarFormulario = false"
-    (save)="onGuardarProducto($event)"
-    [initialData]="productoEditando"
-  ></app-productos-formulario>
-}
-
-<!-- Búsqueda y lista -->
-<div>
-  <app-productos-busqueda (buscar)="buscarProductos($event)"></app-productos-busqueda>
-  <app-productos-lista
-    [searchTerm]="terminoActual"
-    (edit)="onEditarProducto($event)"
-    (deleted)="onProductoEliminado()"
-  ></app-productos-lista>
+  <!-- Búsqueda y lista -->
+  <div>
+    <app-productos-busqueda (buscar)="buscarProductos($event)"></app-productos-busqueda>
+    <app-productos-lista
+      [searchTerm]="terminoActual"
+      (edit)="onEditarProducto($event)"
+      (deleted)="onProductoEliminado()"
+    ></app-productos-lista>
+  </div>
 </div>
 
 <!-- Toast de éxito -->
 @if (toastVisible) {
-  <div
-    class="fixed top-6 right-6 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50"
-    >
+  <div class="fixed inset-x-4 top-4 z-50 rounded-lg bg-green-600 px-4 py-2 text-white shadow-lg sm:inset-x-auto sm:right-6 sm:top-6">
     {{ toastMessage }}
   </div>
 }

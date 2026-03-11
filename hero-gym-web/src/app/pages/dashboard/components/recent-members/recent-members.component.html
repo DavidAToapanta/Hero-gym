@@ -1,8 +1,8 @@
 <!-- Card: Miembros Recientes -->
-<div class="bg-white rounded-2xl shadow-lg p-8 w-full h-[755px]">
+<div class="w-full rounded-2xl bg-white p-5 shadow-lg sm:p-6 lg:p-8">
 
   <!-- Header -->
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
     <h2 class="text-lg font-semibold text-gray-900">Miembros Recientes</h2>
     <a
       routerLink="/dashboard/clientes"
@@ -15,11 +15,48 @@
 
 
   <!-- Table -->
-  <div class="overflow-x-auto">
     @if (recentMembers.length) {
-      <table
-        class="min-w-full text-sm"
-        >
+      <div class="space-y-3 md:hidden">
+        @for (m of recentMembers; track m) {
+          <article class="rounded-2xl border border-gray-200 p-4 shadow-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-3">
+                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 ring-1 ring-gray-200">
+                  <span class="text-[11px] font-semibold text-gray-600">
+                    {{ getInitials(m?.usuario?.nombres, m?.usuario?.apellidos) }}
+                  </span>
+                </div>
+                <div class="min-w-0">
+                  <div class="truncate font-medium text-gray-900">
+                    {{ m?.usuario?.nombres }} {{ m?.usuario?.apellidos }}
+                  </div>
+                  <div class="truncate text-xs text-gray-500">
+                    Usuario: {{ m?.usuario?.userName || '—' }}
+                  </div>
+                </div>
+              </div>
+              <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset"
+                [ngClass]="getBadgeClasses(m?.estadoPlan)">
+                {{ m?.estadoPlan || '—' }}
+              </span>
+            </div>
+
+            <div class="mt-4 grid gap-3 text-sm text-gray-700 sm:grid-cols-2">
+              <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-gray-400">Plan</p>
+                <p class="mt-1">{{ m?.planNombre || '—' }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-gray-400">Fecha</p>
+                <p class="mt-1">{{ m?.fechaRegistro ? (m?.fechaRegistro | date:'dd/MM/yyyy') : '—' }}</p>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="hidden overflow-x-auto md:block">
+      <table class="min-w-full text-sm">
         <thead>
           <tr class="text-left text-gray-500">
             <th class="py-3 pr-6 font-medium">MIEMBRO</th>
@@ -27,8 +64,6 @@
             <th class="py-3 pr-6 font-medium">ESTADO</th>
             <th class="py-3 font-medium">FECHA</th>
           </tr>
-          <!-- Divider -->
-          <div class="border-t border-gray-200 mt-4"></div>
         </thead>
         <tbody class="divide-y divide-gray-200">
           @for (m of recentMembers; track m) {
@@ -74,6 +109,7 @@
           }
         </tbody>
       </table>
+      </div>
     } @else {
       <div class="py-10 text-center">
         <div class="flex flex-col items-center gap-2 text-gray-400">
@@ -100,5 +136,4 @@
     }
 
     <!-- Empty -->
-  </div>
 </div>
