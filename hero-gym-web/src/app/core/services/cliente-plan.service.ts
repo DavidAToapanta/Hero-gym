@@ -4,11 +4,18 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 
+export interface ClientePlanPayload {
+  clienteId: number;
+  planId: number;
+  fechaInicio: string;
+  fechaFin: string;
+  activado: boolean;
+}
+
 export interface CambiarPlanDto {
   nuevoPlanId: number;
   fechaInicio: string;
   fechaFin: string;
-  diaPago?: number;
   motivo?: string;
 }
 

@@ -1,9 +1,25 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
+
 import { ClienteService } from '../../../../../core/services/cliente.service';
+import { ClientePlanPayload } from '../../../../../core/services/cliente-plan.service';
 import { PagoService } from '../../../../../core/services/pago.service';
+import { extractErrorMessage } from '../../../../../core/utils/http-error.utils';
+import {
+  buildPlanDateRange,
+  getTodayDateOnly,
+  PlanDurationUnit,
+} from '../../../../../core/utils/plan-date.utils';
 
 @Component({
   selector: 'app-renovar',
@@ -18,18 +34,16 @@ export class RenovarComponent implements OnChanges, OnInit {
   @Output() close = new EventEmitter<void>();
   @Output() renovado = new EventEmitter<any>();
 
-  // Datos del formulario de renovación
   nuevoPlanId: number = 1;
   fechaInicio: string = '';
   isLoading: boolean = false;
 
-  // Planes disponibles desde el backend
   planesDisponibles: any[] = [];
   planSeleccionado: any = null;
 
   constructor(
     private clienteService: ClienteService,
-    private pagoService: PagoService
+    private pagoService: PagoService,
   ) {}
 
   ngOnInit() {
@@ -39,18 +53,13 @@ export class RenovarComponent implements OnChanges, OnInit {
   ngOnChanges(changes: SimpleChanges) {
     if (this.show && this.cliente) {
       this.cargarPlanes();
-      
-      // Inicializar fecha de inicio con la fecha actual
-      const hoy = new Date();
-      this.fechaInicio = hoy.toISOString().split('T')[0];
-      
-      // Intentar pre-seleccionar el mismo plan que tenía el cliente
+      this.fechaInicio = getTodayDateOnly();
+
       const planActual = this.getPlanActual();
       if (planActual?.plan?.id) {
         this.nuevoPlanId = planActual.plan.id;
       }
-      
-      // Siempre llamar onPlanChange para inicializar planSeleccionado
+
       setTimeout(() => this.onPlanChange(), 100);
     }
   }
@@ -60,13 +69,12 @@ export class RenovarComponent implements OnChanges, OnInit {
       next: (planes) => {
         this.planesDisponibles = Array.isArray(planes) ? planes : [];
         console.log('[RenovarComponent] Planes cargados:', this.planesDisponibles);
-        // Intentar seleccionar un plan una vez que se cargan
         this.onPlanChange();
       },
       error: (error) => {
         console.error('[RenovarComponent] Error al cargar planes:', error);
         this.planesDisponibles = [];
-      }
+      },
     });
   }
 
@@ -76,12 +84,12 @@ export class RenovarComponent implements OnChanges, OnInit {
       return;
     }
 
-    // Buscar el plan seleccionado
-    let plan = this.planesDisponibles.find(p => p.id === +this.nuevoPlanId);
+    let plan = this.planesDisponibles.find((item) => item.id === +this.nuevoPlanId);
 
-    // Si no se encuentra (o nuevoPlanId es inválido), seleccionar el primero por defecto
     if (!plan) {
-      console.warn(`[RenovarComponent] Plan con ID ${this.nuevoPlanId} no encontrado. Seleccionando el primero.`);
+      console.warn(
+        `[RenovarComponent] Plan con ID ${this.nuevoPlanId} no encontrado. Seleccionando el primero.`,
+      );
       plan = this.planesDisponibles[0];
       this.nuevoPlanId = plan.id;
     }
@@ -111,16 +119,20 @@ export class RenovarComponent implements OnChanges, OnInit {
     }
 
     this.isLoading = true;
-    
-    const datosRenovacion = {
-      planId: +this.nuevoPlanId,
-      fechaInicio: this.fechaInicio,
-      duracion: this.planSeleccionado.duracion || 1,
-      unidad: this.planSeleccionado.unidadDuracion || 'MESES',
-      diaPago: new Date(this.fechaInicio).getDate()
+
+    const rangoFechas = buildPlanDateRange(
+      this.fechaInicio,
+      Number(this.planSeleccionado.duracion || 1),
+      this.getPlanUnit(this.planSeleccionado.unidadDuracion),
+    );
+    const datosRenovacion: ClientePlanPayload = {
+      clienteId: this.cliente.id,
+      planId: Number(this.nuevoPlanId),
+      ...rangoFechas,
+      activado: true,
     };
-    
-    this.clienteService.renovarPlan(this.cliente.id, datosRenovacion).subscribe({
+
+    this.clienteService.renovarPlan(datosRenovacion).subscribe({
       next: (response) => {
         this.isLoading = false;
         alert(`Plan renovado exitosamente para ${this.cliente?.usuario?.nombres}`);
@@ -130,9 +142,9 @@ export class RenovarComponent implements OnChanges, OnInit {
       error: (error) => {
         console.error('[RenovarComponent] Error en renovación:', error);
         this.isLoading = false;
-        const mensaje = error.error?.message || 'Error al renovar el plan';
+        const mensaje = extractErrorMessage(error, 'Error al renovar el plan');
         alert(`Error: ${mensaje}`);
-      }
+      },
     });
   }
 
@@ -142,17 +154,14 @@ export class RenovarComponent implements OnChanges, OnInit {
 
   getFechaFinCalculada(): string {
     if (!this.fechaInicio || !this.planSeleccionado) return 'N/A';
-    const inicio = new Date(this.fechaInicio);
-    const duracion = this.planSeleccionado.duracion || 1;
-    const unidad = this.planSeleccionado.unidadDuracion || 'MESES';
-    
-    const fin = new Date(inicio);
-    if (unidad === 'DIAS') {
-      fin.setDate(fin.getDate() + duracion);
-    } else {
-      fin.setMonth(fin.getMonth() + duracion);
-    }
-    return fin.toLocaleDateString('es-ES');
+
+    const rangoFechas = buildPlanDateRange(
+      this.fechaInicio,
+      Number(this.planSeleccionado.duracion || 1),
+      this.getPlanUnit(this.planSeleccionado.unidadDuracion),
+    );
+    const fechaFin = new Date(`${rangoFechas.fechaFin}T00:00:00`);
+    return fechaFin.toLocaleDateString('es-ES');
   }
 
   getPlanActual(): any {
@@ -168,14 +177,17 @@ export class RenovarComponent implements OnChanges, OnInit {
   tienePlanActivo(): boolean {
     const plan = this.getPlanActual();
     if (!plan?.fechaFin) return false;
-    
-    // Crear fechas ignorando la hora para comparacion justa
+
     const fechaFin = new Date(plan.fechaFin);
-    fechaFin.setHours(23, 59, 59, 999); // Final del día de vencimiento
-    
+    fechaFin.setHours(23, 59, 59, 999);
+
     const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0); // Inicio del día actual
+    hoy.setHours(0, 0, 0, 0);
 
     return fechaFin >= hoy;
+  }
+
+  private getPlanUnit(unidadDuracion: unknown): PlanDurationUnit {
+    return unidadDuracion === 'DIAS' ? 'DIAS' : 'MESES';
   }
 }

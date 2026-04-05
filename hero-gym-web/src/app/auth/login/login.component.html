@@ -1,70 +1,207 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-100">
-  <div class="w-full max-w-md bg-white rounded-lg shadow-md p-8">
-    <h2 class="text-2xl font-bold mb-6 text-center">Iniciar sesión</h2>
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <!-- Cédula -->
-      <div class="mb-4">
-        <label class="block text-sm font-medium mb-1" for="cedula"
-          >Cédula</label
-          >
-          <input
-            id="cedula"
-            type="text"
-            formControlName="cedula"
-            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Ingrese su cédula"
-            />
-            @if (
-              loginForm.get('cedula')?.touched &&
-              loginForm.get('cedula')?.hasError('required')
-              ) {
-              <p
-                class="text-red-600 text-sm mt-1"
-                >
-                La cédula es requerida.
+<div class="min-h-screen bg-slate-950 px-4 py-8 sm:px-6 lg:px-8">
+  <div class="mx-auto flex min-h-screen max-w-6xl items-center">
+    <div
+      class="grid w-full overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-[0_30px_80px_-40px_rgba(15,23,42,0.7)] lg:grid-cols-[0.95fr_1.05fr]">
+      <section class="relative overflow-hidden bg-slate-900 px-6 py-8 text-white sm:px-10 sm:py-10">
+        <div
+          class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(245,158,11,0.38),transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(239,68,68,0.26),transparent_42%)]">
+        </div>
+
+        <div class="relative flex h-full flex-col justify-between gap-10">
+          <div class="space-y-5">
+            <span
+              class="inline-flex w-fit rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-amber-200">
+              Gym
+            </span>
+
+            <div class="max-w-md space-y-4">
+              <h1 class="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+                Administra tu gimnasio desde un solo panel.
+              </h1>
+              <p class="text-sm leading-6 text-slate-200 sm:text-base">
+                Controla clientes, pagos y operación diaria con acceso inmediato para tu equipo.
               </p>
-            }
+            </div>
           </div>
 
-          <!-- Contraseña -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium mb-1" for="password"
-              >Contraseña</label
-              >
-              <input
-                id="password"
-                type="password"
-                formControlName="password"
-                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                placeholder="********"
-                />
-                @if (
-                  loginForm.get('password')?.touched &&
-                  loginForm.get('password')?.hasError('required')
-                  ) {
-                  <p
-                    class="text-red-600 text-sm mt-1"
-                    >
-                    La contraseña es requerida.
-                  </p>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <article class="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
+              <p class="text-sm font-semibold text-white">Operación centralizada</p>
+              <p class="mt-2 text-sm leading-6 text-slate-200">
+                Clientes, facturas y administración listas apenas ingresas.
+              </p>
+            </article>
+
+            <article class="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
+              <p class="text-sm font-semibold text-white">Contexto seguro</p>
+              <p class="mt-2 text-sm leading-6 text-slate-200">
+                Cada ingreso conserva el gimnasio, el perfil y el modo de acceso correctos.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="px-6 py-8 sm:px-10 sm:py-10">
+        <div class="mx-auto w-full max-w-lg">
+          @if (!pendingSelection) {
+            <div class="mb-8 space-y-3">
+              <p class="text-sm font-semibold uppercase tracking-[0.28em] text-amber-600">Acceso</p>
+              <h2 class="text-balance text-3xl font-semibold tracking-tight text-slate-900">
+                Inicia sesión
+              </h2>
+              <p class="text-sm leading-6 text-slate-600">
+                Ingresa con tu cédula y contraseña para continuar a tu panel.
+              </p>
+            </div>
+
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5" novalidate>
+              <div>
+                <label class="text-sm font-medium text-slate-700" for="cedula">Cédula</label>
+                <input
+                  id="cedula"
+                  name="cedula"
+                  type="text"
+                  inputmode="numeric"
+                  spellcheck="false"
+                  formControlName="cedula"
+                  autocomplete="username"
+                  placeholder="Ingresa tu cédula…"
+                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm transition placeholder:text-slate-400 focus-visible:border-amber-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-100" />
+                @if (getFieldError('cedula'); as error) {
+                  <p aria-live="polite" class="mt-2 text-sm text-rose-600">{{ error }}</p>
                 }
               </div>
 
-              <!-- Botón -->
+              <div>
+                <label class="text-sm font-medium text-slate-700" for="password">Contraseña</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  formControlName="password"
+                  autocomplete="current-password"
+                  placeholder="Ingresa tu contraseña…"
+                  class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm transition placeholder:text-slate-400 focus-visible:border-amber-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-100" />
+                @if (getFieldError('password'); as error) {
+                  <p aria-live="polite" class="mt-2 text-sm text-rose-600">{{ error }}</p>
+                }
+              </div>
+
+              @if (errorMessage) {
+                <div
+                  aria-live="polite"
+                  class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  {{ errorMessage }}
+                </div>
+              }
+
               <button
                 type="submit"
-                [disabled]="loginForm.invalid"
-                class="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md disabled:bg-gray-400"
-                >
-                Ingresar
+                [disabled]="isSubmitting"
+                [attr.aria-busy]="isSubmitting"
+                class="inline-flex w-full touch-manipulation items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-100 disabled:cursor-not-allowed disabled:bg-slate-300">
+                {{ isSubmitting ? 'Ingresando…' : 'Ingresar' }}
               </button>
-
-              <!-- Error general -->
-              @if (errorMessage) {
-                <p class="text-red-500 mt-4 text-center">
-                  {{ errorMessage }}
-                </p>
-              }
             </form>
-          </div>
+
+            <div class="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p class="text-sm font-medium text-slate-900">
+                ¿Todavía no tienes tu gimnasio en Hero Gym?
+              </p>
+              <p class="mt-1 text-sm leading-6 text-slate-600">
+                Registra tu sede, crea el owner y entra al dashboard en el mismo paso.
+              </p>
+              <a
+                routerLink="/registro"
+                class="mt-4 inline-flex items-center text-sm font-semibold text-amber-700 transition hover:text-amber-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-100">
+                Crear gimnasio
+              </a>
+            </div>
+          } @else {
+            <div class="space-y-8">
+              <div class="space-y-3">
+                <p class="text-sm font-semibold uppercase tracking-[0.28em] text-amber-600">
+                  Acceso
+                </p>
+                <h2
+                  id="context-selection-heading"
+                  class="text-balance text-3xl font-semibold tracking-tight text-slate-900">
+                  Selecciona un Contexto
+                </h2>
+                <p class="text-sm leading-6 text-slate-600">
+                  Tu usuario tiene acceso a más de un gimnasio o perfil. Elige cómo quieres
+                  entrar.
+                </p>
+              </div>
+
+              @if (contextSelectionError) {
+                <div
+                  aria-live="polite"
+                  class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  {{ contextSelectionError }}
+                </div>
+              }
+
+              <ul class="space-y-4" aria-labelledby="context-selection-heading">
+                @for (context of pendingSelection.contexts; track context.contextId) {
+                  @let orderedModes = getOrderedModes(context);
+                  <li>
+                    <article class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                      <div class="flex min-w-0 flex-col gap-3">
+                        <div class="min-w-0 space-y-2">
+                          <h3 class="break-words text-lg font-semibold text-slate-900">
+                            {{ getContextTitle(context) }}
+                          </h3>
+                          <p class="text-sm font-medium text-slate-700">
+                            {{ getContextTypeLabel(context) }}
+                          </p>
+                          <p class="text-sm leading-6 text-slate-600">
+                            Modos disponibles: {{ getContextModesLabel(context) }}
+                          </p>
+                        </div>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                          @for (mode of orderedModes; track mode) {
+                            <button
+                              type="button"
+                              [disabled]="isSelectingContext"
+                              [attr.aria-busy]="isContextActionLoading(context, mode)"
+                              [attr.aria-label]="
+                                getAccessButtonLabel(mode) +
+                                ' en ' +
+                                getContextTitle(context) +
+                                ' como ' +
+                                getContextTypeLabel(context)
+                              "
+                              [ngClass]="getContextActionButtonClasses(orderedModes[0] === mode)"
+                              (click)="onSelectContext(context, mode)"
+                              class="inline-flex w-full touch-manipulation items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400">
+                              {{
+                                isContextActionLoading(context, mode)
+                                  ? 'Ingresando…'
+                                  : getAccessButtonLabel(mode)
+                              }}
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </article>
+                  </li>
+                }
+              </ul>
+
+              <button
+                type="button"
+                [disabled]="isSelectingContext"
+                (click)="onBackToLogin()"
+                class="inline-flex w-full touch-manipulation items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-200 disabled:cursor-not-allowed disabled:text-slate-400">
+                Volver al Inicio de Sesión
+              </button>
+            </div>
+          }
         </div>
+      </section>
+    </div>
+  </div>
+</div>

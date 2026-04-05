@@ -10,14 +10,22 @@ import { AuthService } from '../../auth/auth.service';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterOutlet],
   templateUrl: './dashboard-layout.component.html',
-  styleUrls: ['./dashboard-layout.component.css']
+  styleUrls: ['./dashboard-layout.component.css'],
 })
 export class DashboardLayoutComponent implements OnDestroy {
   @ViewChild('settingsMenuContainer') settingsMenuContainer?: ElementRef<HTMLElement>;
 
   userName = '';
   roleLabel = 'Usuario';
-  isAdmin = false;
+  tenantDisplayName = 'Hero Gym';
+  isOwner = false;
+  isAdminLike = false;
+  canManageClientes = false;
+  canViewClientesAnulados = false;
+  canManageProductos = false;
+  canManagePagos = false;
+  canManageFacturas = false;
+  canManageAdministracion = false;
   showSettingsMenu = false;
   showMobileMenu = false;
 
@@ -25,17 +33,9 @@ export class DashboardLayoutComponent implements OnDestroy {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
   ) {
-    const token = this.authService.getToken();
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        this.userName = payload.userName || '';
-        this.roleLabel = this.mapRole(payload.rol);
-      } catch {}
-    }
-    this.isAdmin = this.authService.hasRole(['ADMIN']);
+    this.setAccessState();
 
     this.routerEventsSubscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
@@ -67,17 +67,10 @@ export class DashboardLayoutComponent implements OnDestroy {
     this.showMobileMenu = false;
   }
 
-  goToClientesAnulados(): void {
-    this.closeSettingsMenu();
-    this.closeMobileMenu();
-    this.router.navigate(['/dashboard/clientes-anulados']);
-  }
-
-  logout() {
+  logout(): void {
     this.closeSettingsMenu();
     this.closeMobileMenu();
     this.authService.logout();
-    this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 
   @HostListener('document:click', ['$event'])
@@ -100,14 +93,49 @@ export class DashboardLayoutComponent implements OnDestroy {
     this.closeMobileMenu();
   }
 
-  private mapRole(roleCode?: string | null): string {
+  private setAccessState(): void {
+    const decodedToken = this.authService.getDecodedToken();
+
+    this.userName = decodedToken?.userName ?? '';
+    this.tenantDisplayName = this.authService.getTenantDisplayName() ?? 'Hero Gym';
+    this.roleLabel = this.mapRoleLabel(
+      this.authService.getTenantRole(),
+      this.authService.getUserRole(),
+    );
+
+    this.isOwner = this.authService.isOwner();
+    this.isAdminLike = this.authService.hasTenantRole(['OWNER', 'ADMIN']);
+    this.canManageClientes = this.authService.hasTenantRole([
+      'OWNER',
+      'ADMIN',
+      'RECEPCIONISTA',
+      'ENTRENADOR',
+    ]);
+    this.canViewClientesAnulados = this.authService.hasTenantRole([
+      'OWNER',
+      'ADMIN',
+      'RECEPCIONISTA',
+    ]);
+    this.canManageProductos = this.authService.hasTenantRole(['OWNER', 'ADMIN']);
+    this.canManagePagos = this.authService.hasTenantRole(['OWNER', 'ADMIN', 'RECEPCIONISTA']);
+    this.canManageFacturas = this.authService.hasTenantRole(['OWNER', 'ADMIN', 'RECEPCIONISTA']);
+    this.canManageAdministracion = this.authService.hasTenantRole(['OWNER', 'ADMIN']);
+  }
+
+  private mapRoleLabel(tenantRole?: string | null, legacyRole?: string | null): string {
+    const roleCode = tenantRole ?? legacyRole;
+
     switch (roleCode) {
+      case 'OWNER':
+        return 'Owner';
       case 'ADMIN':
         return 'Administrador';
       case 'RECEPCIONISTA':
         return 'Recepcionista';
       case 'ENTRENADOR':
         return 'Entrenador';
+      case 'CLIENTE':
+        return 'Cliente';
       default:
         return 'Usuario';
     }

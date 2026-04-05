@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AuthService } from '../../../auth/auth.service';
-import { AsistenciaComponent } from '../components/asistencia/asistencia.component';
+import { Component, OnInit } from '@angular/core';
 
+import { AuthService } from '../../../auth/auth.service';
 import { environment } from '../../../../environments/environment';
+import { AsistenciaComponent } from '../components/asistencia';
 
 interface ClienteData {
   nombres: string;
@@ -36,7 +36,7 @@ export class ClienteDashboardComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   ngOnInit() {
@@ -44,15 +44,14 @@ export class ClienteDashboardComponent implements OnInit {
   }
 
   cargarDatosCliente() {
-    // Obtener el ID del usuario del token
-    const token = this.authService.getToken();
-    if (!token) {
-      this.errorMessage = 'No se encontró el token de autenticación';
+    const clienteId = this.authService.getClienteId();
+
+    if (!clienteId) {
+      this.errorMessage = 'No se encontró el cliente autenticado';
       this.isLoading = false;
       return;
     }
 
-    // Usar el endpoint específico para clientes
     this.http.get<any>(`${environment.apiUrl}/cliente/mi-perfil`).subscribe({
       next: (response) => {
         console.log('Datos del cliente:', response);
@@ -63,13 +62,13 @@ export class ClienteDashboardComponent implements OnInit {
         console.error('Error al cargar datos del cliente:', error);
         this.errorMessage = 'Error al cargar los datos del cliente';
         this.isLoading = false;
-      }
+      },
     });
   }
 
   procesarDatosCliente(data: any) {
     const plan = data.planes?.[0];
-    
+
     if (!plan) {
       this.clienteData = {
         nombres: data.usuario?.nombres || 'Usuario',
@@ -82,21 +81,26 @@ export class ClienteDashboardComponent implements OnInit {
           estado: 'vencido',
           diasTranscurridos: 0,
           diasRestantes: 0,
-          totalDias: 0
+          totalDias: 0,
         },
-        deuda: 0
+        deuda: 0,
       };
       return;
     }
 
-    // Calcular estado del plan y días
     const fechaInicio = new Date(plan.fechaInicio);
     const fechaFin = new Date(plan.fechaFin);
     const hoy = new Date();
-    
-    const totalDias = Math.ceil((fechaFin.getTime() - fechaInicio.getTime()) / (1000 * 60 * 60 * 24));
-    const diasTranscurridos = Math.ceil((hoy.getTime() - fechaInicio.getTime()) / (1000 * 60 * 60 * 24));
-    const diasRestantes = Math.ceil((fechaFin.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+
+    const totalDias = Math.ceil(
+      (fechaFin.getTime() - fechaInicio.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    const diasTranscurridos = Math.ceil(
+      (hoy.getTime() - fechaInicio.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    const diasRestantes = Math.ceil(
+      (fechaFin.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     let estado: 'activo' | 'vencido' | 'por_vencer' = 'activo';
     if (diasRestantes < 0) {
@@ -105,9 +109,10 @@ export class ClienteDashboardComponent implements OnInit {
       estado = 'por_vencer';
     }
 
-    // Calcular deuda total
-    const deudaTotal = plan.deudas?.reduce((sum: number, d: any) => 
-      sum + (d.solventada ? 0 : Number(d.monto)), 0) || 0;
+    const deudaTotal =
+      plan.deudas?.reduce((sum: number, deuda: any) => {
+        return sum + (deuda.solventada ? 0 : Number(deuda.monto));
+      }, 0) || 0;
 
     this.clienteData = {
       nombres: data.usuario?.nombres || 'Usuario',
@@ -120,9 +125,9 @@ export class ClienteDashboardComponent implements OnInit {
         estado,
         diasTranscurridos: Math.max(0, diasTranscurridos),
         diasRestantes: Math.max(0, diasRestantes),
-        totalDias
+        totalDias,
       },
-      deuda: deudaTotal
+      deuda: deudaTotal,
     };
   }
 
@@ -158,6 +163,9 @@ export class ClienteDashboardComponent implements OnInit {
 
   getProgresoPorcentaje(): number {
     if (!this.clienteData || this.clienteData.plan.totalDias === 0) return 0;
-    return Math.min(100, (this.clienteData.plan.diasTranscurridos / this.clienteData.plan.totalDias) * 100);
+    return Math.min(
+      100,
+      (this.clienteData.plan.diasTranscurridos / this.clienteData.plan.totalDias) * 100,
+    );
   }
 }

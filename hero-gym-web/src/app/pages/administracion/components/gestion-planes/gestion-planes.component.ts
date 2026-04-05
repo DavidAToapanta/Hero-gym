@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 
 import { LucideAngularModule } from 'lucide-angular';
 import { PlanModalComponent } from './plan-modal/plan-modal.component';
@@ -18,6 +18,8 @@ export class GestionPlanesComponent implements OnInit {
   mostrarModalConfirmacion = false;
   planParaEliminar: Plan | null = null;
   planes: Plan[] = [];
+  isLoading = false;
+  errorMessage = '';
   
   // Paginación
   paginaActual = 1;
@@ -25,7 +27,10 @@ export class GestionPlanesComponent implements OnInit {
   totalPlanes = 0;
   planesPorPagina = 10;
 
-  constructor(private planService: PlanService) {}
+  constructor(
+    private readonly planService: PlanService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.cargarPlanes();
@@ -74,15 +79,24 @@ export class GestionPlanesComponent implements OnInit {
   }
 
   private cargarPlanes(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
     this.planService.getPlanes(this.paginaActual, this.planesPorPagina).subscribe({
       next: (response) => {
         this.planes = response.data;
         this.totalPlanes = response.total;
         this.totalPaginas = response.totalPages;
         this.paginaActual = response.page;
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al cargar planes:', err);
+        this.errorMessage = 'No se pudieron cargar los planes del gimnasio.';
+        this.planes = [];
+        this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

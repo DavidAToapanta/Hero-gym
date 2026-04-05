@@ -1,9 +1,29 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AsistenciaService, AsistenciaStats } from '../../../../../core/services/asistencia.service';
-import { ClientePlanService, CambioPlanResponse } from '../../../../../core/services/cliente-plan.service';
-import { PlanService, Plan } from '../../../../../core/services/plan.service';
+
+import {
+  AsistenciaService,
+  AsistenciaStats,
+} from '../../../../../core/services/asistencia.service';
+import {
+  CambioPlanResponse,
+  ClientePlanService,
+} from '../../../../../core/services/cliente-plan.service';
+import { Plan, PlanService } from '../../../../../core/services/plan.service';
+import { extractErrorMessage } from '../../../../../core/utils/http-error.utils';
+import {
+  buildPlanDateRange,
+  getTodayDateOnly,
+  PlanDurationUnit,
+} from '../../../../../core/utils/plan-date.utils';
 
 @Component({
   selector: 'app-gestion',
@@ -16,15 +36,12 @@ export class GestionComponent implements OnChanges {
   @Input() show: boolean = false;
   @Input() cliente: any = null;
   @Output() close = new EventEmitter<void>();
-  /** Emitido cuando el usuario pulsa Desactivar desde esta vista */
   @Output() desactivar = new EventEmitter<number>();
-  /** Emitido cuando el plan se cambia exitosamente */
   @Output() planCambiado = new EventEmitter<void>();
 
   stats: AsistenciaStats | null = null;
   loadingStats = false;
 
-  // ── Estado cambio de plan ─────────────────────────────────────
   showCambioPlan = false;
   planesDisponibles: Plan[] = [];
   nuevoPlanId: number | null = null;
@@ -37,18 +54,18 @@ export class GestionComponent implements OnChanges {
   constructor(
     private asistenciaService: AsistenciaService,
     private clientePlanService: ClientePlanService,
-    private planService: PlanService
+    private planService: PlanService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges) {
-    // Cargar estadísticas cada vez que el modal se abre con un cliente válido
     if (changes['show'] && this.show && this.cliente?.id) {
       this.cargarEstadisticas();
     }
+
     if (changes['cliente'] && this.show && this.cliente?.id) {
       this.cargarEstadisticas();
     }
-    // Limpiar estado de cambio de plan al cerrar el modal
+
     if (changes['show'] && !this.show) {
       this.resetCambioPlan();
     }
@@ -58,8 +75,8 @@ export class GestionComponent implements OnChanges {
     this.loadingStats = true;
     this.stats = null;
     this.asistenciaService.getEstadisticas(this.cliente.id).subscribe({
-      next: (s) => {
-        this.stats = s;
+      next: (stats) => {
+        this.stats = stats;
         this.loadingStats = false;
       },
       error: () => {
@@ -79,7 +96,6 @@ export class GestionComponent implements OnChanges {
     this.close.emit();
   }
 
-  // ── Helpers de plan ────────────────────────────────────────────
   getPlanActual(): any {
     return this.cliente?.planes?.[0] ?? null;
   }
@@ -98,49 +114,47 @@ export class GestionComponent implements OnChanges {
   }
 
   getDeudaTotal(): number {
-    const cp = this.getPlanActual();
-    if (!cp?.deudas || !Array.isArray(cp.deudas)) return 0;
-    return cp.deudas
-      .filter((d: any) => !d.solventada)
-      .reduce((sum: number, d: any) => sum + (Number(d.monto) || 0), 0);
+    const clientePlan = this.getPlanActual();
+    if (!clientePlan?.deudas || !Array.isArray(clientePlan.deudas)) return 0;
+    return clientePlan.deudas
+      .filter((deuda: any) => !deuda.solventada)
+      .reduce((sum: number, deuda: any) => sum + (Number(deuda.monto) || 0), 0);
   }
 
-  // ── Helpers de asistencia ──────────────────────────────────────
   getPorcentaje(): number {
     return this.stats?.porcentajeAsistencia ?? 0;
   }
 
   getBarColor(): string {
-    const p = this.getPorcentaje();
-    if (p >= 70) return 'bg-green-500';
-    if (p >= 40) return 'bg-yellow-400';
+    const porcentaje = this.getPorcentaje();
+    if (porcentaje >= 70) return 'bg-green-500';
+    if (porcentaje >= 40) return 'bg-yellow-400';
     return 'bg-red-400';
   }
 
   getTextColor(): string {
-    const p = this.getPorcentaje();
-    if (p >= 70) return 'text-green-600';
-    if (p >= 40) return 'text-yellow-600';
+    const porcentaje = this.getPorcentaje();
+    if (porcentaje >= 70) return 'text-green-600';
+    if (porcentaje >= 40) return 'text-yellow-600';
     return 'text-red-500';
   }
 
-  // ── Cambio de plan ─────────────────────────────────────────────
   abrirCambioPlan() {
     this.resetCambioPlan();
     this.showCambioPlan = true;
     const planActual = this.getPlanActual();
-    this.fechaInicio = new Date().toISOString().split('T')[0];
-    // Cargar planes disponibles
+    this.fechaInicio = getTodayDateOnly();
+
     this.planService.getPlanes(1, 100).subscribe({
-      next: (res) => {
+      next: (response) => {
         const planActualId = planActual?.planId ?? planActual?.plan?.id;
-        this.planesDisponibles = (res.data || []).filter(
-          (p: Plan) => p.id !== planActualId
+        this.planesDisponibles = (response.data || []).filter(
+          (plan: Plan) => plan.id !== planActualId,
         );
       },
       error: () => {
         this.planesDisponibles = [];
-      }
+      },
     });
   }
 
@@ -167,49 +181,48 @@ export class GestionComponent implements OnChanges {
       this.cambioPlanError = 'No se encontró un plan activo para cambiar.';
       return;
     }
+
     if (!this.nuevoPlanId) {
       this.cambioPlanError = 'Debes seleccionar un nuevo plan.';
       return;
     }
+
     if (!this.fechaInicio) {
       this.cambioPlanError = 'Debes indicar la fecha de inicio.';
       return;
     }
-    // Calcular fechaFin basada en el plan seleccionado
-    const planSeleccionado = this.planesDisponibles.find(p => p.id === Number(this.nuevoPlanId));
-    const inicio = new Date(this.fechaInicio);
-    const fin = new Date(inicio);
-    if (planSeleccionado?.unidadDuracion === 'DIAS') {
-      fin.setDate(fin.getDate() + (planSeleccionado.duracion || 30));
-    } else {
-      fin.setMonth(fin.getMonth() + (planSeleccionado?.duracion || 1));
-    }
 
+    const planSeleccionado = this.planesDisponibles.find(
+      (plan) => plan.id === Number(this.nuevoPlanId),
+    );
+    const rangoFechas = buildPlanDateRange(
+      this.fechaInicio,
+      Number(planSeleccionado?.duracion || 1),
+      this.getPlanUnit(planSeleccionado?.unidadDuracion),
+    );
     const dto = {
       nuevoPlanId: Number(this.nuevoPlanId),
-      fechaInicio: this.fechaInicio,
-      fechaFin: fin.toISOString().split('T')[0],
-      motivo: this.motivo || undefined
+      ...rangoFechas,
+      motivo: this.motivo || undefined,
     };
 
     this.isChangingPlan = true;
     this.cambioPlanError = '';
 
     this.clientePlanService.cambiarPlan(planActual.id, dto).subscribe({
-      next: (res) => {
+      next: (response) => {
         this.isChangingPlan = false;
-        this.resultadoCambio = res;
+        this.resultadoCambio = response;
         this.showCambioPlan = false;
-        // Emitir evento para refrescar la tabla
         this.planCambiado.emit();
-        // Cerrar el modal después de mostrar el resumen brevemente
-        setTimeout(() => {
-          this.cerrar();
-        }, 4000);
       },
-      error: (err) => {
+      error: (error) => {
         this.isChangingPlan = false;
-        const mensaje = err?.error?.message || '';
+        const mensaje = extractErrorMessage(
+          error,
+          'Ocurrió un error al intentar cambiar el plan. Inténtalo de nuevo.',
+        );
+
         if (
           mensaje.toLowerCase().includes('72') ||
           mensaje.toLowerCase().includes('horas') ||
@@ -218,11 +231,15 @@ export class GestionComponent implements OnChanges {
         ) {
           this.cambioPlanError =
             'Ya no se puede cambiar este plan porque superó el límite de 72 horas.';
-        } else {
-          this.cambioPlanError =
-            mensaje || 'Ocurrió un error al intentar cambiar el plan. Inténtalo de nuevo.';
+          return;
         }
-      }
+
+        this.cambioPlanError = mensaje;
+      },
     });
+  }
+
+  private getPlanUnit(unidadDuracion: unknown): PlanDurationUnit {
+    return unidadDuracion === 'DIAS' ? 'DIAS' : 'MESES';
   }
 }

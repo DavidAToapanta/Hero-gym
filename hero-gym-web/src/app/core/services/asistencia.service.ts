@@ -16,6 +16,8 @@ export interface AsistenciaStats {
   mensaje?: string;
 }
 
+export type AsistenciaHistorialItem = Record<string, unknown>;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -31,8 +33,12 @@ export class AsistenciaService {
     );
   }
 
-  getHistorial(clienteId: number): Observable<any> {
-    return this.http.get(
+  marcarMiAsistencia(usuarioId: number): Observable<any> {
+    return this.http.post(this.apiUrl, { usuarioId });
+  }
+
+  getHistorial(clienteId: number): Observable<AsistenciaHistorialItem[]> {
+    return this.http.get<AsistenciaHistorialItem[]>(
       `${this.apiUrl}/historial/${clienteId}`
     );
   }
@@ -44,6 +50,18 @@ export class AsistenciaService {
   getEstadisticas(clienteId: number): Observable<AsistenciaStats> {
     return this.http.get<AsistenciaStats>(
       `${this.apiUrl}/estadisticas/${clienteId}`
+    );
+  }
+
+  getMiEstadisticas(): Observable<AsistenciaStats> {
+    return this.http.get<AsistenciaStats>(
+      `${this.apiUrl}/mi-estadisticas`
+    );
+  }
+
+  getMiHistorial(): Observable<AsistenciaHistorialItem[]> {
+    return this.http.get<AsistenciaHistorialItem[]>(
+      `${this.apiUrl}/mi-historial`
     );
   }
 }

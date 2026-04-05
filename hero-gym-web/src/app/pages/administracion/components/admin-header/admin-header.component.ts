@@ -19,14 +19,7 @@ export class AdminHeaderComponent implements OnInit {
   constructor(private auth: AuthService) {}
 
   ngOnInit(): void {
-    const token = this.auth.getToken();
-    let userName = 'Administrador';
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        userName = payload.userName || userName;
-      } catch {}
-    }
+    const userName = this.auth.getDecodedToken()?.userName || 'Administrador';
     const last = localStorage.getItem('ultimoAcceso');
     const fecha = last ? new Date(last) : new Date();
     this.admin.nombre = userName;

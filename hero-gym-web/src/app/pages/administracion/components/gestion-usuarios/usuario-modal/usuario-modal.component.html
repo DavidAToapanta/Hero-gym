@@ -1,147 +1,238 @@
-<div class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm sm:items-center sm:p-6">
-  <div class="relative w-full max-w-2xl rounded-2xl bg-white p-5 shadow-2xl sm:p-8">
-    <!-- Botón cerrar -->
+<div
+  class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm sm:items-center sm:p-6"
+>
+  <div
+    #modalRoot
+    class="relative w-full max-w-2xl rounded-2xl bg-white p-5 shadow-2xl sm:p-8"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="'staff-modal-title'"
+  >
     <button
-      (click)="close.emit()"
-      class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-      >
-      ✕
+      type="button"
+      (click)="cerrar()"
+      aria-label="Cerrar modal de staff"
+      class="absolute right-4 top-4 rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+    >
+      <lucide-icon name="x" class="h-5 w-5" aria-hidden="true"></lucide-icon>
     </button>
 
-    <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-      <lucide-icon name="user-plus" class="w-5 h-5 text-indigo-600"></lucide-icon>
-      Nuevo Usuario del Sistema
-    </h2>
+    <div class="mb-6 pr-10">
+      <h2
+        id="staff-modal-title"
+        class="flex items-center gap-2 text-xl font-semibold text-gray-900 text-balance"
+      >
+        <lucide-icon name="user-plus" class="h-5 w-5 text-indigo-600" aria-hidden="true"></lucide-icon>
+        {{ modalTitle }}
+      </h2>
+      <p class="mt-2 text-sm leading-6 text-gray-500">
+        Completa los datos del perfil y asigna el rol correcto dentro del gimnasio.
+      </p>
+    </div>
 
-    <form class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <!-- Nombre -->
+    @if (visibleErrorMessage) {
+      <div
+        aria-live="polite"
+        class="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+      >
+        {{ visibleErrorMessage }}
+      </div>
+    }
+
+    <form
+      #staffForm="ngForm"
+      (ngSubmit)="guardar()"
+      class="grid grid-cols-1 gap-4 sm:grid-cols-2"
+      novalidate
+    >
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
+        <label class="mb-1 block text-sm font-medium text-gray-700" for="staff-nombres">Nombres</label>
         <input
+          #nombresModel="ngModel"
+          id="staff-nombres"
           type="text"
-          [(ngModel)]="usuario.nombre"
-          name="nombre"
-          class="input text-black placeholder-gray-400 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
-          placeholder="Ej: Carlos"
-          />
-        </div>
+          [(ngModel)]="formModel.nombres"
+          name="nombres"
+          autocomplete="given-name"
+          required
+          [attr.aria-invalid]="nombresModel.invalid && nombresModel.touched"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-black placeholder-gray-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          placeholder="Ej: Carlos…"
+        />
+      </div>
 
-        <!-- Apellidos -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
-          <input
-            type="text"
-            [(ngModel)]="usuario.apellidos"
-            name="apellidos"
-            class="input text-black placeholder-gray-400 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
-            placeholder="Ej: Mendoza"
+      <div>
+        <label class="mb-1 block text-sm font-medium text-gray-700" for="staff-apellidos">
+          Apellidos
+        </label>
+        <input
+          #apellidosModel="ngModel"
+          id="staff-apellidos"
+          type="text"
+          [(ngModel)]="formModel.apellidos"
+          name="apellidos"
+          autocomplete="family-name"
+          required
+          [attr.aria-invalid]="apellidosModel.invalid && apellidosModel.touched"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-black placeholder-gray-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          placeholder="Ej: Andrade…"
+        />
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium text-gray-700" for="staff-cedula">Cédula</label>
+        <input
+          #cedulaModel="ngModel"
+          id="staff-cedula"
+          type="text"
+          [(ngModel)]="formModel.cedula"
+          name="cedula"
+          autocomplete="off"
+          inputmode="numeric"
+          spellcheck="false"
+          required
+          [attr.aria-invalid]="cedulaModel.invalid && cedulaModel.touched"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-black placeholder-gray-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          placeholder="Ej: 0102030405…"
+        />
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium text-gray-700" for="staff-fecha-nacimiento">
+          Fecha de Nacimiento
+        </label>
+        <input
+          #fechaNacimientoModel="ngModel"
+          id="staff-fecha-nacimiento"
+          type="date"
+          [(ngModel)]="formModel.fechaNacimiento"
+          name="fechaNacimiento"
+          autocomplete="bday"
+          required
+          [attr.aria-invalid]="fechaNacimientoModel.invalid && fechaNacimientoModel.touched"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        />
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium text-gray-700" for="staff-rol">Rol</label>
+        <select
+          #tenantRoleModel="ngModel"
+          id="staff-rol"
+          [(ngModel)]="formModel.tenantRole"
+          name="tenantRole"
+          required
+          (ngModelChange)="onRoleChange($event)"
+          [attr.aria-invalid]="tenantRoleModel.invalid && tenantRoleModel.touched"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        >
+          @for (role of roleOptions; track role) {
+            <option [ngValue]="role">{{ getRoleLabel(role) }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium text-gray-700" for="staff-username">Usuario</label>
+        <input
+          #userNameModel="ngModel"
+          id="staff-username"
+          type="text"
+          [(ngModel)]="formModel.userName"
+          name="userName"
+          autocomplete="username"
+          spellcheck="false"
+          required
+          [attr.aria-invalid]="userNameModel.invalid && userNameModel.touched"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-black placeholder-gray-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          placeholder="Ej: carlos.andrade…"
+        />
+      </div>
+
+      <div class="sm:col-span-2">
+        <label class="mb-1 block text-sm font-medium text-gray-700" for="staff-password">
+          {{ isEditing ? 'Nueva Contraseña' : 'Contraseña' }}
+        </label>
+        <input
+          #passwordModel="ngModel"
+          id="staff-password"
+          type="password"
+          [(ngModel)]="formModel.password"
+          name="password"
+          [required]="!isEditing"
+          [attr.autocomplete]="isEditing ? 'new-password' : 'new-password'"
+          [attr.aria-invalid]="passwordModel.invalid && passwordModel.touched"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 text-black placeholder-gray-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          [placeholder]="isEditing ? 'Déjala vacía para conservar la actual…' : 'Mínimo 6 caracteres…'"
+        />
+        <p class="mt-1 text-xs leading-5 text-gray-500">
+          @if (isEditing) {
+            Solo escríbela si deseas reemplazar la contraseña actual.
+          } @else {
+            La contraseña se usará para el primer acceso del staff.
+          }
+        </p>
+      </div>
+
+      @if (requiresScheduleAndSalary()) {
+        <div class="sm:col-span-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-sm font-medium text-gray-700" for="staff-horario">
+              Horario
+            </label>
+            <input
+              #horarioModel="ngModel"
+              id="staff-horario"
+              type="text"
+              [(ngModel)]="formModel.horario"
+              name="horario"
+              autocomplete="off"
+              required
+              [attr.aria-invalid]="horarioModel.invalid && horarioModel.touched"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-black placeholder-gray-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              placeholder="Ej: L-V 08:00-16:00…"
             />
           </div>
 
-          <!-- Cédula -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Cédula</label>
+            <label class="mb-1 block text-sm font-medium text-gray-700" for="staff-sueldo">
+              Sueldo
+            </label>
             <input
-              type="text"
-              [(ngModel)]="usuario.cedula"
-              name="cedula"
-              class="input text-black placeholder-gray-400 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
-              placeholder="0102030405"
-              />
-            </div>
+              #sueldoModel="ngModel"
+              id="staff-sueldo"
+              type="number"
+              [(ngModel)]="formModel.sueldo"
+              name="sueldo"
+              autocomplete="off"
+              inputmode="decimal"
+              min="0.01"
+              step="0.01"
+              required
+              [attr.aria-invalid]="sueldoModel.invalid && sueldoModel.touched"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-black placeholder-gray-400 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              placeholder="Ej: 550.00…"
+            />
+          </div>
+        </div>
+      }
 
-            <!-- Fecha de nacimiento -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
-              <input
-                type="date"
-                [(ngModel)]="usuario.fechaNacimiento"
-                name="fechaNacimiento"
-                class="input text-black placeholder-gray-400 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
-                />
-              </div>
-
-              <!-- Rol -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
-                <select
-                  [(ngModel)]="usuario.rol"
-                  name="rol"
-                  class="input text-black placeholder-gray-400 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
-                  >
-                  <option>Administrador</option>
-                  <option>Entrenador</option>
-                  <option>Recepcionista</option>
-                </select>
-              </div>
-
-              <!-- Usuario -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
-                <input
-                  type="text"
-                  [(ngModel)]="usuario.userName"
-                  name="userName"
-                  class="input text-black placeholder-gray-400 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
-                  placeholder="carlos.mendoza"
-                  />
-                </div>
-
-                <!-- Contraseña -->
-                <div class="col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                  <input
-                    type="password"
-                    [(ngModel)]="usuario.password"
-                    name="password"
-                    class="input text-black placeholder-gray-400 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
-                    placeholder="••••••••"
-                    />
-                  </div>
-
-                  <!-- Campos condicionales para Entrenador/Recepcionista -->
-                  @if (usuario.rol !== 'Administrador') {
-                    <div class="col-span-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Horario</label>
-                        <input
-                          type="text"
-                          [(ngModel)]="usuario.horario"
-                          name="horario"
-                          class="input text-black placeholder-gray-400 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
-                          placeholder="L-V 08:00-16:00"
-                          />
-                        </div>
-                        <div>
-                          <label class="block text-sm font-medium text-gray-700 mb-1">Sueldo</label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            [(ngModel)]="usuario.sueldo"
-                            name="sueldo"
-                            class="input text-black placeholder-gray-400 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
-                            placeholder="500.00"
-                            />
-                          </div>
-                        </div>
-                      }
-                    </form>
-
-                    <div class="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                      <button
-                        type="button"
-                        (click)="close.emit()"
-                        class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
-                        >
-                        Cancelar
-                      </button>
-                      <button
-                        type="button"
-                        (click)="guardar()"
-                        class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
-                        >
-                        Guardar Usuario
-                      </button>
-                    </div>
-                  </div>
-                </div>
+      <div class="mt-4 flex flex-col-reverse gap-3 sm:col-span-2 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          (click)="cerrar()"
+          class="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="isSubmitting"
+          class="rounded-lg bg-indigo-600 px-4 py-2 text-white transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {{ isSubmitting ? 'Guardando…' : submitLabel }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

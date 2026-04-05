@@ -1,89 +1,304 @@
-<div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-  <!-- Encabezado -->
-  <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-    <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-      <lucide-icon name="users" class="w-5 h-5 text-indigo-600"></lucide-icon>
-      Usuarios del Sistema
-    </h2>
+<div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-md">
+  <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="space-y-2">
+      <h2 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
+        <lucide-icon name="users" class="h-5 w-5 text-indigo-600" aria-hidden="true"></lucide-icon>
+        Usuarios del Sistema
+      </h2>
+      <p class="max-w-xl text-sm leading-6 text-gray-500">
+        Administra el staff del tenant actual y controla quién puede operar como administrador,
+        recepcionista o entrenador.
+      </p>
+    </div>
 
     <button
+      type="button"
       (click)="abrirModal()"
-      class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white transition hover:bg-indigo-700 sm:w-auto">
-      <lucide-icon name="plus" class="w-4 h-4"></lucide-icon>
+      [disabled]="isLoadingStaffDetails"
+      class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
+    >
+      <lucide-icon name="plus" class="h-4 w-4" aria-hidden="true"></lucide-icon>
       Nuevo Usuario
     </button>
   </div>
 
-  <div class="space-y-3 md:hidden">
-    @for (u of usuarios; track u) {
-      <article class="rounded-2xl border border-gray-200 p-4 shadow-sm">
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <h3 class="font-semibold text-gray-900">{{ u.nombres }} {{ u.apellidos }}</h3>
-            <p class="text-sm capitalize text-gray-500">{{ u.rol }}</p>
-          </div>
-          <span class="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">Activo</span>
-        </div>
-
-        <button (click)="eliminar(u)" class="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100">
-          Eliminar
-        </button>
-      </article>
-    }
-  </div>
-
-  <!-- Tabla de usuarios -->
-  <div class="hidden overflow-x-auto md:block">
-    <table class="min-w-full text-sm border-separate border-spacing-y-2">
-      <thead>
-        <tr class="text-left text-gray-500 border-b border-gray-200">
-          <th class="py-3 font-medium">Nombre</th>
-          <th class="py-3 font-medium">Rol</th>
-          <th class="py-3 font-medium">Estado</th>
-          <th class="py-3 font-medium">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (u of usuarios; track u) {
-          <tr
-            class="bg-gray-50 hover:bg-gray-100 transition rounded-lg"
-            >
-            <td class="py-3 px-4 font-medium text-gray-800">{{ u.nombres }} {{ u.apellidos }}</td>
-            <td class="py-3 px-4 capitalize">{{ u.rol }}</td>
-            <td class="py-3 px-4">
-              <span
-                class="text-xs px-2 py-1 rounded-full"
-                [ngClass]="'bg-green-100 text-green-700'"
-                >
-                Activo
-              </span>
-            </td>
-            <td class="py-3 px-4">
-              <button (click)="eliminar(u)" class="text-red-600 hover:underline">Eliminar</button>
-            </td>
-          </tr>
+  <div class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+    <div>
+      <label class="mb-1 block text-sm font-medium text-gray-700" for="staff-filter-role">Rol</label>
+      <select
+        id="staff-filter-role"
+        [(ngModel)]="selectedRole"
+        name="selectedRole"
+        (ngModelChange)="cargarStaff()"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+      >
+        <option value="">Todos los roles</option>
+        @for (role of roleOptions; track role) {
+          <option [ngValue]="role">{{ getRoleLabel(role) }}</option>
         }
-      </tbody>
-    </table>
+      </select>
+    </div>
+
+    <div>
+      <label class="mb-1 block text-sm font-medium text-gray-700" for="staff-filter-estado">
+        Estado
+      </label>
+      <select
+        id="staff-filter-estado"
+        [(ngModel)]="selectedEstado"
+        name="selectedEstado"
+        (ngModelChange)="cargarStaff()"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+      >
+        <option value="">Todos los estados</option>
+        @for (estado of estadoOptions; track estado) {
+          <option [ngValue]="estado">{{ getEstadoLabel(estado) }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
+      <button
+        type="button"
+        (click)="cargarStaff()"
+        class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+      >
+        <lucide-icon name="refresh-cw" class="h-4 w-4" aria-hidden="true"></lucide-icon>
+        Actualizar
+      </button>
+      <button
+        type="button"
+        (click)="limpiarFiltros()"
+        class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+      >
+        <lucide-icon name="rotate-ccw" class="h-4 w-4" aria-hidden="true"></lucide-icon>
+        Limpiar
+      </button>
+    </div>
   </div>
+
+  @if (errorMessage) {
+    <div
+      aria-live="polite"
+      class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+    >
+      {{ errorMessage }}
+    </div>
+  }
+
+  @if (isLoadingStaffDetails) {
+    <div
+      aria-live="polite"
+      class="mb-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700"
+    >
+      Cargando el detalle del staff seleccionado…
+    </div>
+  }
+
+  @if (isLoading) {
+    <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+      <p class="text-sm font-medium text-slate-700">Cargando staff…</p>
+      <p class="mt-2 text-sm text-slate-500">
+        Estamos consultando los usuarios del tenant actual.
+      </p>
+    </div>
+  } @else if (staff.length === 0) {
+    <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+      <p class="text-base font-semibold text-slate-900">No hay staff registrado</p>
+      <p class="mt-2 text-sm leading-6 text-slate-500">
+        Crea un usuario nuevo o ajusta los filtros para revisar otro conjunto de resultados.
+      </p>
+    </div>
+  } @else {
+    <div class="space-y-3 lg:hidden">
+      @for (staffItem of staff; track staffItem.usuarioId) {
+        <article class="rounded-xl border border-gray-200 px-4 py-4 shadow-sm">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <h3 class="truncate text-base font-semibold text-gray-900">
+                {{ getNombreCompleto(staffItem) || staffItem.userName }}
+              </h3>
+              <p class="mt-1 text-sm text-gray-500">{{ getRoleLabel(staffItem.tenantRole) }}</p>
+            </div>
+
+            <span
+              class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold"
+              [ngClass]="getEstadoClasses(staffItem.estado)"
+            >
+              {{ getEstadoLabel(staffItem.estado) }}
+            </span>
+          </div>
+
+          <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <div class="min-w-0">
+              <dt class="text-gray-500">Cédula</dt>
+              <dd class="mt-1 truncate font-medium tabular-nums text-gray-900">
+                {{ staffItem.cedula || '—' }}
+              </dd>
+            </div>
+
+            <div class="min-w-0">
+              <dt class="text-gray-500">Horario</dt>
+              <dd class="mt-1 truncate font-medium text-gray-900">
+                {{ staffItem.horario || 'No aplica' }}
+              </dd>
+            </div>
+
+            <div class="min-w-0">
+              <dt class="text-gray-500">Sueldo</dt>
+              <dd class="mt-1 truncate font-medium tabular-nums text-gray-900">
+                {{ formatSueldo(staffItem.sueldo) }}
+              </dd>
+            </div>
+
+            <div class="min-w-0">
+              <dt class="text-gray-500">Usuario</dt>
+              <dd class="mt-1 truncate font-medium text-gray-900">
+                {{ staffItem.userName || '—' }}
+              </dd>
+            </div>
+          </dl>
+
+          <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+            <button
+              type="button"
+              (click)="editarStaff(staffItem)"
+              class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            >
+              <lucide-icon name="pencil" class="h-4 w-4" aria-hidden="true"></lucide-icon>
+              Editar
+            </button>
+
+            <button
+              type="button"
+              (click)="abrirConfirmacion(staffItem)"
+              class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              [ngClass]="
+                staffItem.estado === 'INACTIVO'
+                  ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                  : 'border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
+              "
+            >
+              <lucide-icon
+                [name]="staffItem.estado === 'INACTIVO' ? 'power' : 'power-off'"
+                class="h-4 w-4"
+                aria-hidden="true"
+              ></lucide-icon>
+              {{ staffItem.estado === 'INACTIVO' ? 'Reactivar' : 'Inactivar' }}
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+
+    <div class="hidden overflow-x-auto lg:block">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr class="text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <th class="px-4 py-3">Nombre</th>
+            <th class="px-4 py-3">Rol</th>
+            <th class="px-4 py-3">Cédula</th>
+            <th class="px-4 py-3">Horario</th>
+            <th class="px-4 py-3">Sueldo</th>
+            <th class="px-4 py-3">Estado</th>
+            <th class="px-4 py-3 text-right">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-gray-100">
+          @for (staffItem of staff; track staffItem.usuarioId) {
+            <tr class="transition hover:bg-slate-50/80">
+              <td class="px-4 py-4 align-top">
+                <div class="min-w-0">
+                  <p class="truncate font-semibold text-gray-900">
+                    {{ getNombreCompleto(staffItem) || staffItem.userName }}
+                  </p>
+                  <p class="mt-1 truncate text-sm text-gray-500">
+                    {{ staffItem.userName || 'Sin usuario asignado' }}
+                  </p>
+                </div>
+              </td>
+
+              <td class="px-4 py-4 align-top text-sm text-gray-700">
+                {{ getRoleLabel(staffItem.tenantRole) }}
+              </td>
+
+              <td class="px-4 py-4 align-top text-sm tabular-nums text-gray-700">
+                {{ staffItem.cedula || '—' }}
+              </td>
+
+              <td class="px-4 py-4 align-top text-sm text-gray-700">
+                {{ staffItem.horario || 'No aplica' }}
+              </td>
+
+              <td class="px-4 py-4 align-top text-sm tabular-nums text-gray-700">
+                {{ formatSueldo(staffItem.sueldo) }}
+              </td>
+
+              <td class="px-4 py-4 align-top">
+                <span
+                  class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold"
+                  [ngClass]="getEstadoClasses(staffItem.estado)"
+                >
+                  {{ getEstadoLabel(staffItem.estado) }}
+                </span>
+              </td>
+
+              <td class="px-4 py-4 align-top">
+                <div class="flex items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    (click)="editarStaff(staffItem)"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  >
+                    <lucide-icon name="pencil" class="h-4 w-4" aria-hidden="true"></lucide-icon>
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    (click)="abrirConfirmacion(staffItem)"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    [ngClass]="
+                      staffItem.estado === 'INACTIVO'
+                        ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                        : 'border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'
+                    "
+                  >
+                    <lucide-icon
+                      [name]="staffItem.estado === 'INACTIVO' ? 'power' : 'power-off'"
+                      class="h-4 w-4"
+                      aria-hidden="true"
+                    ></lucide-icon>
+                    {{ staffItem.estado === 'INACTIVO' ? 'Reactivar' : 'Inactivar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </div>
 
-<!-- Confirmation Dialog -->
-<app-confirm-dialog
-  [show]="showConfirmDialog"
-  [title]="'¿Eliminar usuario?'"
-  [message]="usuarioToDelete ? '¿Está seguro que desea eliminar al usuario ' + usuarioToDelete.nombres + ' ' + usuarioToDelete.apellidos + '? Esta acción no se puede deshacer.' : ''"
-  confirmText="Eliminar"
-  cancelText="Cancelar"
-  type="danger"
-  (confirmed)="onConfirmDelete()"
-  (cancelled)="onCancelDelete()"
-></app-confirm-dialog>
-
-<!-- Modal -->
-@if (mostrarModal) {
+@if (showModal) {
   <app-usuario-modal
+    [staff]="staffEditando"
+    [isSubmitting]="isSaving"
+    [errorMessage]="modalErrorMessage"
     (close)="cerrarModal()"
-    (save)="guardarUsuario($event)"
+    (save)="guardarStaff($event)"
   ></app-usuario-modal>
 }
+
+<app-confirm-dialog
+  [show]="showConfirmDialog"
+  [title]="getConfirmTitle()"
+  [message]="getConfirmMessage()"
+  [confirmText]="getConfirmButtonLabel()"
+  cancelText="Cancelar"
+  [type]="accionPendiente === 'reactivar' ? 'info' : 'warning'"
+  (confirmed)="confirmarCambioEstado()"
+  (cancelled)="cerrarConfirmacion()"
+></app-confirm-dialog>

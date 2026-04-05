@@ -95,6 +95,24 @@
     <!-- Mensaje motivacional -->
     <p class="text-sm text-slate-500 font-medium">{{ getMensajeMotivacional() }}</p>
 
+    <!-- Historial reciente -->
+    <div class="grid gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 sm:grid-cols-2">
+      <div>
+        <p class="text-[10px] uppercase tracking-wide text-slate-400">Última asistencia</p>
+        <p class="mt-1 text-sm font-semibold text-slate-700">{{ getUltimaAsistenciaTexto() }}</p>
+      </div>
+      <div>
+        <p class="text-[10px] uppercase tracking-wide text-slate-400">Registros del plan</p>
+        <p class="mt-1 text-sm font-semibold text-slate-700">{{ historial.length }}</p>
+      </div>
+    </div>
+
+    @if (historialError) {
+    <p class="text-xs text-amber-600">
+      No se pudo cargar el historial reciente, pero las estadísticas principales sí están disponibles.
+    </p>
+    }
+
     <!-- Fechas del plan -->
     <div class="flex items-center gap-6 pt-1 border-t border-slate-100">
       <div>

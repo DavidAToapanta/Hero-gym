@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
+import { ClientePlanPayload } from './cliente-plan.service';
+import { normalizeDateOnly } from '../utils/plan-date.utils';
 
 export interface Pago {
   id: number;
@@ -30,13 +32,12 @@ export class PagoService {
   constructor(private http: HttpClient) {}
 
   getPagos(page = 1, limit = 10, searchTerm = ''): Observable<any> {
-    let params = new HttpParams()
-      .set('page', page)
-      .set('limit', limit);
-      
+    let params = new HttpParams().set('page', page).set('limit', limit);
+
     if (searchTerm) {
-        params = params.set('search', searchTerm);
+      params = params.set('search', searchTerm);
     }
+
     return this.http.get<any>(this.apiUrl, { params });
   }
 
@@ -50,20 +51,20 @@ export class PagoService {
 
   getPlanes(page = 1, limit = 100): Observable<any[]> {
     const params = new HttpParams().set('page', page).set('limit', limit);
-    return this.http.get<any>(this.planUrl, { params }).pipe(
-      map(response => response.data || [])
-    );
+
+    return this.http
+      .get<any>(this.planUrl, { params })
+      .pipe(map((response) => response.data || []));
   }
 
-  createClientePlan(data: {
-    clienteId: number;
-    planId: number;
-    fechaInicio: string; // ISO yyyy-MM-dd
-    fechaFin: string;    // ISO yyyy-MM-dd
-    diaPago: number;
-    activado: boolean;
-  }): Observable<any> {
-    return this.http.post<any>(this.clientePlanUrl, data);
+  createClientePlan(data: ClientePlanPayload): Observable<any> {
+    const payload: ClientePlanPayload = {
+      ...data,
+      fechaInicio: normalizeDateOnly(data.fechaInicio),
+      fechaFin: normalizeDateOnly(data.fechaFin),
+    };
+
+    return this.http.post<any>(this.clientePlanUrl, payload);
   }
 
   getPlanById(id: number): Observable<any> {
@@ -72,7 +73,7 @@ export class PagoService {
 
   getIngresosDelMes() {
     return this.http.get<IngresosMesResponse>(`${this.apiUrl}/Ingresos-mes`).pipe(
-      map((res) => Number((res as any)?.ingresos ?? res))
+      map((res) => Number((res as any)?.ingresos ?? res)),
     );
   }
 

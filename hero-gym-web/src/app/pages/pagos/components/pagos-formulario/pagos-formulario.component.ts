@@ -1,9 +1,16 @@
-import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { PagoService } from '../../../../core/services/pago.service';
-import { ClienteService } from '../../../../core/services/cliente.service';
 import { forkJoin, of } from 'rxjs';
+
+import { ClienteService } from '../../../../core/services/cliente.service';
+import { PagoService } from '../../../../core/services/pago.service';
+import { extractErrorMessage } from '../../../../core/utils/http-error.utils';
+import {
+  buildPlanDateRange,
+  getTodayDateOnly,
+  PlanDurationUnit,
+} from '../../../../core/utils/plan-date.utils';
 
 @Component({
   selector: 'app-pagos-formulario',
@@ -38,36 +45,41 @@ export class PagosFormularioComponent implements OnInit {
   deudaCalculada = 0;
   mensajeAdvertencia = '';
 
-  constructor(private pagoService: PagoService, private clienteService: ClienteService) {}
+  constructor(
+    private pagoService: PagoService,
+    private clienteService: ClienteService,
+  ) {}
 
   ngOnInit(): void {
-    // Prefijar fecha de pago a hoy
-    this.pago.fecha = this.hoyISO();
+    this.pago.fecha = getTodayDateOnly();
 
-    // Cargar todos los clientes (paginado grande)
     this.clienteService.getClientes(1, 50).subscribe({
       next: (res: any) => {
         const page1 = Array.isArray(res?.data) ? res.data : [];
         const totalPages = Number(res?.meta?.totalPages ?? 1);
+
         if (totalPages > 1) {
           const requests = [] as any[];
-          for (let p = 2; p <= totalPages; p++) {
-            requests.push(this.clienteService.getClientes(p, 50));
+          for (let page = 2; page <= totalPages; page++) {
+            requests.push(this.clienteService.getClientes(page, 50));
           }
+
           forkJoin(requests.length ? requests : [of({ data: [] })]).subscribe({
             next: (pages: any[]) => {
-              const rest = pages.flatMap((r) => (Array.isArray(r?.data) ? r.data : []));
+              const rest = pages.flatMap((response) =>
+                Array.isArray(response?.data) ? response.data : [],
+              );
               const all = page1.concat(rest);
               this.clientes = all
-                .map((c: any) => ({ 
-                  id: c?.id, 
-                  nombre: `${c?.usuario?.nombres ?? ''} ${c?.usuario?.apellidos ?? ''}`.trim(),
-                  cedula: c?.usuario?.cedula || ''
+                .map((cliente: any) => ({
+                  id: cliente?.id,
+                  nombre: `${cliente?.usuario?.nombres ?? ''} ${cliente?.usuario?.apellidos ?? ''}`.trim(),
+                  cedula: cliente?.usuario?.cedula || '',
                 }))
-                .filter((x: any) => x.id)
+                .filter((cliente: any) => cliente.id)
                 .sort((a: any, b: any) => a.nombre.localeCompare(b.nombre));
-              
-              this.todosLosClientes = [...this.clientes]; // Guardar copia completa
+
+              this.todosLosClientes = [...this.clientes];
             },
             error: () => this.setClientes(page1),
           });
@@ -78,15 +90,14 @@ export class PagosFormularioComponent implements OnInit {
       error: () => (this.clientes = []),
     });
 
-    // Cargar todos los planes
     this.pagoService.getPlanes().subscribe({
       next: (planes) => (this.planes = Array.isArray(planes) ? planes : []),
       error: () => (this.planes = []),
     });
 
-    // Cargar relaciones cliente-plan para asociar si existe
     this.pagoService.getClientePlanes().subscribe({
-      next: (cp) => (this.clientePlanes = Array.isArray(cp) ? cp : []),
+      next: (clientePlanes) =>
+        (this.clientePlanes = Array.isArray(clientePlanes) ? clientePlanes : []),
       error: () => (this.clientePlanes = []),
     });
   }
@@ -98,6 +109,7 @@ export class PagosFormularioComponent implements OnInit {
     this.selectedPlanId = null;
     this.detallesPlan = null;
     this.planActivoDelCliente = this.obtenerPlanVigente(this.selectedClienteId);
+
     if (this.planActivoDelCliente) {
       const nombrePlan = this.planActivoDelCliente?.plan?.nombre ?? 'el plan actual';
       const fechaFin = this.formatearFechaHumana(this.planActivoDelCliente?.fechaFin);
@@ -109,12 +121,14 @@ export class PagosFormularioComponent implements OnInit {
 
   onPlanChange() {
     const planId = Number(this.selectedPlanId);
-    this.selectedPlan = this.planes.find((p) => p?.id === planId) ?? null;
+    this.selectedPlan = this.planes.find((plan) => plan?.id === planId) ?? null;
 
-    // Buscar si ya existe una relación cliente-plan para este cliente y plan
     const existente = this.clientePlanes
-      .filter((x) => x?.clienteId === this.selectedClienteId && x?.planId === planId)
-      .sort((a, b) => new Date(b?.fechaInicio ?? 0).getTime() - new Date(a?.fechaInicio ?? 0).getTime())[0];
+      .filter((clientePlan) => clientePlan?.clienteId === this.selectedClienteId && clientePlan?.planId === planId)
+      .sort(
+        (a, b) =>
+          new Date(b?.fechaInicio ?? 0).getTime() - new Date(a?.fechaInicio ?? 0).getTime(),
+      )[0];
 
     if (existente) {
       this.pago.clientePlanId = existente.id;
@@ -125,24 +139,22 @@ export class PagosFormularioComponent implements OnInit {
         activado: !!existente?.activado,
       };
     } else {
-      // No existe relación todavía: proponer fechas con base en el plan
-      const inicio = this.pago.fecha || this.hoyISO();
-      // Usar duracion y unidadDuracion del plan
-      const duracion = Number(this.selectedPlan?.duracion ?? 1);
-      const unidad = this.selectedPlan?.unidadDuracion ?? 'MESES';
-      
-      const fin = this.sumarDuracionISO(inicio, duracion, unidad);
-      
+      const inicio = this.pago.fecha || getTodayDateOnly();
+      const rangoFechas = buildPlanDateRange(
+        inicio,
+        Number(this.selectedPlan?.duracion ?? 1),
+        this.getPlanUnit(this.selectedPlan?.unidadDuracion),
+      );
+
       this.pago.clientePlanId = null as unknown as number;
       this.detallesPlan = {
         nombre: this.selectedPlan?.nombre ?? '—',
-        fechaInicio: inicio,
-        fechaFin: fin,
+        fechaInicio: rangoFechas.fechaInicio,
+        fechaFin: rangoFechas.fechaFin,
         activado: true,
       };
     }
 
-    // Autocompletar monto con precio del plan
     if (this.selectedPlan?.precio != null) {
       const precio = Number(this.selectedPlan.precio);
       if (!isNaN(precio)) this.pago.monto = precio;
@@ -156,7 +168,9 @@ export class PagosFormularioComponent implements OnInit {
       });
     }
 
-    if (!this.pago.fecha) this.pago.fecha = this.hoyISO();
+    if (!this.pago.fecha) {
+      this.pago.fecha = getTodayDateOnly();
+    }
   }
 
   guardar() {
@@ -173,8 +187,8 @@ export class PagosFormularioComponent implements OnInit {
     const crearPagoCon = (clientePlanId: number) => {
       const payload = { clientePlanId, monto, fecha: fechaPago };
       this.pagoService.createPago(payload).subscribe({
-        next: (res) => {
-          this.save.emit(res);
+        next: (response) => {
+          this.save.emit(response);
           this.isSubmitting = false;
           this.cerrar();
         },
@@ -184,33 +198,46 @@ export class PagosFormularioComponent implements OnInit {
 
     if (this.pago.clientePlanId) {
       crearPagoCon(Number(this.pago.clientePlanId));
-    } else {
-      const planVigente = this.obtenerPlanVigente(clienteId);
-      if (planVigente) {
-        const nombrePlan = planVigente?.plan?.nombre ?? 'el plan actual';
-        const fechaFin = this.formatearFechaHumana(planVigente?.fechaFin);
-        this.errorMessage = `No se puede asignar un nuevo plan porque ${nombrePlan} termina el ${fechaFin}.`;
-        this.isSubmitting = false;
-        return;
-      }
-
-      const fechaInicio = this.detallesPlan?.fechaInicio || this.hoyISO();
-      const duracion = Number(this.selectedPlan?.duracion ?? 1);
-      const unidad = this.selectedPlan?.unidadDuracion ?? 'MESES';
-      const fechaFin = this.sumarDuracionISO(fechaInicio, duracion, unidad);
-      
-      const diaPago = new Date(fechaInicio).getDate();
-      this.pagoService
-        .createClientePlan({ clienteId, planId, fechaInicio, fechaFin, diaPago, activado: true })
-        .subscribe({
-          next: (cp) => {
-            const id = Number(cp?.id);
-            if (!isNaN(id)) crearPagoCon(id);
-            else this.manejarError({ error: { message: 'No se pudo crear la relación Cliente-Plan' } });
-          },
-          error: (error) => this.manejarError(error),
-        });
+      return;
     }
+
+    const planVigente = this.obtenerPlanVigente(clienteId);
+    if (planVigente) {
+      const nombrePlan = planVigente?.plan?.nombre ?? 'el plan actual';
+      const fechaFin = this.formatearFechaHumana(planVigente?.fechaFin);
+      this.errorMessage = `No se puede asignar un nuevo plan porque ${nombrePlan} termina el ${fechaFin}.`;
+      this.isSubmitting = false;
+      return;
+    }
+
+    const fechaInicio = this.detallesPlan?.fechaInicio || getTodayDateOnly();
+    const rangoFechas = buildPlanDateRange(
+      fechaInicio,
+      Number(this.selectedPlan?.duracion ?? 1),
+      this.getPlanUnit(this.selectedPlan?.unidadDuracion),
+    );
+
+    this.pagoService
+      .createClientePlan({
+        clienteId,
+        planId,
+        ...rangoFechas,
+        activado: true,
+      })
+      .subscribe({
+        next: (clientePlan) => {
+          const id = Number(clientePlan?.id);
+          if (!isNaN(id)) {
+            crearPagoCon(id);
+            return;
+          }
+
+          this.manejarError({
+            error: { message: 'No se pudo crear la relación Cliente-Plan' },
+          });
+        },
+        error: (error) => this.manejarError(error),
+      });
   }
 
   cerrar() {
@@ -233,39 +260,32 @@ export class PagosFormularioComponent implements OnInit {
     this.pagoForm?.resetForm(this.pago);
   }
 
-  private hoyISO(): string {
-    const d = new Date();
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-  }
-
   private setClientes(data: any[]) {
     this.clientes = (Array.isArray(data) ? data : [])
-      .map((c: any) => ({ 
-        id: c?.id, 
-        nombre: `${c?.usuario?.nombres ?? ''} ${c?.usuario?.apellidos ?? ''}`.trim(),
-        cedula: c?.usuario?.cedula || ''
+      .map((cliente: any) => ({
+        id: cliente?.id,
+        nombre: `${cliente?.usuario?.nombres ?? ''} ${cliente?.usuario?.apellidos ?? ''}`.trim(),
+        cedula: cliente?.usuario?.cedula || '',
       }))
-      .filter((x: any) => x.id)
+      .filter((cliente: any) => cliente.id)
       .sort((a: any, b: any) => a.nombre.localeCompare(b.nombre));
-      
+
     this.todosLosClientes = [...this.clientes];
   }
 
   filtrarClientes() {
     const term = (this.searchTermCliente || '').toLowerCase().trim();
-    this.showSuggestions = true; // Mostrar sugerencias al escribir
-    
+    this.showSuggestions = true;
+
     if (!term) {
       this.clientes = [...this.todosLosClientes];
       return;
     }
-    
-    this.clientes = this.todosLosClientes.filter(c => 
-      c.nombre.toLowerCase().includes(term) || 
-      c.cedula.toLowerCase().includes(term)
+
+    this.clientes = this.todosLosClientes.filter(
+      (cliente) =>
+        cliente.nombre.toLowerCase().includes(term) ||
+        cliente.cedula.toLowerCase().includes(term),
     );
   }
 
@@ -276,39 +296,15 @@ export class PagosFormularioComponent implements OnInit {
     this.onClienteChange();
   }
 
-  private sumarDuracionISO(fechaISO: string, cantidad: number, unidad: 'MESES' | 'DIAS'): string {
-    const [y, m, d] = fechaISO.split('-').map((x) => Number(x));
-    // El mes en Date es 0-indexado, por eso (m - 1)
-    const dt = new Date(y, m - 1, d);
-
-    if (unidad === 'DIAS') {
-      dt.setDate(dt.getDate() + cantidad);
-    } else {
-      // Default: MESES
-      dt.setMonth(dt.getMonth() + cantidad);
-    }
-    
-    const yyyy = dt.getFullYear();
-    const mm = String(dt.getMonth() + 1).padStart(2, '0');
-    const dd = String(dt.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
-  }
-
   private manejarError(error: any) {
-    const mensaje = error?.error?.message;
-    this.errorMessage =
-      typeof mensaje === 'string'
-        ? mensaje
-        : Array.isArray(mensaje) && mensaje.length > 0
-        ? mensaje.join('. ')
-        : 'Ocurrió un error al registrar el pago';
+    this.errorMessage = extractErrorMessage(error, 'Ocurrió un error al registrar el pago');
     this.isSubmitting = false;
   }
 
   calcularDeuda() {
     const precioPlan = Number(this.selectedPlan?.precio || 0);
     const montoPago = Number(this.pago.monto || 0);
-    
+
     if (montoPago > 0 && montoPago < precioPlan) {
       this.deudaCalculada = precioPlan - montoPago;
       this.mensajeAdvertencia = '';
@@ -324,14 +320,19 @@ export class PagosFormularioComponent implements OnInit {
   private obtenerPlanVigente(clienteId: number | null): any | null {
     if (!clienteId || !Array.isArray(this.clientePlanes)) return null;
     const hoy = new Date();
-    const planesCliente = this.clientePlanes.filter((cp) => cp?.clienteId === clienteId);
-    return planesCliente
-      .sort((a, b) => new Date(b?.fechaFin ?? 0).getTime() - new Date(a?.fechaFin ?? 0).getTime())
-      .find((cp) => {
-        if (!cp) return false;
-        const fin = new Date(cp?.fechaFin ?? '');
-        return !!cp.activado && !isNaN(fin.getTime()) && fin >= hoy;
-      }) ?? null;
+    const planesCliente = this.clientePlanes.filter((clientePlan) => clientePlan?.clienteId === clienteId);
+
+    return (
+      planesCliente
+        .sort(
+          (a, b) => new Date(b?.fechaFin ?? 0).getTime() - new Date(a?.fechaFin ?? 0).getTime(),
+        )
+        .find((clientePlan) => {
+          if (!clientePlan) return false;
+          const fin = new Date(clientePlan?.fechaFin ?? '');
+          return !!clientePlan.activado && !isNaN(fin.getTime()) && fin >= hoy;
+        }) ?? null
+    );
   }
 
   private formatearFechaHumana(fechaISO?: string): string {
@@ -339,5 +340,9 @@ export class PagosFormularioComponent implements OnInit {
     const fecha = new Date(fechaISO);
     if (isNaN(fecha.getTime())) return fechaISO;
     return fecha.toLocaleDateString();
+  }
+
+  private getPlanUnit(unidadDuracion: unknown): PlanDurationUnit {
+    return unidadDuracion === 'DIAS' ? 'DIAS' : 'MESES';
   }
 }

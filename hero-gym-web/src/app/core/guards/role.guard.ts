@@ -1,35 +1,88 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
+
 import { AuthService } from '../../auth/auth.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RoleGuard implements CanActivate {
-
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {}
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-    const expectedRoles = route.data['roles'] as string[];
-    const userRole = this.authService.getUserRole();
-
-    if (!userRole || !expectedRoles.includes(userRole)) {
-      // Si no tiene rol o no está en la lista permitida, redirigir
-      console.warn('🚫 RoleGuard: Acceso denegado. Rol:', userRole, 'Roles permitidos:', expectedRoles);
-      
-      if (this.authService.isAuthenticated()) {
-        // Ya está logueado pero no tiene permiso
-        // Redirigir según su rol
-        if (userRole === 'CLIENTE') {
-          this.router.navigate(['/cliente']);
-        } else {
-          this.router.navigate(['/dashboard']);
-        }
-      } else {
-        this.router.navigate(['/login']);
-      }
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
       return false;
     }
+
+    const tenantRoles = this.readRoles(route.data['tenantRoles']);
+
+    if (tenantRoles.length > 0) {
+      if (this.authService.hasTenantRole(tenantRoles)) {
+        return true;
+      }
+
+      this.handleForbiddenAccess(state.url, {
+        tenantRoles,
+      });
+      return false;
+    }
+
+    if (route.data['clientPortal'] === true) {
+      if (this.authService.isClientePortalUser()) {
+        return true;
+      }
+
+      this.handleForbiddenAccess(state.url, {
+        clientPortal: true,
+      });
+      return false;
+    }
+
+    const legacyRoles = this.readRoles(route.data['roles']);
+
+    if (legacyRoles.length > 0) {
+      if (this.authService.hasRole(legacyRoles)) {
+        return true;
+      }
+
+      this.handleForbiddenAccess(state.url, {
+        legacyRoles,
+      });
+      return false;
+    }
+
     return true;
+  }
+
+  private handleForbiddenAccess(
+    url: string,
+    context: {
+      tenantRoles?: string[];
+      clientPortal?: boolean;
+      legacyRoles?: string[];
+    },
+  ): void {
+    console.warn('[RoleGuard] Acceso denegado.', {
+      url,
+      tenantRole: this.authService.getTenantRole(),
+      userRole: this.authService.getUserRole(),
+      ...context,
+    });
+
+    this.router.navigate([this.authService.getPostLoginRoute()], { replaceUrl: true });
+  }
+
+  private readRoles(value: unknown): string[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value.filter(
+      (role): role is string => typeof role === 'string' && role.trim() !== '',
+    );
   }
 }

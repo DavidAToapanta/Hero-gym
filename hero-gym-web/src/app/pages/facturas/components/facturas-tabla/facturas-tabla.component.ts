@@ -6,6 +6,7 @@ import {
   FacturaService,
 } from '../../../../core/services/factura.service';
 import { PagoService } from '../../../../core/services/pago.service';
+import { extractErrorMessage } from '../../../../core/utils/http-error.utils';
 
 @Component({
   selector: 'app-facturas-tabla',
@@ -196,9 +197,10 @@ export class FacturasTablaComponent {
       },
       error: (err) => {
         console.error('Error al procesar pago:', err);
-        this.paymentErrorMessage =
-          err?.error?.message ||
-          'Error al procesar el pago. Por favor, intente nuevamente.';
+        this.paymentErrorMessage = extractErrorMessage(
+          err,
+          'Error al procesar el pago. Por favor, intente nuevamente.',
+        );
         this.isPaymentProcessing = false;
       },
     });
@@ -290,9 +292,10 @@ export class FacturasTablaComponent {
         },
         error: (err) => {
           console.error('Error al procesar devolucion:', err);
-          this.refundErrorMessage =
-            err?.error?.message ||
-            'Error al registrar la devolucion. Por favor, intente nuevamente.';
+          this.refundErrorMessage = extractErrorMessage(
+            err,
+            'Error al registrar la devolucion. Por favor, intente nuevamente.',
+          );
           this.isRefundProcessing = false;
         },
       });

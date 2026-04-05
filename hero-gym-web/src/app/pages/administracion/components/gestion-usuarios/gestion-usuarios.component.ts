@@ -1,147 +1,349 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
 import { LucideAngularModule } from 'lucide-angular';
-import { UsuarioModalComponent } from './usuario-modal/usuario-modal.component';
-import { UsuarioBasico, UsuarioService } from '../../../../core/services/usuario.service';
-import { forkJoin } from 'rxjs';
+
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import {
+  CreateStaffDto,
+  STAFF_ESTADOS,
+  STAFF_ROLES,
+  StaffEstado,
+  StaffFilters,
+  StaffItem,
+  StaffRole,
+  UpdateStaffDto,
+  UsuarioService,
+} from '../../../../core/services/usuario.service';
+import { UsuarioModalComponent } from './usuario-modal/usuario-modal.component';
+
+type StaffToggleAction = 'inactivar' | 'reactivar';
 
 @Component({
   selector: 'app-gestion-usuarios',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, UsuarioModalComponent, ConfirmDialogComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    UsuarioModalComponent,
+    ConfirmDialogComponent,
+  ],
   templateUrl: './gestion-usuarios.component.html',
   styleUrl: './gestion-usuarios.component.css',
 })
 export class GestionUsuariosComponent implements OnInit {
-  @ViewChild(UsuarioModalComponent) usuarioModal?: UsuarioModalComponent;
-  mostrarModal = false;
-  usuarios: UsuarioBasico[] = [];
-  
-  // Confirmation dialog state
-  showConfirmDialog = false;
-  usuarioToDelete: UsuarioBasico | null = null;
+  readonly roleOptions = STAFF_ROLES;
+  readonly estadoOptions = STAFF_ESTADOS;
 
-  constructor(private usuarioService: UsuarioService) {}
+  staff: StaffItem[] = [];
+  isLoading = false;
+  isSaving = false;
+  isLoadingStaffDetails = false;
+  isTogglingStaff = false;
+  errorMessage = '';
+  modalErrorMessage = '';
+  selectedRole: StaffRole | '' = '';
+  selectedEstado: StaffEstado | '' = '';
+  showModal = false;
+  staffEditando: StaffItem | null = null;
+  showConfirmDialog = false;
+  staffToToggle: StaffItem | null = null;
+  accionPendiente: StaffToggleAction | null = null;
+
+  constructor(
+    private readonly usuarioService: UsuarioService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
-    this.cargarUsuarios();
+    this.cargarStaff();
   }
 
-  abrirModal() {
-    this.mostrarModal = true;
-  }
+  cargarStaff(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
 
-  cerrarModal() {
-    this.mostrarModal = false;
-    if (this.usuarioModal) {
-      this.usuarioModal.resetear();
-    }
-  }
-
-  guardarUsuario(usuario: any) {
-    // Validar campos requeridos
-    if (!usuario.userName || !usuario.password || !usuario.nombre || 
-        !usuario.apellidos || !usuario.cedula || !usuario.fechaNacimiento) {
-      alert('Por favor complete todos los campos requeridos');
-      return;
-    }
-
-    if (usuario.password.length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-
-    const rol = (usuario.rol || 'Administrador').toLowerCase();
-    
-    // Validar campos requeridos según el rol
-    if (rol !== 'administrador') {
-      if (!usuario.horario || !usuario.sueldo) {
-        alert('Horario y sueldo son requeridos para ' + usuario.rol);
-        return;
-      }
-    }
-
-    // Mapear a DTO esperado por backend
-    const dto = {
-      userName: usuario.userName.trim(),
-      password: usuario.password,
-      nombres: usuario.nombre.trim(),
-      apellidos: usuario.apellidos.trim(),
-      cedula: usuario.cedula.trim(),
-      fechaNacimiento: usuario.fechaNacimiento,
-      rol: rol,
-      horario: usuario.horario ? usuario.horario.trim() : undefined,
-      sueldo: usuario.sueldo ? Number(usuario.sueldo) : undefined,
-    };
-
-    console.log('Enviando usuario al backend:', dto);
-
-    this.usuarioService.crearUsuario(dto).subscribe({
-      next: (res) => {
-        console.log('Usuario creado exitosamente:', res);
-        alert('Usuario creado exitosamente');
-        this.cargarUsuarios();
-        this.cerrarModal();
+    this.usuarioService.getStaff(this.buildFilters()).subscribe({
+      next: (staff) => {
+        this.staff = staff;
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error al guardar usuario:', err);
-        const mensaje = err.error?.message || 'Error al guardar el usuario. Por favor intente nuevamente.';
-        alert('Error: ' + mensaje);
-      }
+      error: (error) => {
+        console.error('Error al cargar staff:', error);
+        this.errorMessage = this.parseErrorMessage(
+          error,
+          'No se pudo cargar el staff del gimnasio',
+        );
+        this.staff = [];
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
     });
   }
 
-  eliminar(u: UsuarioBasico) {
-    this.usuarioToDelete = u;
+  abrirModal(): void {
+    if (this.isSaving || this.isLoadingStaffDetails) {
+      return;
+    }
+
+    this.staffEditando = null;
+    this.modalErrorMessage = '';
+    this.showModal = true;
+  }
+
+  editarStaff(staff: StaffItem): void {
+    if (this.isSaving || this.isLoadingStaffDetails) {
+      return;
+    }
+
+    this.isLoadingStaffDetails = true;
+    this.errorMessage = '';
+
+    this.usuarioService.getStaffById(staff.usuarioId).subscribe({
+      next: (staffDetalle) => {
+        this.staffEditando = staffDetalle;
+        this.modalErrorMessage = '';
+        this.showModal = true;
+        this.isLoadingStaffDetails = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error al cargar detalle del staff:', error);
+        this.errorMessage = this.parseErrorMessage(
+          error,
+          'No se pudo cargar la información del staff seleccionado',
+        );
+        this.isLoadingStaffDetails = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  cerrarModal(): void {
+    if (this.isSaving) {
+      return;
+    }
+
+    this.showModal = false;
+    this.staffEditando = null;
+    this.modalErrorMessage = '';
+  }
+
+  guardarStaff(payload: CreateStaffDto | UpdateStaffDto): void {
+    if (this.isSaving) {
+      return;
+    }
+
+    this.isSaving = true;
+    this.modalErrorMessage = '';
+
+    const request$ = this.staffEditando
+      ? this.usuarioService.updateStaff(this.staffEditando.usuarioId, payload as UpdateStaffDto)
+      : this.usuarioService.createStaff(payload as CreateStaffDto);
+
+    request$.subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.cerrarModal();
+        this.cargarStaff();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error al guardar staff:', error);
+        this.modalErrorMessage = this.parseErrorMessage(
+          error,
+          'No se pudo guardar el staff. Revisa los datos e inténtalo de nuevo',
+        );
+        this.isSaving = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  abrirConfirmacion(staff: StaffItem): void {
+    if (this.isTogglingStaff) {
+      return;
+    }
+
+    this.staffToToggle = staff;
+    this.accionPendiente = staff.estado === 'INACTIVO' ? 'reactivar' : 'inactivar';
     this.showConfirmDialog = true;
   }
 
-  onConfirmDelete() {
-    if (this.usuarioToDelete === null) return;
-    
-    console.log('[GestionUsuarios] Eliminando usuario:', this.usuarioToDelete);
-    this.usuarioService.eliminarUsuario(this.usuarioToDelete.id).subscribe({
-      next: () => {
-        console.log('[GestionUsuarios] Usuario eliminado exitosamente');
-        alert('Usuario eliminado exitosamente');
-        this.cargarUsuarios();
-        this.showConfirmDialog = false;
-        this.usuarioToDelete = null;
-      },
-      error: (err) => {
-        console.error('[GestionUsuarios] Error al eliminar usuario:', err);
-        const mensaje = err.error?.message || err.message || 'Error desconocido';
-        alert(`Error al eliminar el usuario: ${mensaje}`);
-        this.showConfirmDialog = false;
-        this.usuarioToDelete = null;
-      }
-    });
-  }
+  cerrarConfirmacion(): void {
+    if (this.isTogglingStaff) {
+      return;
+    }
 
-  onCancelDelete() {
-    console.log('[GestionUsuarios] Eliminación cancelada');
     this.showConfirmDialog = false;
-    this.usuarioToDelete = null;
+    this.staffToToggle = null;
+    this.accionPendiente = null;
   }
 
-  private cargarUsuarios(): void {
-    forkJoin([
-      this.usuarioService.getUsuarios('administrador'),
-      this.usuarioService.getUsuarios('entrenador'),
-      this.usuarioService.getUsuarios('recepcionista'),
-    ]).subscribe(([admins, ent, rec]) => {
-      const a = (admins || []).map(x => ({
-        id: x.id,
-        userName: x.userName,
-        nombres: x.nombres,
-        apellidos: x.apellidos,
-        cedula: x.cedula,
-        rol: 'administrador' as const,
-      }));
-      const e = (ent || []).map(x => ({ ...x, rol: 'entrenador' as const }));
-      const r = (rec || []).map(x => ({ ...x, rol: 'recepcionista' as const }));
-      this.usuarios = [...a, ...e, ...r];
+  confirmarCambioEstado(): void {
+    if (!this.staffToToggle || !this.accionPendiente || this.isTogglingStaff) {
+      return;
+    }
+
+    this.isTogglingStaff = true;
+
+    const request$ =
+      this.accionPendiente === 'inactivar'
+        ? this.usuarioService.inactivarStaff(this.staffToToggle.usuarioId)
+        : this.usuarioService.reactivarStaff(this.staffToToggle.usuarioId);
+
+    request$.subscribe({
+      next: () => {
+        this.isTogglingStaff = false;
+        this.cerrarConfirmacion();
+        this.cargarStaff();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error al cambiar estado del staff:', error);
+        this.errorMessage = this.parseErrorMessage(
+          error,
+          `No se pudo ${this.accionPendiente} el staff seleccionado`,
+        );
+        this.isTogglingStaff = false;
+        this.cdr.detectChanges();
+      },
     });
+  }
+
+  limpiarFiltros(): void {
+    this.selectedRole = '';
+    this.selectedEstado = '';
+    this.cargarStaff();
+  }
+
+  getNombreCompleto(staff: StaffItem): string {
+    return `${staff.nombres} ${staff.apellidos}`.trim();
+  }
+
+  getRoleLabel(role: StaffRole): string {
+    switch (role) {
+      case 'ADMIN':
+        return 'Administrador';
+      case 'RECEPCIONISTA':
+        return 'Recepcionista';
+      case 'ENTRENADOR':
+        return 'Entrenador';
+    }
+  }
+
+  getEstadoLabel(estado: StaffEstado): string {
+    switch (estado) {
+      case 'ACTIVO':
+        return 'Activo';
+      case 'INACTIVO':
+        return 'Inactivo';
+      case 'PENDIENTE':
+        return 'Pendiente';
+    }
+  }
+
+  getEstadoClasses(estado: StaffEstado): string {
+    switch (estado) {
+      case 'ACTIVO':
+        return 'border-green-200 bg-green-50 text-green-700';
+      case 'INACTIVO':
+        return 'border-slate-200 bg-slate-100 text-slate-600';
+      case 'PENDIENTE':
+        return 'border-amber-200 bg-amber-50 text-amber-700';
+    }
+  }
+
+  formatSueldo(sueldo: number | null): string {
+    if (sueldo === null) {
+      return 'No aplica';
+    }
+
+    return new Intl.NumberFormat('es-EC', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+    }).format(sueldo);
+  }
+
+  getConfirmTitle(): string {
+    return this.accionPendiente === 'reactivar' ? '¿Reactivar staff?' : '¿Inactivar staff?';
+  }
+
+  getConfirmMessage(): string {
+    if (!this.staffToToggle) {
+      return '';
+    }
+
+    const nombreStaff = this.getNombreCompleto(this.staffToToggle) || this.staffToToggle.userName;
+    return this.accionPendiente === 'reactivar'
+      ? `Vas a reactivar a ${nombreStaff}. El usuario volverá a tener acceso al sistema según su rol actual.`
+      : `Vas a inactivar a ${nombreStaff}. El usuario dejará de operar en el tenant actual, pero no se eliminará su historial.`;
+  }
+
+  getConfirmButtonLabel(): string {
+    return this.isTogglingStaff
+      ? 'Guardando…'
+      : this.accionPendiente === 'reactivar'
+      ? 'Reactivar Staff'
+      : 'Inactivar Staff';
+  }
+
+  private buildFilters(): StaffFilters {
+    const filters: StaffFilters = {};
+
+    if (this.selectedRole) {
+      filters.role = this.selectedRole;
+    }
+
+    if (this.selectedEstado) {
+      filters.estado = this.selectedEstado;
+    }
+
+    return filters;
+  }
+
+  private parseErrorMessage(error: unknown, fallbackMessage: string): string {
+    const backendMessage = this.extractBackendMessage(error);
+    if (!backendMessage) {
+      return fallbackMessage;
+    }
+
+    return backendMessage;
+  }
+
+  private extractBackendMessage(error: unknown): string | null {
+    if (!error || typeof error !== 'object') {
+      return null;
+    }
+
+    const errorRecord = error as Record<string, unknown>;
+    const nestedError = errorRecord['error'];
+
+    if (typeof nestedError === 'string') {
+      return nestedError;
+    }
+
+    if (nestedError && typeof nestedError === 'object') {
+      const nestedRecord = nestedError as Record<string, unknown>;
+      const message = nestedRecord['message'];
+
+      if (typeof message === 'string') {
+        return message;
+      }
+
+      if (Array.isArray(message)) {
+        const normalizedMessages = message.filter(
+          (item): item is string => typeof item === 'string' && item.trim().length > 0,
+        );
+
+        return normalizedMessages.length > 0 ? normalizedMessages.join('. ') : null;
+      }
+    }
+
+    return null;
   }
 }
