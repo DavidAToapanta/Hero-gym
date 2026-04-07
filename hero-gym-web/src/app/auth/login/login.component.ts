@@ -65,7 +65,7 @@ export class LoginComponent implements OnInit {
     this.isSubmitting = true;
 
     this.authService
-      .login(cedula.trim(), password)
+      .login(cedula.trim(), password, 'ASISTENCIA')
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
         next: (response) => {

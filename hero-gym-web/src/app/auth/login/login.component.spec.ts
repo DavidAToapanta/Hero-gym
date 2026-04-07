@@ -57,7 +57,7 @@ describe('LoginComponent', () => {
 
     component.onSubmit();
 
-    expect(authServiceSpy.login).toHaveBeenCalledWith('0102030405', 'secreto');
+    expect(authServiceSpy.login).toHaveBeenCalledWith('0102030405', 'secreto', 'ASISTENCIA');
   });
 
   it('should show pending context selection when login requires it', () => {
@@ -93,7 +93,7 @@ function createPendingSelection(): LoginContextSelectionResponse {
   return {
     requiresContextSelection: true,
     selectionToken: 'selection-token',
-    requestedAccessMode: 'PLATFORM',
+    requestedAccessMode: 'ASISTENCIA',
     contexts: [
       {
         contextId: 'tenant-hero-norte-owner',
