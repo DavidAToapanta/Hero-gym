@@ -9,17 +9,34 @@
       </div>
     </div>
 
-    <button
-      (click)="nuevoPago()"
-      class="inline-flex w-full items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-white transition hover:bg-indigo-700 sm:w-auto"
-    >
-      Registrar Pago
-    </button>
+    <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+      <button
+        type="button"
+        (click)="nuevoPago()"
+        class="inline-flex w-full touch-manipulation items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100 sm:w-auto"
+      >
+        Registrar Pago
+      </button>
+      <button
+        type="button"
+        (click)="nuevoIngresoRapido()"
+        class="inline-flex w-full touch-manipulation items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 font-medium text-sky-700 transition-colors hover:bg-sky-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-100 sm:w-auto"
+      >
+        Pago Rápido
+      </button>
+    </div>
   </div>
 
   <!-- Modal formulario -->
   @if (mostrarFormulario) {
   <app-pagos-formulario (close)="mostrarFormulario = false" (save)="onGuardarPago($event)"></app-pagos-formulario>
+  }
+
+  @if (mostrarIngresoRapido) {
+  <app-ingreso-rapido-formulario
+    (close)="mostrarIngresoRapido = false"
+    (save)="onGuardarIngresoRapido($event)">
+  </app-ingreso-rapido-formulario>
   }
 
   <!-- Búsqueda y lista -->
@@ -31,7 +48,9 @@
 
 <!-- Toast simple -->
 @if (toastVisible) {
-<div class="fixed inset-x-4 bottom-4 z-50 rounded-lg bg-gray-900 px-4 py-2 text-white shadow-lg sm:inset-x-auto sm:right-6 sm:bottom-6">
+<div
+  aria-live="polite"
+  class="fixed inset-x-4 bottom-4 z-50 rounded-xl bg-gray-900 px-4 py-3 text-white shadow-lg sm:inset-x-auto sm:right-6 sm:bottom-6">
   {{ toastMessage }}
 </div>
 }

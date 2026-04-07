@@ -18,6 +18,11 @@ export interface AsistenciaStats {
 
 export type AsistenciaHistorialItem = Record<string, unknown>;
 
+export interface RegistrarAsistenciaHistoricaPayload {
+  clienteId: number;
+  fecha: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -31,6 +36,10 @@ export class AsistenciaService {
       `${this.apiUrl}/registrar/${clienteId}`,
       {}
     );
+  }
+
+  registrarAsistenciaHistorica(payload: RegistrarAsistenciaHistoricaPayload): Observable<any> {
+    return this.http.post(`${this.apiUrl}/historica`, payload);
   }
 
   marcarMiAsistencia(usuarioId: number): Observable<any> {

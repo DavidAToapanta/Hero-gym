@@ -1,0 +1,139 @@
+<div
+  class="ingreso-rapido-overlay fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm sm:items-center sm:p-6"
+  (click)="cerrar()">
+  <div
+    class="ingreso-rapido-panel relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_32px_90px_-40px_rgba(15,23,42,0.65)]"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ingreso-rapido-titulo"
+    aria-describedby="ingreso-rapido-descripcion"
+    (click)="$event.stopPropagation()">
+    <div class="bg-[linear-gradient(135deg,#111827_0%,#1d4ed8_52%,#0ea5e9_100%)] px-6 py-6 text-white sm:px-8">
+      <div class="flex items-start justify-between gap-4">
+        <div class="min-w-0 space-y-3">
+          <p class="text-xs font-semibold uppercase tracking-[0.28em] text-sky-100">Pago rapido</p>
+          <div class="space-y-2">
+            <h2 id="ingreso-rapido-titulo" class="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
+              Registrar ingreso rapido
+            </h2>
+            <p id="ingreso-rapido-descripcion" class="max-w-2xl text-sm leading-6 text-sky-100">
+              Usa este flujo para ingresos operativos del dia que no pertenecen a un pago asociado a
+              cliente o plan.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          (click)="cerrar()"
+          aria-label="Cerrar ingreso rapido"
+          class="inline-flex touch-manipulation items-center justify-center rounded-2xl border border-white/15 bg-white/10 p-3 text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-200">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <form #ingresoRapidoForm="ngForm" (ngSubmit)="guardar()" class="flex min-h-0 flex-1 flex-col">
+      <div class="flex-1 overflow-y-auto p-6 sm:p-8">
+        <div class="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)]">
+          <section class="space-y-6">
+            <div class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <div class="space-y-5">
+                <div>
+                  <label for="ingreso-rapido-concepto" class="block text-sm font-medium text-slate-700">
+                    Concepto
+                  </label>
+                  <input
+                    id="ingreso-rapido-concepto"
+                    type="text"
+                    [(ngModel)]="ingreso.concepto"
+                    name="concepto"
+                    autocomplete="off"
+                    required
+                    placeholder="Ej. Pase diario…"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus-visible:border-sky-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-100" />
+                </div>
+
+                <div>
+                  <label for="ingreso-rapido-monto" class="block text-sm font-medium text-slate-700">
+                    Monto
+                  </label>
+                  <input
+                    id="ingreso-rapido-monto"
+                    type="number"
+                    [(ngModel)]="ingreso.monto"
+                    name="monto"
+                    autocomplete="off"
+                    inputmode="decimal"
+                    min="0.01"
+                    step="0.01"
+                    required
+                    placeholder="0.00…"
+                    class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 shadow-sm transition-colors placeholder:text-slate-400 focus-visible:border-sky-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-100" />
+                  <p class="mt-2 text-sm leading-6 text-slate-500">
+                    Registra solo ingresos sueltos del dia. Los pagos normales siguen en el flujo de
+                    clientes y planes.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            @if (errorMessage) {
+            <div aria-live="polite" class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {{ errorMessage }}
+            </div>
+            }
+
+            @if (statusMessage) {
+            <div aria-live="polite" class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700">
+              {{ statusMessage }}
+            </div>
+            }
+          </section>
+
+          <aside class="space-y-4">
+            <section class="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5 shadow-sm">
+              <p class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Uso recomendado</p>
+              <ul class="mt-4 space-y-3 text-sm leading-6 text-slate-600">
+                <li>Registra pases diarios, ventas casuales o ingresos operativos que no generan cliente-plan.</li>
+                <li>Estos ingresos no se muestran en la tabla de pagos para no mezclar historiales.</li>
+                <li>El dashboard los reflejara en la metrica diaria si el backend ya los incluye en el total del dia.</li>
+              </ul>
+            </section>
+
+            <section class="rounded-[1.75rem] border border-emerald-200 bg-white p-5 shadow-sm">
+              <p class="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-600">Valor sugerido</p>
+              <div class="mt-4 space-y-2">
+                <p class="text-base font-semibold text-slate-900">Pase diario</p>
+                <p class="text-sm leading-6 text-slate-600">
+                  Puedes dejar el concepto por defecto y cambiar solo el monto cuando aplique.
+                </p>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-200 bg-slate-50 px-6 py-5 sm:px-8">
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            (click)="cerrar()"
+            [disabled]="isSubmitting"
+            class="inline-flex touch-manipulation items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-200 disabled:cursor-not-allowed disabled:text-slate-400">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="isSubmitting"
+            [attr.aria-busy]="isSubmitting"
+            class="inline-flex touch-manipulation items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-100 disabled:cursor-not-allowed disabled:bg-slate-300">
+            {{ isSubmitting ? 'Registrando ingreso…' : 'Guardar ingreso rapido' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

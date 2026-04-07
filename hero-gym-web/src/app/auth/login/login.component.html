@@ -48,11 +48,40 @@
             <div class="mb-8 space-y-3">
               <p class="text-sm font-semibold uppercase tracking-[0.28em] text-amber-600">Acceso</p>
               <h2 class="text-balance text-3xl font-semibold tracking-tight text-slate-900">
-                Inicia sesión
+                {{ isEntryAccessMode('ASISTENCIA') ? 'Marca tu asistencia' : 'Inicia sesión' }}
               </h2>
               <p class="text-sm leading-6 text-slate-600">
-                Ingresa con tu cédula y contraseña para continuar a tu panel.
+                {{
+                  isEntryAccessMode('ASISTENCIA')
+                    ? 'Ingresa con tu cédula y contraseña para registrar tu asistencia.'
+                    : 'Ingresa con tu cédula y contraseña para continuar a tu panel.'
+                }}
               </p>
+            </div>
+
+            <div class="mb-6 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+              <button
+                type="button"
+                (click)="setEntryAccessMode('PLATFORM')"
+                [ngClass]="
+                  isEntryAccessMode('PLATFORM')
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                "
+                class="rounded-xl px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-100">
+                Panel
+              </button>
+              <button
+                type="button"
+                (click)="setEntryAccessMode('ASISTENCIA')"
+                [ngClass]="
+                  isEntryAccessMode('ASISTENCIA')
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                "
+                class="rounded-xl px-4 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-100">
+                Asistencia
+              </button>
             </div>
 
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5" novalidate>
@@ -101,7 +130,13 @@
                 [disabled]="isSubmitting"
                 [attr.aria-busy]="isSubmitting"
                 class="inline-flex w-full touch-manipulation items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-100 disabled:cursor-not-allowed disabled:bg-slate-300">
-                {{ isSubmitting ? 'Ingresando…' : 'Ingresar' }}
+                {{
+                  isSubmitting
+                    ? 'Ingresando…'
+                    : isEntryAccessMode('ASISTENCIA')
+                      ? 'Marcar asistencia'
+                      : 'Ingresar'
+                }}
               </button>
             </form>
 

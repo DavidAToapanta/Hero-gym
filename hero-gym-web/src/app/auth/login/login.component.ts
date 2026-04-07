@@ -1,7 +1,7 @@
 import { NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { finalize } from 'rxjs';
 
@@ -25,6 +25,7 @@ export class LoginComponent implements OnInit {
 
   errorMessage = '';
   contextSelectionError = '';
+  entryAccessMode: AuthAccessMode = 'PLATFORM';
   isSubmitting = false;
   isSelectingContext = false;
   pendingSelection: LoginContextSelectionResponse | null = null;
@@ -34,6 +35,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private route: ActivatedRoute,
     private router: Router,
   ) {
     this.loginForm = this.fb.nonNullable.group({
@@ -43,6 +45,8 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.syncEntryAccessModeFromQuery();
+
     if (this.redirectAuthenticatedUser()) {
       return;
     }
@@ -65,7 +69,7 @@ export class LoginComponent implements OnInit {
     this.isSubmitting = true;
 
     this.authService
-      .login(cedula.trim(), password, 'ASISTENCIA')
+      .login(cedula.trim(), password, this.entryAccessMode)
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
         next: (response) => {
@@ -128,6 +132,27 @@ export class LoginComponent implements OnInit {
     }
 
     return null;
+  }
+
+  setEntryAccessMode(accessMode: AuthAccessMode): void {
+    if (this.entryAccessMode === accessMode) {
+      return;
+    }
+
+    this.entryAccessMode = accessMode;
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      replaceUrl: true,
+      queryParams: {
+        mode: accessMode === 'ASISTENCIA' ? 'asistencia' : null,
+      },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  isEntryAccessMode(accessMode: AuthAccessMode): boolean {
+    return this.entryAccessMode === accessMode;
   }
 
   getContextTitle(context: AuthContext): string {
@@ -198,5 +223,10 @@ export class LoginComponent implements OnInit {
     this.isSelectingContext = false;
     this.selectedContext = null;
     this.selectedAccessMode = null;
+  }
+
+  private syncEntryAccessModeFromQuery(): void {
+    this.entryAccessMode =
+      this.route.snapshot.queryParamMap.get('mode') === 'asistencia' ? 'ASISTENCIA' : 'PLATFORM';
   }
 }

@@ -1,10 +1,12 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+
 import { ClientePlanService } from '../../../../core/services/cliente-plan.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { RenovarComponent } from './renovar/renovar.component';
-import { ProductosCienteComponent } from './productos-cliente/productos-cliente.component';
 import { GestionComponent } from './gestion/gestion.component';
+import { ProductosCienteComponent } from './productos-cliente/productos-cliente.component';
+import { RegistroAsistenciaComponent } from './registro-asistencia/registro-asistencia.component';
+import { RenovarComponent } from './renovar/renovar.component';
 
 @Component({
   selector: 'app-acciones-tabla',
@@ -14,75 +16,79 @@ import { GestionComponent } from './gestion/gestion.component';
     RenovarComponent,
     ProductosCienteComponent,
     GestionComponent,
+    RegistroAsistenciaComponent,
     ConfirmDialogComponent,
   ],
   templateUrl: './acciones-tabla.component.html',
   styleUrl: './acciones-tabla.component.css',
 })
 export class AccionesTablaComponent {
-  /** Cliente sobre el que aplican las acciones */
   @Input() cliente: any = null;
 
-  /** Emitido cuando el usuario elige Desactivar (el padre maneja la lógica) */
   @Output() desactivar = new EventEmitter<number>();
-
-  /** Emitido cuando se cierra el menú sin acción (o tras completar una acción) */
   @Output() cerrado = new EventEmitter<void>();
-
-  /** Emitido cuando se completó una renovación (para que clientes-lista recargue) */
   @Output() renovado = new EventEmitter<void>();
-
-  /** Emitido cuando se completó un cambio de plan (para que clientes-lista recargue) */
   @Output() planCambiado = new EventEmitter<void>();
   @Output() planQuitado = new EventEmitter<void>();
+  @Output() asistenciaRegistrada = new EventEmitter<void>();
 
-  // Estado de modales hijos
   showRenovarModal = false;
   showProductosModal = false;
   showGestionModal = false;
+  showRegistroAsistenciaModal = false;
   showQuitarPlanConfirm = false;
   isRemovingPlan = false;
   removePlanError = '';
 
   constructor(private clientePlanService: ClientePlanService) {}
 
-  // --- Renovar ---
-  abrirRenovar() {
+  abrirRenovar(): void {
     this.showRenovarModal = true;
   }
 
-  cerrarRenovar() {
+  cerrarRenovar(): void {
     this.showRenovarModal = false;
   }
 
-  onRenovacionConfirmada(_response: any) {
+  onRenovacionConfirmada(_response: unknown): void {
     this.cerrarRenovar();
     this.renovado.emit();
     this.cerrado.emit();
   }
 
-  // --- Productos ---
-  abrirProductos() {
+  abrirProductos(): void {
     this.showProductosModal = true;
   }
 
-  cerrarProductos() {
+  cerrarProductos(): void {
     this.showProductosModal = false;
   }
 
-  // --- Gestión ---
-  abrirGestion() {
+  abrirGestion(): void {
     this.showGestionModal = true;
   }
 
-  cerrarGestion() {
+  cerrarGestion(): void {
     this.showGestionModal = false;
   }
 
-  /** Llamado cuando GestionComponent emite planCambiado */
-  onPlanCambiado() {
+  onPlanCambiado(): void {
     this.planCambiado.emit();
     this.cerrarGestion();
+    this.cerrado.emit();
+  }
+
+  abrirRegistroAsistencia(): void {
+    this.showRegistroAsistenciaModal = true;
+  }
+
+  cerrarRegistroAsistencia(): void {
+    this.showRegistroAsistenciaModal = false;
+  }
+
+  onAsistenciaRegistrada(): void {
+    this.asistenciaRegistrada.emit();
+    this.cerrarRegistroAsistencia();
     this.cerrado.emit();
   }
 
@@ -95,23 +101,25 @@ export class AccionesTablaComponent {
     return this.getClientePlanIdActual() !== null;
   }
 
-  abrirConfirmacionQuitarPlan() {
+  abrirConfirmacionQuitarPlan(): void {
     if (!this.tienePlanActual()) {
       return;
     }
+
     this.removePlanError = '';
     this.showQuitarPlanConfirm = true;
   }
 
-  cancelarQuitarPlan() {
+  cancelarQuitarPlan(): void {
     if (this.isRemovingPlan) {
       return;
     }
+
     this.showQuitarPlanConfirm = false;
     this.removePlanError = '';
   }
 
-  confirmarQuitarPlan() {
+  confirmarQuitarPlan(): void {
     if (this.isRemovingPlan) {
       return;
     }
@@ -142,9 +150,7 @@ export class AccionesTablaComponent {
     });
   }
 
-  // --- Desactivar ---
-  /** Puede ser llamado directamente (desde el menú) o vía evento de gestion (pasa el id) */
-  solicitarDesactivar(clienteId?: number) {
+  solicitarDesactivar(clienteId?: number): void {
     const id = clienteId ?? this.cliente?.id;
     if (id) {
       this.desactivar.emit(id);
@@ -153,8 +159,44 @@ export class AccionesTablaComponent {
     }
   }
 
-  // --- Cerrar menú ---
-  cerrarMenu() {
+  cerrarMenu(): void {
+    if (this.isRemovingPlan) {
+      return;
+    }
+
     this.cerrado.emit();
+  }
+
+  getNombreCliente(): string {
+    const nombres = this.cliente?.usuario?.nombres?.trim() ?? '';
+    const apellidos = this.cliente?.usuario?.apellidos?.trim() ?? '';
+    return `${nombres} ${apellidos}`.trim() || 'Cliente sin nombre';
+  }
+
+  getCedulaCliente(): string {
+    return this.cliente?.usuario?.cedula || 'Sin cedula';
+  }
+
+  getPlanActualNombre(): string {
+    return this.cliente?.planes?.[0]?.plan?.nombre || 'Sin plan asignado';
+  }
+
+  getEstadoCliente(): string {
+    const fechaFin = this.cliente?.planes?.[0]?.fechaFin;
+    if (!fechaFin) {
+      return 'Sin plan';
+    }
+
+    return new Date(fechaFin) >= new Date() ? 'Activo' : 'Vencido';
+  }
+
+  tieneModalHijoAbierto(): boolean {
+    return (
+      this.showRenovarModal ||
+      this.showProductosModal ||
+      this.showGestionModal ||
+      this.showRegistroAsistenciaModal ||
+      this.showQuitarPlanConfirm
+    );
   }
 }

@@ -2,10 +2,10 @@
   display: contents;
 }
 
-.acciones-tabla-overlay {
+.ingreso-rapido-overlay {
   overscroll-behavior: contain;
 }
 
-.acciones-tabla-panel {
+.ingreso-rapido-panel {
   -webkit-tap-highlight-color: transparent;
 }

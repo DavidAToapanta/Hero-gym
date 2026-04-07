@@ -3,6 +3,7 @@ import { CurrencyPipe } from '@angular/common';
 import { ClientePlanService } from '../../../../core/services/cliente-plan.service';
 import { PagoService } from '../../../../core/services/pago.service';
 import { DeudaService } from '../../../../core/services/deuda.service';
+import { EstadisticasService } from '../../../../core/services/estadisticas.service';
 
 @Component({
   selector: 'app-metrics-cards',
@@ -13,6 +14,7 @@ import { DeudaService } from '../../../../core/services/deuda.service';
 export class MetricsCardsComponent implements OnInit {
   miembrosActivos: number = 0;
   ingresosMes: number  =  0;
+  ingresosDia: number = 0;
   pagosPendientes: number = 0;
 
   loadingg = false;
@@ -20,12 +22,14 @@ export class MetricsCardsComponent implements OnInit {
   constructor(
     private clientePlanService: ClientePlanService,
     private pagoService: PagoService,
-    private deudaService: DeudaService
+    private deudaService: DeudaService,
+    private estadisticasService: EstadisticasService,
   ) {}
 
   ngOnInit(): void {
     this.cargarMiembrosActivos();
     this.cargarIngresosMes();
+    this.cargarIngresosDia();
     this.cargarDeudores();
   }
 
@@ -45,10 +49,22 @@ export class MetricsCardsComponent implements OnInit {
   private cargarIngresosMes(): void {
     this.pagoService.getIngresosDelMes().subscribe({
       next: (res) => {
-        //si el backend devuelve { ingresos: 1250}
         this.ingresosMes = (res as any).ingresos ?? res;
       },
       error: (err) => console.error('Error ingreso mes:', err)
+    });
+  }
+
+  private cargarIngresosDia(): void {
+    this.estadisticasService.getIngresos('dia').subscribe({
+      next: (response) => {
+        const data = Array.isArray(response?.data) ? response.data : [];
+        this.ingresosDia = data.reduce((total, value) => total + (Number(value) || 0), 0);
+      },
+      error: (err) => {
+        this.ingresosDia = 0;
+        console.error('Error ingreso dia:', err);
+      },
     });
   }
   

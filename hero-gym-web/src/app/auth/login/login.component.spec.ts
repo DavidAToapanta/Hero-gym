@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router';
 
 import { of } from 'rxjs';
 
@@ -12,7 +12,15 @@ describe('LoginComponent', () => {
   let authServiceSpy: jasmine.SpyObj<AuthService>;
   let router: Router;
 
-  beforeEach(async () => {
+  function createActivatedRoute(mode?: string) {
+    return {
+      snapshot: {
+        queryParamMap: convertToParamMap(mode ? { mode } : {}),
+      },
+    };
+  }
+
+  async function createComponent(mode?: string) {
     authServiceSpy = jasmine.createSpyObj<AuthService>('AuthService', [
       'clearPendingContextSelection',
       'getPendingContextSelection',
@@ -33,6 +41,7 @@ describe('LoginComponent', () => {
       imports: [LoginComponent],
       providers: [
         provideRouter([]),
+        { provide: ActivatedRoute, useValue: createActivatedRoute(mode) },
         { provide: AuthService, useValue: authServiceSpy },
       ],
     }).compileComponents();
@@ -43,6 +52,10 @@ describe('LoginComponent', () => {
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  }
+
+  beforeEach(async () => {
+    await createComponent();
   });
 
   it('should create', () => {
@@ -50,6 +63,20 @@ describe('LoginComponent', () => {
   });
 
   it('should submit login credentials when the form is valid', () => {
+    component.loginForm.setValue({
+      cedula: '0102030405',
+      password: 'secreto',
+    });
+
+    component.onSubmit();
+
+    expect(authServiceSpy.login).toHaveBeenCalledWith('0102030405', 'secreto', 'PLATFORM');
+  });
+
+  it('should request attendance mode when login is opened in asistencia mode', async () => {
+    TestBed.resetTestingModule();
+    await createComponent('asistencia');
+
     component.loginForm.setValue({
       cedula: '0102030405',
       password: 'secreto',
@@ -93,7 +120,7 @@ function createPendingSelection(): LoginContextSelectionResponse {
   return {
     requiresContextSelection: true,
     selectionToken: 'selection-token',
-    requestedAccessMode: 'ASISTENCIA',
+    requestedAccessMode: 'PLATFORM',
     contexts: [
       {
         contextId: 'tenant-hero-norte-owner',
